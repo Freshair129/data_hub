@@ -83,8 +83,20 @@ export default function Home() {
             const res = await fetch('/api/customers');
             if (res.ok) {
                 const loaded = await res.json();
-                setCustomers(loaded);
-                if (loaded.length > 0) setActiveCustomer(loaded[0]);
+                // Ensure each customer object has both id and customer_id for stability
+                const normalized = loaded.map(c => ({ ...c, id: c.customer_id }));
+                setCustomers(normalized);
+
+                // Smart active customer selection:
+                // 1. Keep currently active if still valid
+                // 2. Or pick the first one from the list
+                setActiveCustomer(prev => {
+                    if (prev) {
+                        const stillExists = normalized.find(c => c.customer_id === prev.customer_id);
+                        if (stillExists) return stillExists;
+                    }
+                    return normalized[0] || null;
+                });
             }
         } catch (e) {
             console.error('Failed to load customers', e);

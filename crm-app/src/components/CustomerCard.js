@@ -85,17 +85,17 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Session</span>
                     </div>
                     <select
-                        value={customer.id}
+                        value={customer.customer_id}
                         onChange={(e) => {
-                            const selected = customers.find(c => c.id === e.target.value);
+                            const selected = customers.find(c => c.customer_id === e.target.value);
                             if (selected) onSelectCustomer(selected);
                         }}
                         className="pl-4 pr-10 py-2 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-700 appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all outline-none"
                         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23fb923c\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 9l4-4 4 4m0 6l-4 4-4-4\' /%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
                     >
                         {customers.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.profile?.member_id ? `[${c.profile.member_id}]` : `[${c.id}]`} {c.profile?.first_name ? `${c.profile.first_name} ${c.profile.last_name || ''}` : ''}
+                            <option key={c.customer_id} value={c.customer_id}>
+                                {c.profile?.member_id ? `[${c.profile.member_id}]` : `[${c.customer_id}]`} {c.profile?.first_name ? `${c.profile.first_name} ${c.profile.last_name || ''}` : ''}
                             </option>
                         ))}
                     </select>
