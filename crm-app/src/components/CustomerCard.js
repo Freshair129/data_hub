@@ -100,10 +100,10 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
                     {/* Profile Detail Card - Compact */}
                     <div className="bg-[#162A47]/80 rounded-[1.5rem] shadow-lg border border-white/10 overflow-hidden relative group backdrop-blur-md">
-                        <div className="p-5 pb-20 bg-gradient-to-br from-[#162A47]/80 to-[#1F3A5F]/80 relative">
+                        <div className="p-2.5 pb-20 bg-gradient-to-br from-[#162A47]/80 to-[#1F3A5F]/80 relative">
                             <div className="flex flex-col items-center text-center">
                                 <div className="relative mb-4">
-                                    <div className="w-20 h-20 rounded-full bg-[#162A47] p-0.5 ring-2 ring-[#C9A34E]/20 shadow-xl overflow-hidden">
+                                    <div className="w-[140px] h-[140px] rounded-full bg-[#162A47] p-0.5 ring-2 ring-[#C9A34E]/20 shadow-xl overflow-hidden">
                                         <img
                                             src={profile.profile_picture || 'https://via.placeholder.com/150'}
                                             alt="Avatar"
@@ -111,8 +111,8 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                             onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=' + (profile.first_name || 'C') + '&background=0A1A2F&color=C9A34E'; }}
                                         />
                                     </div>
-                                    <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-2 border-[#162A47] rounded-full flex items-center justify-center shadow-md">
-                                        <i className="fas fa-check text-white text-[7px]"></i>
+                                    <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-2 border-[#162A47] rounded-full flex items-center justify-center shadow-md">
+                                        <i className="fas fa-check text-white text-[9px]"></i>
                                     </div>
                                 </div>
 
