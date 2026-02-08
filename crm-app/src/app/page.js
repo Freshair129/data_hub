@@ -410,7 +410,7 @@ export default function Home() {
                         allProducts={products}
                         activeCustomer={activeCustomer}
                         onAddToCart={addToCart}
-                        onProductClick={setSelectedProduct}
+                        onSelectProduct={setSelectedProduct}
                         cart={cart}
                         setCart={setCart}
                         onCheckout={handleCheckout}
