@@ -171,9 +171,9 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                         onClick={() => setIsCartOpen(false)}
                     ></div>
 
-                    <div className="relative w-full max-w-md h-full bg-white shadow-2xl flex flex-col p-6 animate-slide-in-right border-l border-slate-200">
-                        {/* Cart Header */}
-                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <div className="relative w-full max-w-md h-full bg-white shadow-2xl flex flex-col animate-slide-in-right border-l border-slate-200">
+                        {/* Cart Header - Fixed at Top */}
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100 flex-shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
                                     <i className="fas fa-shopping-bag text-xl"></i>
@@ -199,9 +199,9 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                 <div className="relative z-10 flex items-center gap-4">
                                     {/* Avatar */}
                                     <div className="relative">
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-inner overflow-hidden border-2 border-white/20 ${activeCustomer.profile?.membership_tier === 'GOLD' ? 'bg-gradient-to-tr from-amber-400 to-yellow-600' :
-                                            activeCustomer.profile?.membership_tier === 'SILVER' ? 'bg-gradient-to-tr from-slate-300 to-slate-400' :
-                                                'bg-gradient-to-tr from-cyan-400 to-blue-600'
+                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-inner overflow-hidden border-2 border-white/20 ${activeCustomer.profile?.membership_tier === 'ELITE' ? 'bg-gradient-to-tr from-cyan-400 to-blue-600' :
+                                            activeCustomer.profile?.membership_tier === 'PLATINUM' ? 'bg-gradient-to-tr from-slate-300 to-slate-400' :
+                                                'bg-gradient-to-tr from-amber-400 to-yellow-600'
                                             }`}>
                                             {activeCustomer.profile?.profile_picture ? (
                                                 <img src={activeCustomer.profile.profile_picture} alt="Avatar" className="w-full h-full object-cover" />
@@ -238,9 +238,10 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                     </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
 
-                        {/* Cart Content */}
+                    {/* Cart Content - Scrollable Middle Area */}
+                    <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
                         {cart.length === 0 ? (
                             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-4">
                                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
@@ -315,7 +316,7 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                                     </div>
                                                     <button
                                                         onClick={() => removeFromCart(item.id, item.type)}
-                                                        className="w-8 h-8 bg-white text-slate-300 hover:text-red-500 hover:shadow-md rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                                                        className="w-8 h-8 bg-white text-slate-300 hover:text-red-500 hover:shadow-md rounded-lg flex items-center justify-center transition-all opacity-40 group-hover:opacity-100"
                                                     >
                                                         <i className="fas fa-trash-alt text-xs"></i>
                                                     </button>
@@ -357,7 +358,12 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                     })}
                                 </div>
 
-                                <div className="mt-6 p-6 bg-[#0A1A2F] rounded-3xl text-white shadow-2xl relative overflow-hidden">
+                            </div>
+
+                        {/* Checkout Footer - Fixed at Bottom */}
+                        {cart.length > 0 && (
+                            <div className="p-6 border-t border-slate-100 bg-white flex-shrink-0">
+                                <div className="p-6 bg-[#0A1A2F] rounded-3xl text-white shadow-2xl relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
 
                                     <div className="relative z-10 space-y-4">
@@ -392,7 +398,7 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                         </button>
                                     </div>
                                 </div>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
