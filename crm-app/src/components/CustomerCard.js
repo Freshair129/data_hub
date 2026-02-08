@@ -103,7 +103,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                         <div className="p-5 pb-20 bg-gradient-to-br from-[#162A47]/80 to-[#1F3A5F]/80 relative">
                             <div className="flex flex-col items-center text-center">
                                 <div className="relative mb-4">
-                                    <div className="w-20 h-20 rounded-full bg-[#162A47] p-0.5 ring-2 ring-[#C9A34E]/20 shadow-xl overflow-hidden">
+                                    <div className="w-16 h-16 rounded-full bg-[#162A47] p-0.5 ring-2 ring-[#C9A34E]/20 shadow-xl overflow-hidden">
                                         <img
                                             src={profile.profile_picture || 'https://via.placeholder.com/150'}
                                             alt="Avatar"
@@ -131,8 +131,8 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     </span>
                                 </div>
 
-                                {/* Membership Progress - Compact Detailed */}
-                                <div className="w-full max-w-[200px] mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
+                                {/* Membership Progress - Extreme Compact */}
+                                <div className="w-full max-w-[160px] mb-4 p-2.5 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">
                                             {nextTier ? `Next: ${nextTier.label.split(' ')[0]}` : 'Tier: Elite (Max)'}
@@ -176,8 +176,8 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     </div>
                                 </div>
 
-                                {/* Wallet Section - Compact */}
-                                <div className="w-full max-w-[200px] bg-[#162A47] rounded-xl p-4 mb-4 border border-white/10 relative overflow-hidden">
+                                {/* Wallet Section - Extreme Compact */}
+                                <div className="w-full max-w-[160px] bg-[#162A47] rounded-xl p-3 mb-4 border border-white/10 relative overflow-hidden">
                                     <div className="space-y-3 relative z-10">
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col text-left">
@@ -219,9 +219,9 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                             </div>
                         </div>
 
-                        {/* Contact List Aligned - Compact */}
-                        <div className="px-4 -mt-16 pb-6 relative z-10">
-                            <div className="max-w-[200px] mx-auto bg-[#162A47] rounded-xl p-4 shadow-2xl border border-white/10 space-y-2.5 backdrop-blur-md">
+                        {/* Contact List Aligned - Extreme Compact */}
+                        <div className="px-3 -mt-16 pb-6 relative z-10">
+                            <div className="max-w-[160px] mx-auto bg-[#162A47] rounded-xl p-3 shadow-2xl border border-white/10 space-y-2 backdrop-blur-md">
                                 {[
                                     { icon: 'fa-envelope', label: 'E-mail', val: contact.email || profile.email || '-', color: 'text-blue-400' },
                                     { icon: 'fa-phone', label: 'Phone', val: contact.phone_primary || profile.phone_primary || '-', color: 'text-green-400' },
