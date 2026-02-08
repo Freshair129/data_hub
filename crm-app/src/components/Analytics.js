@@ -7,12 +7,8 @@ export default function Analytics({ customers, products }) {
     const [activeTab, setActiveTab] = useState('market');
     const [marketingData, setMarketingData] = useState(null);
 
-    useEffect(() => {
-        fetch('/data/marketing.json')
-            .then(res => res.json())
-            .then(data => setMarketingData(data))
-            .catch(err => console.error('Failed to load marketing data', err));
-    }, []);
+    const today = new Date();
+    const now = new Date(); // Reuse for best sellers
 
     // --- Market & Sales Logic (Existing) ---
     // ABC Analysis Calculation
@@ -48,7 +44,6 @@ export default function Analytics({ customers, products }) {
     // Best Sellers Ranking Logic
     const getBestSellers = (period) => {
         // ... [Existing Logic] ...
-        const now = new Date();
         const periodMs = period === 'day' ? 86400000 : period === 'week' ? 604800000 : 2592000000;
         const counts = {};
         customers.forEach(cust => {
@@ -179,7 +174,6 @@ export default function Analytics({ customers, products }) {
 
     // --- RFM Analysis Logic (Real) ---
     const calculateRFM = () => {
-        const today = new Date();
         return customers.map(c => {
             // Recency: Days since last purchase (ORDER or PURCHASE)
             const purchaseEvents = (c.timeline || []).filter(e => e.type === 'ORDER' || e.type === 'PURCHASE');
