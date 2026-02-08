@@ -100,7 +100,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
                     {/* Profile Detail Card - Compact */}
                     <div className="bg-[#162A47]/80 rounded-[1.5rem] shadow-lg border border-white/10 overflow-hidden relative group backdrop-blur-md">
-                        <div className="p-2.5 pb-20 bg-gradient-to-br from-[#162A47]/80 to-[#1F3A5F]/80 relative">
+                        <div className="p-[15px] pb-20 bg-gradient-to-br from-[#162A47]/80 to-[#1F3A5F]/80 relative">
                             <div className="flex flex-col items-center text-center">
                                 <div className="relative mb-4">
                                     <div className="w-[140px] h-[140px] rounded-full bg-[#162A47] p-0.5 ring-2 ring-[#C9A34E]/20 shadow-xl overflow-hidden">
@@ -116,19 +116,23 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     </div>
                                 </div>
 
-                                <h3 className="text-lg font-black text-[#F8F8F6] mb-0.5 tracking-tight">{profile.first_name} {profile.last_name}</h3>
-                                {profile.member_id && (
-                                    <p className="text-[#C9A34E] font-black text-[10px] tracking-widest uppercase mb-1 font-mono">{profile.member_id}</p>
-                                )}
-                                <p className="text-white/40 font-bold text-[8px] tracking-[0.2em] uppercase mb-3">
+                                <h3 className="text-lg font-black text-[#F8F8F6] mb-0.5 tracking-tight leading-tight">{profile.first_name} {profile.last_name}</h3>
+                                <p className="text-white/40 font-bold text-[8px] tracking-[0.2em] uppercase mb-4">
                                     {profile.nick_name ? `"${profile.nick_name}"` : 'Premium Member'}
                                 </p>
 
-                                <div className={`flex items-center gap-1.5 px-3 py-1 ${currentTier.color} rounded-full mb-4 shadow-md border border-white/20 transition-all hover:scale-105 cursor-default`}>
-                                    <i className={`fas ${currentTier.icon} ${currentTier.textColor} text-[9px]`}></i>
-                                    <span className={`text-[8px] font-black uppercase tracking-widest ${currentTier.textColor}`}>
-                                        {currentTier.label.split(' ')[0]}
-                                    </span>
+                                <div className={`flex flex-col items-center justify-center gap-0.5 px-4 py-1.5 ${currentTier.color} rounded-2xl mb-5 shadow-md border border-white/20 transition-all hover:scale-105 cursor-default min-w-[100px]`}>
+                                    <div className="flex items-center gap-1.5">
+                                        <i className={`fas ${currentTier.icon} ${currentTier.textColor} text-[9px]`}></i>
+                                        <span className={`text-[9px] font-black uppercase tracking-widest ${currentTier.textColor}`}>
+                                            {currentTier.label.split(' ')[0]}
+                                        </span>
+                                    </div>
+                                    {profile.member_id && (
+                                        <span className={`${currentTier.textColor} text-[7px] font-bold opacity-70 tracking-tighter font-mono -mt-0.5`}>
+                                            {profile.member_id}
+                                        </span>
+                                    )}
                                 </div>
 
                                 {/* Membership Progress - Full Width */}
@@ -220,7 +224,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                         </div>
 
                         {/* Contact List Aligned - Full Width */}
-                        <div className="px-2.5 -mt-16 pb-6 relative z-10 flex justify-center">
+                        <div className="px-[15px] -mt-16 pb-6 relative z-10 flex justify-center">
                             <div className="w-full bg-[#162A47] rounded-xl p-4 shadow-2xl border border-white/10 space-y-2.5 backdrop-blur-md">
                                 {[
                                     { icon: 'fa-envelope', label: 'E-mail', val: contact.email || profile.email || '-', color: 'text-blue-400' },
