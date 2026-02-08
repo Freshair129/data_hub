@@ -131,8 +131,8 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     </span>
                                 </div>
 
-                                {/* Membership Progress - Edge-to-Edge Compact */}
-                                <div className="w-[160px] mb-4 p-2.5 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
+                                {/* Membership Progress - Expanded & Centered */}
+                                <div className="w-[210px] mx-auto mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">
                                             {nextTier ? `Next: ${nextTier.label.split(' ')[0]}` : 'Tier: Elite (Max)'}
@@ -176,8 +176,8 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     </div>
                                 </div>
 
-                                {/* Wallet Section - Edge-to-Edge Compact */}
-                                <div className="w-[160px] bg-[#162A47] rounded-xl p-3 mb-4 border border-white/10 relative overflow-hidden">
+                                {/* Wallet Section - Expanded & Centered */}
+                                <div className="w-[210px] mx-auto bg-[#162A47] rounded-xl p-4 mb-4 border border-white/10 relative overflow-hidden">
                                     <div className="space-y-3 relative z-10">
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col text-left">
@@ -219,9 +219,9 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                             </div>
                         </div>
 
-                        {/* Contact List Aligned - Edge-to-Edge Compact */}
-                        <div className="px-0 -mt-16 pb-6 relative z-10">
-                            <div className="w-[160px] bg-[#162A47] rounded-xl p-3 shadow-2xl border border-white/10 space-y-2 backdrop-blur-md">
+                        {/* Contact List Aligned - Expanded & Centered */}
+                        <div className="px-4 -mt-16 pb-6 relative z-10 flex justify-center">
+                            <div className="w-[210px] bg-[#162A47] rounded-xl p-4 shadow-2xl border border-white/10 space-y-2.5 backdrop-blur-md">
                                 {[
                                     { icon: 'fa-envelope', label: 'E-mail', val: contact.email || profile.email || '-', color: 'text-blue-400' },
                                     { icon: 'fa-phone', label: 'Phone', val: contact.phone_primary || profile.phone_primary || '-', color: 'text-green-400' },
