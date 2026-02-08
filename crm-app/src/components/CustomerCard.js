@@ -150,7 +150,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
                                 {/* Membership Progress */}
                                 {nextTier && (
-                                    <div className="w-full max-w-[240px] mb-6 p-4 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
+                                    <div className="w-full max-w-[240px] mb-6 p-4 bg-[#162A47] rounded-2xl border border-white/10 shadow-inner">
                                         <div className="flex items-center justify-between mb-3">
                                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Next Tier: {nextTier.label.split(' ')[0]}</span>
                                             <div className="flex gap-1.5">
@@ -241,9 +241,9 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                             </div>
                         </div>
 
-                        {/* Contact List Overlap - Dark Mode */}
+                        {/* Contact List Overlap - Aligned with Wallet Box */}
                         <div className="px-6 -mt-24 pb-8 relative z-10">
-                            <div className="bg-slate-800/80 rounded-3xl p-6 shadow-xl shadow-black/20 border border-slate-700 space-y-4 backdrop-blur-sm">
+                            <div className="max-w-[240px] mx-auto bg-[#162A47] rounded-2xl p-6 shadow-xl shadow-black/40 border border-white/10 space-y-4 backdrop-blur-md">
                                 {[
                                     { icon: 'fa-envelope', label: 'E-mail', val: contact.email || profile.email || '-', color: 'text-blue-400' },
                                     { icon: 'fa-phone', label: 'Phone', val: contact.phone_primary || profile.phone_primary || '-', color: 'text-green-400' },

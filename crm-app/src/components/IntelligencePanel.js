@@ -25,16 +25,16 @@ export default function IntelligencePanel({ intel }) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
-                    {/* Customer Goal */}
-                    <div className="md:col-span-8 p-6 bg-slate-50/50 rounded-2xl border border-slate-100 border-dashed">
+                    {/* Customer Goal - Aligned with Wallet Style */}
+                    <div className="md:col-span-8 p-6 bg-[#162A47] rounded-2xl border border-white/10 shadow-inner group/goal hover:bg-[#1F3A5F] transition-colors">
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-3">Core Learning Objective</p>
-                        <p className="text-slate-800 font-bold text-lg leading-relaxed italic">
+                        <p className="text-white font-bold text-lg leading-relaxed italic">
                             &quot;{intel.customer_goal_th || intel.customer_goal || '-'}&quot;
                         </p>
                     </div>
 
-                    {/* Churn Risk */}
-                    <div className="md:col-span-4 p-6 bg-slate-50/50 rounded-2xl border border-slate-100 border-dashed flex flex-col justify-center items-center text-center">
+                    {/* Churn Risk - Aligned with Wallet Style */}
+                    <div className="md:col-span-4 p-6 bg-[#162A47] rounded-2xl border border-white/10 shadow-inner flex flex-col justify-center items-center text-center group/risk hover:bg-[#1F3A5F] transition-colors">
                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-3">Churn Probability</p>
                         <div className={`text-5xl font-black mb-2 ${riskColor} drop-shadow-sm`}>{riskPercent}%</div>
                         <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${riskBg} ${riskColor} border border-current/10`}>
