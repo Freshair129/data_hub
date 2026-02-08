@@ -121,16 +121,16 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     {profile.nick_name ? `"${profile.nick_name}"` : 'Premium Member'}
                                 </p>
 
-                                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-[#C9A34E] rounded-full mb-5 shadow-lg border border-white/10 transition-all hover:scale-105 cursor-default group/badge">
+                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#C9A34E] rounded-full mb-5 shadow-lg border border-white/10 transition-all hover:scale-105 cursor-default group/badge">
                                     <div className="flex items-center justify-center">
-                                        <i className="fas fa-gem text-[#162A47] text-[13px]"></i>
+                                        <i className="fas fa-gem text-[#162A47] text-[16px]"></i>
                                     </div>
-                                    <div className="flex flex-col items-start leading-none py-0.5">
-                                        <span className="text-[8px] font-black uppercase tracking-tight text-[#162A47]">
+                                    <div className="flex flex-col items-center leading-none py-0.5">
+                                        <span className="text-[10px] font-black uppercase tracking-tight text-[#162A47]">
                                             {currentTier.label.split(' ')[0].split('').join(' ')}
                                         </span>
                                         {profile.member_id && (
-                                            <span className="text-[#162A47] text-[5px] font-black opacity-60 tracking-tighter font-mono mt-0.5">
+                                            <span className="text-[6.5px] font-black opacity-60 tracking-tighter font-mono mt-0.5">
                                                 {profile.member_id.split('').join(' ')}
                                             </span>
                                         )}
@@ -140,7 +140,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                 {/* Membership Progress - Full Width */}
                                 <div className="w-full mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
                                             {nextTier ? `Next: ${nextTier.label.split(' ')[0]}` : 'Tier: Elite (Max)'}
                                         </span>
                                         <div className="flex gap-1">
@@ -153,7 +153,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
                                     <div className="space-y-2">
                                         <div>
-                                            <div className="flex justify-between text-[6px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
+                                            <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
                                                 <span>Spend</span>
                                                 <span>{totalSpend.toLocaleString()} / {nextTier?.threshold?.toLocaleString() || 'MAX'}</span>
                                             </div>
@@ -167,7 +167,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
                                         {(nextTier?.hourThreshold > 0 || !nextTier) && (
                                             <div>
-                                                <div className="flex justify-between text-[6px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
+                                                <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
                                                     <span>Hours</span>
                                                     <span>{learningHours} / {nextTier?.hourThreshold || '100+'} HRS</span>
                                                 </div>
@@ -187,13 +187,13 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     <div className="space-y-3 relative z-10">
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col text-left">
-                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Wallet</span>
-                                                <div className="text-md font-black text-white flex items-baseline gap-0.5 leading-none">
-                                                    <span className="text-[9px] text-slate-500 font-bold">฿</span>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Wallet</span>
+                                                <div className="text-lg font-black text-white flex items-baseline gap-0.5 leading-none">
+                                                    <span className="text-[11px] text-slate-500 font-bold">฿</span>
                                                     {wallet.balance?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                                 </div>
                                             </div>
-                                            <button className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white text-[8px] font-bold uppercase tracking-wider rounded-md transition-all active:scale-95">
+                                            <button className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-md transition-all active:scale-95">
                                                 Top Up
                                             </button>
                                         </div>
@@ -202,13 +202,13 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
                                         <div className="flex items-center justify-between text-left">
                                             <div className="flex flex-col">
-                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">VPoints</span>
-                                                <div className="text-md font-black text-[#C9A34E] flex items-baseline gap-0.5 leading-none">
-                                                    <span className="text-[9px] text-[#C9A34E]/60 font-bold">VP</span>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">VPoints</span>
+                                                <div className="text-lg font-black text-[#C9A34E] flex items-baseline gap-0.5 leading-none">
+                                                    <span className="text-[11px] text-[#C9A34E]/60 font-bold">VP</span>
                                                     {wallet.points?.toLocaleString()}
                                                 </div>
                                             </div>
-                                            <button className="px-3 py-1 bg-white/5 hover:bg-white/10 text-white text-[8px] font-bold uppercase tracking-wider rounded-md border border-white/10 transition-all">
+                                            <button className="px-3 py-1 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-md border border-white/10 transition-all">
                                                 Use
                                             </button>
                                         </div>
