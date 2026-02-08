@@ -131,21 +131,50 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     </span>
                                 </div>
 
-                                {/* Membership Progress - Compact */}
-                                {nextTier && (
-                                    <div className="w-full max-w-[200px] mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">{nextTier.label.split(' ')[0]} Tier</span>
-                                            <span className="text-[7px] font-black text-amber-400">{Math.round(combinedProgress)}%</span>
-                                        </div>
-                                        <div className="h-1 w-full bg-black/20 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transition-all duration-1000"
-                                                style={{ width: `${combinedProgress}%` }}
-                                            ></div>
+                                {/* Membership Progress - Compact Detailed */}
+                                <div className="w-full max-w-[200px] mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">
+                                            {nextTier ? `Next: ${nextTier.label.split(' ')[0]}` : 'Tier: Elite (Max)'}
+                                        </span>
+                                        <div className="flex gap-1">
+                                            <div className={`w-1 h-1 rounded-full ${spendProgress >= 100 ? 'bg-green-400' : 'bg-slate-600'}`}></div>
+                                            {(nextTier?.hourThreshold > 0 || !nextTier) && (
+                                                <div className={`w-1 h-1 rounded-full ${hourProgress >= 100 ? 'bg-blue-400' : 'bg-slate-600'}`}></div>
+                                            )}
                                         </div>
                                     </div>
-                                )}
+
+                                    <div className="space-y-2">
+                                        <div>
+                                            <div className="flex justify-between text-[6px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
+                                                <span>Spend</span>
+                                                <span>{totalSpend.toLocaleString()} / {nextTier?.threshold?.toLocaleString() || 'MAX'}</span>
+                                            </div>
+                                            <div className="h-1 w-full bg-black/20 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transition-all duration-1000"
+                                                    style={{ width: `${spendProgress}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        {(nextTier?.hourThreshold > 0 || !nextTier) && (
+                                            <div>
+                                                <div className="flex justify-between text-[6px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
+                                                    <span>Hours</span>
+                                                    <span>{learningHours} / {nextTier?.hourThreshold || '100+'} HRS</span>
+                                                </div>
+                                                <div className="h-1 w-full bg-black/20 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-blue-400 to-blue-200 rounded-full transition-all duration-1000"
+                                                        style={{ width: `${hourProgress}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
 
                                 {/* Wallet Section - Compact */}
                                 <div className="w-full max-w-[200px] bg-[#162A47] rounded-xl p-4 mb-4 border border-white/10 relative overflow-hidden">
@@ -198,6 +227,8 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     { icon: 'fa-phone', label: 'Phone', val: contact.phone_primary || profile.phone_primary || '-', color: 'text-green-400' },
                                     { icon: 'fa-line', label: 'Line ID', val: contact.line_id || '-', color: 'text-emerald-400' },
                                     { icon: 'fa-facebook', label: 'Facebook', val: contact.facebook || '-', color: 'text-blue-500' },
+                                    { icon: 'fa-birthday-cake', label: 'Birthday', val: profile.birthday || '-', color: 'text-pink-400' },
+                                    { icon: 'fa-briefcase', label: 'Occupation', val: profile.job_title || '-', color: 'text-orange-400' },
                                     { icon: 'fa-user-tie', label: 'Agent', val: profile.agent || 'None', color: 'text-[#C9A34E]' }
                                 ].map((item, i) => (
                                     <div key={i} className="flex items-center gap-3 group/item hover:bg-white/5 p-1 rounded-lg transition-colors -mx-1">
