@@ -49,6 +49,16 @@ export default function Dashboard({ customers, products }) {
         { label: 'Reward Points', value: totalPoints.toLocaleString(), icon: 'fa-award', color: 'text-orange-500', bg: 'bg-orange-500/10' },
     ];
 
+    // --- AI Insight Calculations ---
+    const allCoursesEnrolled = customers.flatMap(c => c.inventory?.learning_courses || []).map(c => c.name);
+    const courseFreq = {};
+    allCoursesEnrolled.forEach(c => courseFreq[c] = (courseFreq[c] || 0) + 1);
+    const topCourse = Object.entries(courseFreq).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+
+    const platinumMembers = customers.filter(c => c.profile?.membership_tier === 'PLATINUM' || c.profile?.membership_tier === 'GOLD');
+    const goldFreq = platinumMembers.length > 0 ? (platinumMembers.reduce((sum, c) => sum + (c.intelligence?.metrics?.total_order || 1), 0) / platinumMembers.length).toFixed(1) : 0;
+
+
     return (
         <div className="animate-fade-in space-y-8">
             {/* Page Header */}
@@ -131,10 +141,11 @@ export default function Dashboard({ customers, products }) {
                             <h3 className="font-black text-2xl tracking-tight leading-tight">AI Insights Peak Performance</h3>
                         </div>
                         <div className="space-y-6 flex-1 text-sm font-bold opacity-80 leading-relaxed">
-                            <p>Current retention rate is up by <span className="underline decoration-2">12.5%</span> this month.</p>
-                            <p>Platinum members are increasing their order frequency by <span className="underline decoration-2">2.4x</span>.</p>
-                            <p>Most popular course category: <span className="underline decoration-2">Japanese Culinary Arts</span>.</p>
+                            <p>Current retention rate is at <span className="underline decoration-2">{(100 - churnRate).toFixed(1)}%</span> from {totalCustomers} students.</p>
+                            <p>Gold/Platinum members average <span className="underline decoration-2">{goldFreq}x</span> order frequency.</p>
+                            <p>Most popular course category: <span className="underline decoration-2">{topCourse}</span>.</p>
                         </div>
+
                         <button className="mt-8 w-full bg-[#0A1A2F] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-xl">
                             Run Full Analysis
                         </button>

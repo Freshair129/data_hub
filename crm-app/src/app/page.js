@@ -80,25 +80,29 @@ export default function Home() {
 
     async function loadCustomers() {
         try {
-            const customerIds = ['c001', 'c002', 'c003', 'c004', 'c005', 'c006', 'c007'];
-            const loaded = [];
-
-            for (const id of customerIds) {
-                try {
-                    const res = await fetch(`/data/customer/${id}/profile_${id}.json`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        loaded.push({ id, ...data });
-                    }
-                } catch (e) {
-                    console.log(`Could not load customer ${id}`);
-                }
+            const res = await fetch('/api/customers');
+            if (res.ok) {
+                const loaded = await res.json();
+                setCustomers(loaded);
+                if (loaded.length > 0) setActiveCustomer(loaded[0]);
             }
-
-            setCustomers(loaded);
-            if (loaded.length > 0) setActiveCustomer(loaded[0]);
         } catch (e) {
             console.error('Failed to load customers', e);
+        }
+    }
+
+    async function saveCustomer(customer) {
+        try {
+            const res = await fetch(`/api/customers/${customer.customer_id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customer)
+            });
+            if (!res.ok) throw new Error('Failed to save customer');
+            console.log('Customer saved successfully');
+        } catch (e) {
+            console.error('Save error:', e);
+            alert('Warning: Changes could not be saved to disk.');
         }
     }
 
@@ -130,7 +134,6 @@ export default function Home() {
                 free: (product.selectedFreeCourses || []).sort()
             })
             : product.id;
-
         const existing = cart.find(c => {
             const cSignature = c.type === 'bundle'
                 ? JSON.stringify({
@@ -153,23 +156,37 @@ export default function Home() {
                     : c.id;
                 return cSignature === productSignature
                     ? { ...c, qty: c.qty + 1 }
-                    : c
+                    : c;
             }));
         } else {
             setCart([...cart, { ...product, qty: 1 }]);
         }
     }
 
-    function handleRegisterCustomer(newCustomer) {
+    async function handleRegisterCustomer(newCustomer) {
         setCustomers([...customers, newCustomer]);
         setActiveCustomer(newCustomer);
         setIsRegistrationOpen(false);
+
+        // Persist to disk
+        await saveCustomer(newCustomer);
+
         alert(`Customer ${newCustomer.customer_id} registered successfully!`);
     }
 
-    const handleCheckout = (slipData = null) => {
+
+    const handleCheckout = async (slipData = null) => {
         if (!activeCustomer) {
             alert("Please select a customer first!");
+            return;
+        }
+
+        const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const currentBalance = activeCustomer.wallet?.balance || 0;
+
+        // Wallet Logic: Check if balance is sufficient
+        if (currentBalance < cartTotal) {
+            alert(`Insufficient Wallet Balance! (Have: ฿${currentBalance.toLocaleString()}, Need: ฿${cartTotal.toLocaleString()})`);
             return;
         }
 
@@ -177,77 +194,68 @@ export default function Home() {
         const timestamp = new Date().toISOString().split('T')[0];
 
         cart.forEach(item => {
-            if (item.type === 'bundle' || item.type === 'package') {
-                const bundleItems = [];
-
-                // 1. Standard & Swapped Courses
-                if (item.courses) {
-                    item.courses.forEach(cId => {
-                        // Check if this slot was swapped
-                        const targetId = item.swappedCourses && item.swappedCourses[cId]
-                            ? item.swappedCourses[cId].id
-                            : cId;
-
-                        const course = products.find(p => p.id === targetId);
+            for (let i = 0; i < item.qty; i++) {
+                if (item.type === 'bundle' || item.type === 'package') {
+                    const bundleItems = [];
+                    if (item.courses) {
+                        item.courses.forEach(cId => {
+                            const targetId = item.swappedCourses && item.swappedCourses[cId]
+                                ? item.swappedCourses[cId].id
+                                : cId;
+                            const course = products.find(p => p.id === targetId);
+                            if (course) {
+                                bundleItems.push({
+                                    name: course.name,
+                                    course_id: course.id,
+                                    description: targetId !== cId ? `Customized (Swapped)` : course.description,
+                                    type: 'course',
+                                    purchase_date: timestamp,
+                                    status: 'Active',
+                                    credits_remaining: { sessions: course.duration ? Math.ceil(course.duration / 3) : 1 },
+                                    is_bundle_item: true
+                                });
+                            }
+                        });
+                    }
+                    const freeCourseIds = item.selectedFreeCourses && item.selectedFreeCourses.length > 0
+                        ? item.selectedFreeCourses
+                        : (item.free_courses || []);
+                    freeCourseIds.forEach(cId => {
+                        const course = products.find(p => p.id === cId);
                         if (course) {
                             bundleItems.push({
-                                name: course.name,
+                                name: course.name + " (Bonus)",
                                 course_id: course.id,
-                                description: targetId !== cId ? `Customized (Swapped)` : course.description,
+                                description: "Bonus Course",
                                 type: 'course',
                                 purchase_date: timestamp,
                                 status: 'Active',
-                                credits_remaining: { sessions: course.duration ? Math.ceil(course.duration / 3) : 1 },
+                                credits_remaining: { sessions: 1 },
+                                is_bonus: true,
                                 is_bundle_item: true
                             });
                         }
                     });
+                    newInventoryItems.push({
+                        name: item.name,
+                        bundle_id: item.id,
+                        description: "Package License",
+                        type: 'bundle',
+                        purchase_date: timestamp,
+                        status: 'Active',
+                        items: bundleItems
+                    });
+                } else {
+                    newInventoryItems.push({
+                        name: item.name,
+                        course_id: item.id,
+                        description: item.description,
+                        type: 'course',
+                        purchase_date: timestamp,
+                        status: 'Active',
+                        credits_remaining: { sessions: 1 }
+                    });
                 }
-
-                // 2. Free Courses (Selected or Default)
-                const freeCourseIds = item.selectedFreeCourses && item.selectedFreeCourses.length > 0
-                    ? item.selectedFreeCourses
-                    : (item.free_courses || []);
-
-                freeCourseIds.forEach(cId => {
-                    const course = products.find(p => p.id === cId);
-                    if (course) {
-                        bundleItems.push({
-                            name: course.name + " (Bonus)",
-                            course_id: course.id,
-                            description: "Bonus Course",
-                            type: 'course',
-                            purchase_date: timestamp,
-                            status: 'Active',
-                            credits_remaining: { sessions: 1 },
-                            is_bonus: true,
-                            is_bundle_item: true
-                        });
-                    }
-                });
-
-                // Add the BUNDLE itself as the inventory item, containing the children
-                newInventoryItems.push({
-                    name: item.name,
-                    bundle_id: item.id,
-                    description: "Package License",
-                    type: 'bundle',
-                    purchase_date: timestamp,
-                    status: 'Active',
-                    items: bundleItems // Nested items
-                });
-
-            } else {
-                // Single Course
-                newInventoryItems.push({
-                    name: item.name,
-                    course_id: item.id,
-                    description: item.description,
-                    type: 'course',
-                    purchase_date: timestamp,
-                    status: 'Active',
-                    credits_remaining: { sessions: 1 }
-                });
             }
         });
 
@@ -258,15 +266,20 @@ export default function Home() {
             title: `Order #${Math.floor(Math.random() * 90000) + 10000}`,
             details: {
                 total: cartTotal,
-                items: cart.map(item => item.name)
+                items: cart.map(item => `${item.qty}x ${item.name}`)
             }
         };
 
         const updatedCustomers = customers.map(c => {
             if (c.customer_id === activeCustomer.customer_id) {
                 const updatedTotalSpend = (c.intelligence?.metrics?.total_spend || 0) + cartTotal;
+                const newBalance = (c.wallet?.balance || 0) - cartTotal;
                 return {
                     ...c,
+                    wallet: {
+                        ...c.wallet,
+                        balance: newBalance
+                    },
                     inventory: {
                         ...c.inventory,
                         learning_courses: [
@@ -290,11 +303,18 @@ export default function Home() {
         setCustomers(updatedCustomers);
         const newActive = updatedCustomers.find(c => c.customer_id === activeCustomer.customer_id);
         setActiveCustomer(newActive);
+
+        // Persist to disk
+        if (newActive) {
+            await saveCustomer(newActive);
+        }
+
         setCart([]);
         setIsCartOpen(false);
         setActiveView('inventory');
-        alert("Checkout successful! Items added to inventory.");
+        alert(`Checkout successful! ฿${cartTotal.toLocaleString()} deducted from wallet.`);
     };
+
 
     const nextCustomerId = `c${String(customers.length + 1).padStart(3, '0')}`;
 

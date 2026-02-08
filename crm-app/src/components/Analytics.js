@@ -1,10 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Analytics({ customers, products }) {
     const [rankingPeriod, setRankingPeriod] = useState('month');
-    const [activeTab, setActiveTab] = useState('market'); // market, customer, financial
+    const [activeTab, setActiveTab] = useState('market');
+    const [marketingData, setMarketingData] = useState(null);
+
+    useEffect(() => {
+        fetch('/data/marketing.json')
+            .then(res => res.json())
+            .then(data => setMarketingData(data))
+            .catch(err => console.error('Failed to load marketing data', err));
+    }, []);
 
     // --- Market & Sales Logic (Existing) ---
     // ABC Analysis Calculation
@@ -283,11 +291,20 @@ export default function Analytics({ customers, products }) {
         const channel = c.contact_info?.lead_channel || 'Organic / Other';
         const revenue = c.intelligence?.metrics?.total_spend || 0;
 
+        // Logic: New if only 1 purchase event or total_order <= 1
+        const purchaseEvents = (c.timeline || []).filter(e => e.type === 'ORDER' || e.type === 'PURCHASE');
+        const isNew = (purchaseEvents.length <= 1) && (c.intelligence?.metrics?.total_order <= 1);
+
         if (!roiAggregation[channel]) {
-            roiAggregation[channel] = { revenue: 0, leads: 0 };
+            roiAggregation[channel] = { revenue: 0, revenueNew: 0, revenueReturning: 0, leads: 0 };
         }
         roiAggregation[channel].revenue += revenue;
-        roiAggregation[channel].leads += 1; // Assuming each customer counted as a lead from their channel
+        if (isNew) {
+            roiAggregation[channel].revenueNew += revenue;
+        } else {
+            roiAggregation[channel].revenueReturning += revenue;
+        }
+        roiAggregation[channel].leads += 1;
     });
 
     const channelROI = Object.entries(roiAggregation).map(([channel, stats]) => {
@@ -298,7 +315,10 @@ export default function Analytics({ customers, products }) {
             channel,
             spend,
             sales,
+            salesNew: stats.revenueNew,
+            salesReturning: stats.revenueReturning,
             roas: spend > 0 ? (sales / spend).toFixed(2) : '∞',
+            acqRoas: spend > 0 ? (stats.revenueNew / spend).toFixed(2) : '0.00',
             profit: sales - spend,
             color: channel.includes('Facebook') ? 'bg-blue-600' :
                 channel.includes('TikTok') ? 'bg-pink-500' :
@@ -313,49 +333,52 @@ export default function Analytics({ customers, products }) {
     const bestChannel = channelROI.reduce((prev, current) => (parseFloat(current.roas) > parseFloat(prev.roas) ? current : prev));
 
     // --- Financial P&L Logic (Real) ---
-    // источ source of truth for Top-line: totalRevenue
-    const COGS_RATE = 0.40; // 40% Estimated COGS
+    const financialConfig = marketingData?.financial_config || { cogs_rate: 0.45, opex: {} };
+    const COGS_RATE = financialConfig.cogs_rate;
     const cogs = totalRevenue * COGS_RATE;
     const grossProfit = totalRevenue - cogs;
 
-    // Real Marketing Spend + Configurable Overheads
     const opex = {
-        marketing: totalAdSpend, // Real aggregated ad spend from Channel ROI
-        staff: 150000,           // Configurable Fixed Cost
-        rent: 40000,            // Configurable Fixed Cost
-        utility: 10000          // Configurable Fixed Cost
+        ...financialConfig.opex,
+        "Ads (Dynamic)": totalAdSpend
     };
     const totalOpex = Object.values(opex).reduce((a, b) => a + b, 0);
     const netProfit = grossProfit - totalOpex;
     const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
-    // --- Event / Openhouse Logic (New) ---
-    const eventStats = {
-        count: 3,
-        leads: 89,
-        sales: 245000
-    };
+    // --- Event / Openhouse Logic (Dynamic) ---
+    const eventStats = marketingData?.events?.stats || { count: 0, leads: 0, sales: 0 };
+    const upcomingEvents = marketingData?.events?.upcoming || [];
+    const pastEvents = marketingData?.events?.past || [];
 
-    const upcomingEvents = [
-        { name: 'Openhouse Anuban Suan Dek', date: '08 Feb 2026', loc: 'Anuban Suan Dek', status: 'Confirmed', leads: 35, color: 'text-green-500', dot: 'bg-green-500' },
-        { name: 'V-School Fair 2026', date: '15 Feb 2026', loc: 'V-School Main Branch', status: 'Preparing', leads: 80, color: 'text-amber-500', dot: 'bg-amber-500' },
-        { name: 'Parent Meeting Q1', date: '28 Feb 2026', loc: 'Conference Room A', status: 'Planned', leads: 25, color: 'text-blue-500', dot: 'bg-blue-500' }
-    ];
-
-    const pastEvents = [
-        { name: 'Christmas Fair', date: '20 Dec 2025', leads: 65, reg: 28, closed: 15, sales: 125000 }
-    ];
-
-    // --- Campaign Tracker Logic (New) ---
-    const campaigns = [
-        { name: 'Summer Chef Promo', platform: 'Facebook', status: 'Active', budget: 50000, spend: 35000, revenue: 120000, start: '01 Feb', end: '28 Feb', color: 'bg-blue-600' },
-        { name: 'Q1 Retargeting', platform: 'Google Ads', status: 'Active', budget: 30000, spend: 12000, revenue: 45000, start: '15 Jan', end: '15 Mar', color: 'bg-orange-500' },
-        { name: 'New Branch Awareness', platform: 'TikTok', status: 'Paused', budget: 20000, spend: 18000, revenue: 8000, start: '01 Jan', end: '31 Jan', color: 'bg-pink-500' }
-    ].map(c => ({
+    // --- Campaign Tracker Logic (Dynamic) ---
+    const campaigns = (marketingData?.campaigns || []).map(c => ({
         ...c,
-        utilization: ((c.spend / c.budget) * 100).toFixed(1),
+        utilization: ((c.spend / (c.budget || 1)) * 100).toFixed(1),
         roas: c.spend > 0 ? (c.revenue / c.spend).toFixed(2) : '0.00'
     }));
+
+
+    // --- V-Insight AI Aggregation ---
+    const allPainPoints = customers.flatMap(c => c.intelligence?.pain_points_th || c.intelligence?.pain_points || []);
+    const painPointFreq = {};
+    allPainPoints.forEach(p => painPointFreq[p] = (painPointFreq[p] || 0) + 1);
+    const topPainPoints = Object.entries(painPointFreq)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    const allRecommendations = customers.map(c => ({
+        name: c.profile?.nick_name || c.profile?.first_name,
+        action: c.intelligence?.next_best_action?.action_th || c.intelligence?.next_best_action?.action,
+        reason: c.intelligence?.next_best_action?.reason_th || c.intelligence?.next_best_action?.reason
+    })).filter(r => r.action);
+
+    const aiSummary = {
+        totalIntelligence: customers.filter(c => c.intelligence).length,
+        avgRisk: (customers.reduce((sum, c) => sum + (c.intelligence?.metrics?.churn_risk_level === 'High' ? 100 : c.intelligence?.metrics?.churn_risk_level === 'Medium' ? 50 : 0), 0) / customers.length).toFixed(0),
+        topOpportunity: "Focus on 'Returning' customer upsell for Line OA leads."
+    };
+
 
     const campaignStats = {
         active: campaigns.filter(c => c.status === 'Active').length,
@@ -385,6 +408,7 @@ export default function Analytics({ customers, products }) {
                         { id: 'lead', label: 'Lead Funnel', icon: 'fa-filter' },
                         { id: 'retention', label: 'Retention & Follow-up', icon: 'fa-bell' },
                         { id: 'roi', label: 'Channel ROI', icon: 'fa-sack-dollar' },
+                        { id: 'vinsight', label: 'V-Insight AI', icon: 'fa-brain' },
                         { id: 'event', label: 'Event Calendar', icon: 'fa-calendar-check' },
                         { id: 'campaign', label: 'Campaign Tracker', icon: 'fa-bullhorn' }
                     ].map(tab => (
