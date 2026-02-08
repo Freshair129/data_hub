@@ -1,0 +1,57 @@
+{
+    "id": "TVS-FC-FULL-COURSES-A-111H",
+    "type": "package",
+    "name": "Full Course เมนูอาหารญี่ปุ่น 111 ชั่วโมง",
+    "category": "business",
+    "base_price": 110000,
+    "price": 110000,
+    "duration": 111,
+    "duration_unit": "hours",
+    "description": "เรียนทำอาหารญี่ปุ่นครบวงจร 111 ชั่วโมง ครอบคลุมเมนูยอดนิยมทั้งหมด เหมาะสำหรับผู้ที่ต้องการเปิดร้านอาหารและไปทำงานต่างประเทศ",
+    "courses": [
+        "TVS-JP-2FC-HC-01",
+        "TVS-JP-2FC-HR-02",
+        "TVS-JP-2FC-SC-03",
+        "TVS-JP-2FC-HN-04",
+        "TVS-JP-2FC-SC-05",
+        "TVS-JP-2FC-SC-06",
+        "TVS-JP-2FC-HR-07",
+        "TVS-JP-2FC-DS-08",
+        "TVS-JP-2FC-HO-09",
+        "TVS-JP-2FC-HO-10",
+        "TVS-JP-2FC-HO-11",
+        "TVS-SP-2FC-HO-01",
+        "TVS-JP-2FC-HC-12",
+        "TVS-JP-2FC-HO-13",
+        "TVS-JP-2FC-HN-14",
+        "TVS-JP-2FC-CO-15"
+    ],
+    "conditions": [
+        "รับฟรี! ชุดอุปกรณ์สำหรับการเรียนระดับพรีเมี่ยม 6 รายการ (มีดเดบะ, ยานางิบะ, หินลับมีด, ชุดเชฟ, ผ้ากันเปื้อน, ที่ไส้ผัก) มูลค่ากว่า 15,000 บาท",
+        "สามารถเก็บสิทธิ์คอร์สเรียนได้มากถึง 2 ปี",
+        "ได้รับใบประกาศนียบัตรทุกคอร์สเรียน",
+        "เรียนครบ 30 ชั่วโมงขึ้นไป รับตรารับรองจากสมาคมเชฟโลก (Worldchefs)"
+    ],
+    "metadata": {
+        "level": "Intermediate",
+        "difficulty": "Intermediate",
+        "instructor": "V School Chefs",
+        "cooking_method": "Mixed Techniques",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1-3",
+        "total_hours": 111,
+        "total_menus": "100+",
+        "is_best_seller": false,
+        "is_full_course": true,
+        "premium_equipment": [
+            "มีดเดบะ 18 ซม. (Deba Knife)",
+            "มีดยานางิบะ 30 ซม. (Yanagiba Knife)",
+            "หินลับมีดญี่ปุ่น (Sharpening Stone)",
+            "ผ้ากันเปื้อน+หมวก 4 ชุด (Apron & Hat)",
+            "เสื้อเชฟ 2 ชุด (Chef Jacket)",
+            "ที่ไส้ผักสารพัดประโยชน์ (Veggie Tool)"
+        ]
+    }
+}

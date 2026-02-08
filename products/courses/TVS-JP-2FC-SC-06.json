@@ -1,0 +1,21 @@
+{
+    "id": "TVS-JP-2FC-SC-06",
+    "type": "course",
+    "name": "คอร์สฟิวชัน ซูชิ",
+    "category": "japan",
+    "price": 9900,
+    "duration": 6,
+    "duration_unit": "hours",
+    "menu_count": 7,
+    "description": "Standard Course",
+    "metadata": {
+        "level": "Basic",
+        "difficulty": "Beginner",
+        "instructor": "Chef A",
+        "cooking_method": "Raw Preparation",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1"
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "id": "TVS-JP-2FC-HC-12",
+    "type": "course",
+    "name": "คอร์สอาหารสไตล์อิซากาย่า (ผับญี่ปุ่น)",
+    "category": "japan",
+    "price": 7500,
+    "duration": 6,
+    "duration_unit": "hours",
+    "menu_count": 8,
+    "description": "Standard Course",
+    "metadata": {
+        "level": "Basic",
+        "difficulty": "Beginner",
+        "instructor": "Chef A",
+        "cooking_method": "Mixed Techniques",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1"
+    }
+}

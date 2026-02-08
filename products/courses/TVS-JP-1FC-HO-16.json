@@ -1,0 +1,21 @@
+{
+    "id": "TVS-JP-1FC-HO-16",
+    "type": "course",
+    "name": "คอร์สคัตสึเร็สึ เมนูทอดญี่ปุ่น",
+    "category": "japan",
+    "price": 8800,
+    "duration": 6,
+    "duration_unit": "hours",
+    "menu_count": 8,
+    "description": "Standard Course",
+    "metadata": {
+        "level": "Basic",
+        "difficulty": "Beginner",
+        "instructor": "Chef A",
+        "cooking_method": "Deep Frying",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1"
+    }
+}

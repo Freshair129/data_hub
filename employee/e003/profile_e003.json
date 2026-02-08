@@ -1,0 +1,52 @@
+{
+    "meta_schema_version": "1.0",
+    "employee_id": "e003",
+    "profile": {
+        "first_name": "SalesA",
+        "last_name": "Team",
+        "nick_name": "SalesA",
+        "gender": "N/A",
+        "nationality": "Thai",
+        "role": "Manager",
+        "department": "Sales",
+        "birthday": null,
+        "profile_picture": null,
+        "status": "Active",
+        "join_date": "2024-02-01"
+    },
+    "contact_info": {
+        "email": "salesa@vschool.co.th",
+        "phone_primary": "+66 77 777 7777",
+        "line_id": "@vschool_salesa"
+    },
+    "credentials": {
+        "password": "salesa123"
+    },
+    "permissions": {
+        "can_register_customers": true,
+        "can_process_orders": true,
+        "can_access_analytics": false,
+        "can_manage_products": false,
+        "can_edit_inventory": true,
+        "is_admin": false
+    },
+    "performance": {
+        "metrics": {
+            "total_sales": 2,
+            "total_customers_registered": 1,
+            "total_revenue_generated": 25000
+        }
+    },
+    "timeline": [
+        {
+            "id": "ACT-E003-001",
+            "date": "2026-02-01T10:00:00Z",
+            "type": "CALL",
+            "summary": "Initial inquiry from c002",
+            "details": {
+                "customer_id": "c002",
+                "result": "Interested in B2B package"
+            }
+        }
+    ]
+}

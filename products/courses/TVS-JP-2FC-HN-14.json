@@ -1,0 +1,21 @@
+{
+    "id": "TVS-JP-2FC-HN-14",
+    "type": "course",
+    "name": "คอร์สราเมนเส้นสด",
+    "category": "japan",
+    "price": 5500,
+    "duration": 3,
+    "duration_unit": "hours",
+    "menu_count": 2,
+    "description": "Standard Course",
+    "metadata": {
+        "level": "Basic",
+        "difficulty": "Beginner",
+        "instructor": "Chef A",
+        "cooking_method": "Boiling",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1"
+    }
+}

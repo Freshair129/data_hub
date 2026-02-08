@@ -1,0 +1,236 @@
+{
+    "meta_schema_version": "1.0",
+    "customer_id": "c001",
+    "profile": {
+        "member_id": "MEM-2024-0001",
+        "first_name": "Somchai",
+        "last_name": "Jaidee",
+        "nick_name": "Chai",
+        "gender": "Male",
+        "nationality": "Thai",
+        "job_title": "Business owner",
+        "birthday": "12/02/1993",
+        "company": "Mhookatha 89",
+        "profile_picture": "/data/customer/c001/assets/c001_profile.jpg",
+        "avatar_url": null,
+        "status": "Active",
+        "membership_tier": "GOLD",
+        "lifecycle_stage": "Golden Period",
+        "agent": "SalesB"
+    },
+    "contact_info": {
+        "email": "somchai.j@techcorp.co",
+        "phone_primary": "+66 81 234 5678",
+        "phone_secondary": null,
+        "line_id": "@somchai_j",
+        "facebook": "facebook.com/somchai.j",
+        "address": {
+            "line1": "123 Tech Tower, Sukhumvit Rd.",
+            "city": "Bangkok",
+            "postal_code": "10110",
+            "country": "Thailand"
+        }
+    },
+    "intelligence": {
+        "tags": [
+            "VIP",
+            "High Spender",
+            "Japanese food",
+            "Sushi",
+            "Salmon",
+            "Wagyu",
+            "Food Industry",
+            "Bussiness owner",
+            "mhoo ka tha"
+        ],
+        "metrics": {
+            "total_spend": 165000,
+            "total_learning_hours": 32,
+            "internship_completed": false,
+            "total_point": 500,
+            "total_order": 1,
+            "last_purchase_date": "2023-11-20",
+            "churn_risk_level": "Low"
+        },
+        "note": "Don't oversell. Don't call before 10 AM.",
+        "customer_goal": "Learn sushi making to add new menu to existing Mookata restaurant.",
+        "customer_goal_th": "เรียนทำซูชิเพื่อเพิ่มเมนูใหม่ให้กับร้านหมูกระทะที่มีอยู่",
+        "intent": {
+            "level": "High",
+            "type": "Transactional",
+            "motivation": "Business Expansion",
+            "buying_readiness": "Ready to buy",
+            "last_inferred_at": "2026-02-07T15:00:00Z"
+        },
+        "pain_points": [
+            "Current Mookata menu is getting stale",
+            "Lacks knowledge in Japanese food preparation",
+            "Worried about ingredient cost for sushi",
+            "Failed previous online course due to lack of practical practice"
+        ],
+        "pain_points_th": [
+            "เมนูหมูกระทะปัจจุบันเริ่มน่าเบื่อ",
+            "ขาดความรู้ในการเตรียมอาหารญี่ปุ่น",
+            "กังวลเรื่องต้นทุนวัตถุดิบสำหรับซูชิ",
+            "เคยเรียนออนไลน์แล้วไม่สำเร็จเพราะขาดการฝึกปฏิบัติจริง"
+        ],
+        "next_best_action": {
+            "action": "Pitch 'Hands-on Pro Workshop' (Face-to-Face)",
+            "action_th": "เสนอคอร์ส 'Hands-on Pro Workshop' (เรียนสดที่สถาบัน)",
+            "reason": "Customer had bad experience with online-only courses. Needs practical training to feel confident for business.",
+            "reason_th": "ลูกค้ามีประสบการณ์ไม่ดีกับหลักสูตรออนไลน์ล้วน ต้องการการฝึกปฏิบัติจริงเพื่อให้มั่นใจในการทำธุรกิจ"
+        }
+    },
+    "communication_consent": {
+        "email_marketing": true,
+        "sms_promo": false,
+        "line_broadcast": true,
+        "phone_calling": true
+    },
+    "inventory": {
+        "coupons": [
+            {
+                "code": "BDAY-2026",
+                "coupon_id": "COUP-123",
+                "name": "Birthday Special 25%",
+                "description": "Exclusive birthday discount for VIP",
+                "status": "Active",
+                "expiry_date": "2026-02-28"
+            },
+            {
+                "code": "VIP-FREE-DISH",
+                "coupon_id": "COUP-124",
+                "name": "Free Wagyu Set",
+                "description": "Redeemable for one premium set",
+                "status": "Active",
+                "expiry_date": "2026-06-30"
+            },
+            {
+                "code": "PROMO-TOPUP-500",
+                "coupon_id": "COUP-125",
+                "name": "Free Drink (250ml)",
+                "description": "Bonus for 500 THB Top-up",
+                "status": "Active",
+                "expiry_date": "2026-03-31"
+            }
+        ],
+        "learning_courses": [
+            {
+                "course_id": "CRS-SUSHI-001",
+                "name": "Intensive sushi",
+                "total_hours": 12,
+                "sessions_total": 3,
+                "hours_per_session": 4,
+                "status": "Available",
+                "credits_remaining": {
+                    "hours": 12,
+                    "sessions": 3
+                },
+                "enrolled_at": "2023-11-20T14:30:00Z"
+            }
+        ]
+    },
+    "wallet": {
+        "balance": 500,
+        "currency": "THB",
+        "points": 600,
+        "points_unit": "VPoint",
+        "status": "Active",
+        "last_transaction": "2026-02-07T14:58:00Z",
+        "last_transaction_id": "TXN-2026-001"
+    },
+    "support_tickets": [
+        {
+            "ticket_id": "TKT-C001-001",
+            "subject": "สอบถามเรื่องการใช้คูปองวันเกิด",
+            "description": "ลูกค้าต้องการทราบว่าคูปองวันเกิดใช้ร่วมกับโปรโมชันอื่นได้ไหม",
+            "priority": "Medium",
+            "status": "Resolved",
+            "assigned_to": "Admin_Soming",
+            "created_at": "2026-02-05T10:00:00Z"
+        }
+    ],
+    "timeline": [
+        {
+            "id": "NOTE-2026-001",
+            "date": "2026-02-07T15:08:00Z",
+            "type": "CHAT",
+            "summary": "Customer feedback on previous learning (Follow-up from INT-2023-001)",
+            "details": {
+                "content": "เคยเรียนออนไลน์แล้วไม่เข้าใจเพราะไม่ได้ลงมือทำจริง",
+                "insight": "Prefer Hands-on training",
+                "ref": {
+                    "interaction_id": "INT-2023-001"
+                },
+                "agent": "SalesB"
+            }
+        },
+        {
+            "id": "TXN-2026-001",
+            "date": "2026-02-07T14:58:00Z",
+            "type": "TOPUP",
+            "summary": "Top-up 500 THB (Promo: Free Drink)",
+            "details": {
+                "amount": 500,
+                "currency": "THB",
+                "payment_method": "PromptPay",
+                "rewards_triggered": [
+                    "COUP-125"
+                ]
+            }
+        },
+        {
+            "id": "INT-2023-003",
+            "date": "2023-11-20T14:30:00Z",
+            "type": "ORDER",
+            "summary": "Purchased Intensive sushi",
+            "details": {
+                "order_id": "ORD-999",
+                "amount": 15400,
+                "items": [
+                    "Intensive sushi"
+                ],
+                "payment_method": "Bank Transfer",
+                "channel": "Online",
+                "transaction_id": "TXN-ORD-999-ABC",
+                "payment_status": "Paid",
+                "payment_verification": {
+                    "status": "Verified",
+                    "verified_by": "Finance_Admin_01",
+                    "verified_at": "2023-11-20T14:45:00Z",
+                    "method": "Manual_Slip_Check",
+                    "note": "Checked with K-Bank Statement, amount matches."
+                },
+                "attachments": [
+                    {
+                        "type": "payment_slip",
+                        "url": "/assets/slips/slip-ord-999.jpg",
+                        "uploaded_at": "2023-11-20T14:35:00Z"
+                    }
+                ],
+                "agent": "SalesB"
+            }
+        },
+        {
+            "id": "INT-2023-002",
+            "date": "2023-11-15T10:00:00Z",
+            "type": "CALL",
+            "summary": "Sales Follow-up Call",
+            "details": {
+                "duration": "15m",
+                "agent": "SalesB",
+                "result": "Positive, promised to buy next week"
+            }
+        },
+        {
+            "id": "INT-2023-001",
+            "date": "2023-11-01T09:00:00Z",
+            "type": "CHAT",
+            "summary": "lead form facebook AD",
+            "details": {
+                "status": "Opened",
+                "agent": "SalesB"
+            }
+        }
+    ]
+}

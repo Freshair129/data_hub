@@ -1,0 +1,101 @@
+{
+    "customer_id": "c005",
+    "profile": {
+        "member_id": "MEM-2024-0005",
+        "first_name": "Charlie",
+        "last_name": "ตันเจริญ",
+        "phone_primary": "",
+        "line_id": "",
+        "email": "",
+        "job_title": "N/A",
+        "birthday": "N/A",
+        "profile_picture": null,
+        "status": "Active",
+        "lifecycle_stage": "Customer",
+        "agent": "Admin"
+    },
+    "address": {
+        "full": "คลองเขื่อน, ฉะเชิงเทรา, 24000",
+        "city": "คลองเขื่อน",
+        "country": "Thailand",
+        "zipcode": "24000"
+    },
+    "wallet": {
+        "balance": 0,
+        "currency": "THB",
+        "points": 0,
+        "last_updated": "2026-02-07T11:52:00.016Z"
+    },
+    "intelligence": {
+        "customer_goal": "Learn new skills",
+        "pain_points": [],
+        "purchased_courses": [
+            "ราเมน",
+            "ข้าวหน้าหมูย่างซีอิ้วญี่ปุ่น"
+        ],
+        "next_best_action": {
+            "action": "Recommend advanced course",
+            "reason": "Completed beginner track"
+        }
+    },
+    "inventory": {
+        "coupons": [
+            {
+                "id": "cpn_B-20260131-0002_0",
+                "product_id": 3,
+                "code": "CODE-B-20-0",
+                "name": "ราเมน",
+                "description": "Purchased Item",
+                "expiry_date": "31 Dec 2026",
+                "status": "Active"
+            },
+            {
+                "id": "cpn_B-20260131-0003_0",
+                "product_id": 2,
+                "code": "CODE-B-20-0",
+                "name": "ข้าวหน้าหมูย่างซีอิ้วญี่ปุ่น",
+                "description": "Purchased Item",
+                "expiry_date": "31 Dec 2026",
+                "status": "Active"
+            }
+        ],
+        "learning_courses": [
+            {
+                "name": "ราเมน",
+                "sessions_total": 10,
+                "credits_remaining": {
+                    "sessions": 10
+                }
+            },
+            {
+                "name": "ข้าวหน้าหมูย่างซีอิ้วญี่ปุ่น",
+                "sessions_total": 10,
+                "credits_remaining": {
+                    "sessions": 10
+                }
+            }
+        ]
+    },
+    "timeline": [
+        {
+            "date": "2026-01-31T02:09:41.530Z",
+            "type": "ORDER",
+            "summary": "Purchased 1 items",
+            "details": {
+                "amount": 15300,
+                "content": "ราเมน",
+                "payment_method": "โอนเงิน"
+            }
+        },
+        {
+            "date": "2026-01-31T03:00:16.203Z",
+            "type": "ORDER",
+            "summary": "Purchased 1 items",
+            "details": {
+                "amount": 810,
+                "content": "ข้าวหน้าหมูย่างซีอิ้วญี่ปุ่น",
+                "payment_method": "โอนเงิน"
+            }
+        }
+    ]
+}

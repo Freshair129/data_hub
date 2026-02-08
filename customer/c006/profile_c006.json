@@ -1,0 +1,91 @@
+{
+    "customer_id": "c006",
+    "profile": {
+        "member_id": "MEM-2024-0006",
+        "first_name": "ชูวิทย์",
+        "last_name": "นอนฝันดี",
+        "phone_primary": "0909998877",
+        "line_id": "",
+        "email": "",
+        "job_title": "N/A",
+        "birthday": "12/02/1988",
+        "profile_picture": null,
+        "status": "Active",
+        "lifecycle_stage": "Customer",
+        "agent": "Admin"
+    },
+    "address": {
+        "full": "กรุงเทพมหานคร",
+        "city": "",
+        "country": "Thailand",
+        "zipcode": ""
+    },
+    "wallet": {
+        "balance": 0,
+        "currency": "THB",
+        "points": 0,
+        "last_updated": "2026-02-07T11:52:00.345Z"
+    },
+    "intelligence": {
+        "customer_goal": "Learn new skills",
+        "pain_points": [],
+        "purchased_courses": [
+            "คอร์สเส้นสดราเม็ง 2 เมนู / 3 ชั่วโมง",
+            "คอร์สอาหารญี่ปุ่นพื้นฐาน 15 เมนู / 12 ชั่วโมง"
+        ],
+        "next_best_action": {
+            "action": "Recommend advanced course",
+            "reason": "Completed beginner track"
+        }
+    },
+    "inventory": {
+        "coupons": [
+            {
+                "id": "cpn_B-20260201-0002_0",
+                "product_id": 16,
+                "code": "CODE-B-20-0",
+                "name": "คอร์สเส้นสดราเม็ง 2 เมนู / 3 ชั่วโมง",
+                "description": "Purchased Item",
+                "expiry_date": "31 Dec 2026",
+                "status": "Active"
+            },
+            {
+                "id": "cpn_B-20260201-0002_1",
+                "product_id": 5,
+                "code": "CODE-B-20-1",
+                "name": "คอร์สอาหารญี่ปุ่นพื้นฐาน 15 เมนู / 12 ชั่วโมง",
+                "description": "Purchased Item",
+                "expiry_date": "31 Dec 2026",
+                "status": "Active"
+            }
+        ],
+        "learning_courses": [
+            {
+                "name": "คอร์สเส้นสดราเม็ง 2 เมนู / 3 ชั่วโมง",
+                "sessions_total": 10,
+                "credits_remaining": {
+                    "sessions": 10
+                }
+            },
+            {
+                "name": "คอร์สอาหารญี่ปุ่นพื้นฐาน 15 เมนู / 12 ชั่วโมง",
+                "sessions_total": 10,
+                "credits_remaining": {
+                    "sessions": 10
+                }
+            }
+        ]
+    },
+    "timeline": [
+        {
+            "date": "2026-02-01T09:10:31.288Z",
+            "type": "ORDER",
+            "summary": "Purchased 2 items",
+            "details": {
+                "amount": 21500,
+                "content": "คอร์สเส้นสดราเม็ง 2 เมนู / 3 ชั่วโมง, คอร์สอาหารญี่ปุ่นพื้นฐาน 15 เมนู / 12 ชั่วโมง",
+                "payment_method": "โอนเงิน"
+            }
+        }
+    ]
+}

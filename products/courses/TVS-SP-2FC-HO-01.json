@@ -1,0 +1,21 @@
+{
+    "id": "TVS-SP-2FC-HO-01",
+    "type": "course",
+    "name": "คอร์สแคนนาเดียนล็อบสเตอร์",
+    "category": "japan",
+    "price": 17000,
+    "duration": 3,
+    "duration_unit": "hours",
+    "menu_count": 1,
+    "description": "Standard Course",
+    "metadata": {
+        "level": "Basic",
+        "difficulty": "Beginner",
+        "instructor": "Chef A",
+        "cooking_method": "Mixed Techniques",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1"
+    }
+}

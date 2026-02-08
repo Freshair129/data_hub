@@ -1,0 +1,21 @@
+{
+    "id": "TVS-JP-1FC-SC-19",
+    "type": "course",
+    "name": "คอร์ส โอมากาเสะปลาไทย",
+    "category": "japan",
+    "price": 15500,
+    "duration": 12,
+    "duration_unit": "hours",
+    "menu_count": 13,
+    "description": "Standard Course",
+    "metadata": {
+        "level": "Basic",
+        "difficulty": "Beginner",
+        "instructor": "Chef A",
+        "cooking_method": "Mixed Techniques",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1"
+    }
+}

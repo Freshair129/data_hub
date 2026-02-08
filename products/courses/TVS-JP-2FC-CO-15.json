@@ -1,0 +1,21 @@
+{
+    "id": "TVS-JP-2FC-CO-15",
+    "type": "course",
+    "name": "คอร์สน้ำสลัดยอดนิยม",
+    "category": "japan",
+    "price": 5500,
+    "duration": 6,
+    "duration_unit": "hours",
+    "menu_count": 7,
+    "description": "Standard Course",
+    "metadata": {
+        "level": "Basic",
+        "difficulty": "Beginner",
+        "instructor": "Chef A",
+        "cooking_method": "Mixed Techniques",
+        "max_students": 12,
+        "certification": true,
+        "location": "V School",
+        "room_number": "Kitchen 1"
+    }
+}
