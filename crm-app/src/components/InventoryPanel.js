@@ -175,13 +175,13 @@ export default function InventoryPanel({ inventory, searchTerm = '', currentUser
         <div className="space-y-10 px-4 md:px-8 py-4">
             {/* Header Section */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-2xl bg-[#0A1A2F] shadow-xl flex items-center justify-center text-white ring-4 ring-[#0A1A2F]/5">
-                        <i className="fas fa-wallet text-xl"></i>
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#0A1A2F] shadow-xl flex items-center justify-center text-white ring-2 ring-white/5">
+                        <i className="fas fa-wallet text-sm"></i>
                     </div>
                     <div>
-                        <h3 className="font-black text-white text-2xl tracking-tight">Your Inventory</h3>
-                        <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">Coupons & Course Credits</p>
+                        <h3 className="font-black text-white text-lg tracking-tight">Active Inventory</h3>
+                        <p className="text-white/40 text-[8px] font-bold uppercase tracking-widest">Coupons & Course Credits</p>
                     </div>
                 </div>
 

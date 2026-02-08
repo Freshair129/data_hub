@@ -17,27 +17,27 @@ export default function Timeline({ timeline }) {
     const sortedTimeline = [...timeline].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     return (
-        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
-            <div className="flex items-center justify-between mb-10">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                        <i className="fas fa-stream text-indigo-500 text-lg"></i>
+        <div className="bg-[#162A47]/80 backdrop-blur-md rounded-[1.5rem] p-5 shadow-lg border border-white/10">
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                        <i className="fas fa-stream text-indigo-500 text-sm"></i>
                     </div>
-                    <h3 className="font-extrabold text-slate-900 text-xl tracking-tight">Recent Activity Log</h3>
+                    <h3 className="font-extrabold text-white text-lg tracking-tight">Activity Log</h3>
                 </div>
-                <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                        {timeline.length} Events Logged
+                <div className="flex items-center gap-2 bg-[#0A1A2F]/50 px-2.5 py-1 rounded-full border border-white/5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                        {timeline.length} Events
                     </span>
                 </div>
             </div>
 
             <div className="relative">
                 {/* Visual Line */}
-                <div className="absolute left-6 top-0 bottom-0 w-1 bg-slate-50 rounded-full"></div>
+                <div className="absolute left-5 top-0 bottom-0 w-1 bg-white/5 rounded-full"></div>
 
-                <div className="space-y-10 relative z-10">
+                <div className="space-y-6 relative z-10">
                     {sortedTimeline.map((item, idx) => {
                         const date = new Date(item.date);
                         const formattedDate = date.toLocaleDateString('th-TH', {
@@ -58,10 +58,10 @@ export default function Timeline({ timeline }) {
                         const typeInfo = iconMap[item.type] || { icon: 'fa-dot-circle', color: 'bg-slate-400 shadow-slate-100', text: 'text-slate-600', label: item.type };
 
                         return (
-                            <div key={idx} className="relative pl-16 group">
+                            <div key={idx} className="relative pl-12 group">
                                 {/* Timeline Marker */}
-                                <div className={`absolute left-2 w-10 h-10 ${typeInfo.color} rounded-2xl shadow-lg border-4 border-white flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-500`}>
-                                    <i className={`fas ${typeInfo.icon} text-white text-xs`}></i>
+                                <div className={`absolute left-1.5 w-8 h-8 ${typeInfo.color} rounded-xl shadow-lg border-2 border-[#162A47] flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-500`}>
+                                    <i className={`fas ${typeInfo.icon} text-white text-[10px]`}></i>
                                 </div>
 
                                 <div className="flex flex-col">
@@ -72,13 +72,13 @@ export default function Timeline({ timeline }) {
                                             {typeInfo.label}
                                         </span>
                                     </div>
-                                    <h4 className="font-extrabold text-slate-800 text-lg leading-tight mb-3 group-hover:text-indigo-600 transition-colors">
+                                    <h4 className="font-extrabold text-white text-base leading-tight mb-2 group-hover:text-indigo-400 transition-colors">
                                         {item.summary}
                                     </h4>
 
                                     {item.details && (
-                                        <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 group-hover:border-indigo-100 group-hover:bg-indigo-50/20 transition-all duration-500">
-                                            {item.details.content && <p className="text-slate-600 text-sm leading-relaxed mb-3">{item.details.content}</p>}
+                                        <div className="p-3 bg-[#0A1A2F]/30 rounded-xl border border-white/5 group-hover:border-indigo-500/30 transition-all duration-500">
+                                            {item.details.content && <p className="text-slate-400 text-xs leading-relaxed mb-2">{item.details.content}</p>}
                                             <div className="flex flex-wrap items-center gap-4">
                                                 {item.details.amount && (
                                                     <div className="flex items-center gap-2">
