@@ -395,13 +395,20 @@ export default function Home() {
                 {activeView === 'store' && (
                     <StoreGrid
                         products={products}
+                        allProducts={products}
+                        activeCustomer={activeCustomer}
                         onAddToCart={addToCart}
                         onProductClick={setSelectedProduct}
+                        cart={cart}
+                        setCart={setCart}
+                        onCheckout={handleCheckout}
+                        isCartOpen={isCartOpen}
+                        setIsCartOpen={setIsCartOpen}
                     />
                 )}
 
                 {activeView === 'orders' && (
-                    <Orders />
+                    <Orders customers={customers} />
                 )}
 
                 {activeView === 'analytics' && (
