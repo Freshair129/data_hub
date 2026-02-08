@@ -121,15 +121,20 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     {profile.nick_name ? `"${profile.nick_name}"` : 'Premium Member'}
                                 </p>
 
-                                <div className={`flex flex-col items-center justify-center gap-0.5 px-4 py-2 ${currentTier.color} rounded-2xl mb-5 shadow-md border border-white/20 transition-all hover:scale-105 cursor-default min-w-[120px]`}>
-                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#C9A34E]">
-                                        {currentTier.label.split(' ')[0]}
-                                    </span>
-                                    {profile.member_id && (
-                                        <span className="text-[#C9A34E] text-[6px] font-bold opacity-80 tracking-widest font-mono">
-                                            {profile.member_id}
+                                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-[#C9A34E] rounded-full mb-5 shadow-lg border border-white/10 transition-all hover:scale-105 cursor-default group/badge">
+                                    <div className="flex items-center justify-center">
+                                        <i className="fas fa-gem text-[#162A47] text-[13px]"></i>
+                                    </div>
+                                    <div className="flex flex-col items-start leading-none py-0.5">
+                                        <span className="text-[8px] font-black uppercase tracking-tight text-[#162A47]">
+                                            {currentTier.label.split(' ')[0].split('').join(' ')}
                                         </span>
-                                    )}
+                                        {profile.member_id && (
+                                            <span className="text-[#162A47] text-[5px] font-black opacity-60 tracking-tighter font-mono mt-0.5">
+                                                {profile.member_id.split('').join(' ')}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Membership Progress - Full Width */}
