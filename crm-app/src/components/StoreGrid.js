@@ -173,122 +173,106 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
 
                     <div className="relative w-full max-w-md h-full bg-white shadow-2xl flex flex-col animate-slide-in-right border-l border-slate-200">
                         {/* Cart Header - Fixed at Top */}
-                        <div className="flex items-center justify-between p-6 border-b border-slate-100 flex-shrink-0">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
-                                    <i className="fas fa-shopping-bag text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-slate-800 text-xl tracking-tight">Shopping Cart</h3>
-                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{cartItemCount} items selected</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setIsCartOpen(false)}
-                                className="w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full flex items-center justify-center transition-colors"
-                            >
-                                <i className="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        {/* Mini Profile Section */}
-                        {activeCustomer && (
-                            <div className="mb-6 p-4 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl text-white shadow-xl relative overflow-hidden border border-white/10">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-
-                                <div className="relative z-10 flex items-center gap-4">
-                                    {/* Avatar */}
-                                    <div className="relative">
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-inner overflow-hidden border-2 border-white/20 ${activeCustomer.profile?.membership_tier === 'ELITE' ? 'bg-gradient-to-tr from-cyan-400 to-blue-600' :
-                                            activeCustomer.profile?.membership_tier === 'PLATINUM' ? 'bg-gradient-to-tr from-slate-300 to-slate-400' :
-                                                'bg-gradient-to-tr from-amber-400 to-yellow-600'
-                                            }`}>
-                                            {activeCustomer.profile?.profile_picture ? (
-                                                <img src={activeCustomer.profile.profile_picture} alt="Avatar" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <span>{(activeCustomer.profile?.nick_name || activeCustomer.profile?.first_name || 'C').charAt(0)}</span>
-                                            )}
-                                        </div>
-                                        <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-slate-800"></div>
+                        <div className="flex-shrink-0 border-b border-slate-100 p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                                        <i className="fas fa-shopping-bag text-xl"></i>
                                     </div>
-
-                                    {/* Name & Tier */}
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-bold text-lg leading-tight">
-                                                {activeCustomer.profile?.nick_name || activeCustomer.profile?.first_name || 'Customer'}
-                                            </p>
-                                            <span className="bg-white/10 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter border border-white/5">
-                                                {activeCustomer.profile?.membership_tier || 'MEMBER'}
-                                            </span>
-                                        </div>
-                                        <p className="text-[10px] text-white/40 font-mono tracking-tight mt-1">{activeCustomer.customer_id}</p>
-                                    </div>
-
-                                    {/* Wallet Summary */}
-                                    <div className="text-right">
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-[9px] font-black text-orange-400 uppercase tracking-widest leading-none">Wallet</span>
-                                            <span className="text-sm font-black text-white">฿{(activeCustomer.wallet?.balance || 0).toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 mt-1 justify-end">
-                                            <i className="fas fa-coins text-[8px] text-amber-400"></i>
-                                            <span className="text-[10px] font-bold text-white/60">{(activeCustomer.intelligence?.metrics?.total_point || activeCustomer.wallet?.points || 0).toLocaleString()} <span className="text-[8px] opacity-40">pts</span></span>
-                                        </div>
+                                    <div>
+                                        <h3 className="font-black text-slate-800 text-xl tracking-tight">Shopping Cart</h3>
+                                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{cartItemCount} items selected</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                    {/* Cart Content - Scrollable Middle Area */}
-                    <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
-                        {cart.length === 0 ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-4">
-                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
-                                    <i className="fas fa-shopping-basket text-4xl opacity-20"></i>
-                                </div>
-                                <p className="font-bold">Your cart is empty</p>
                                 <button
                                     onClick={() => setIsCartOpen(false)}
-                                    className="text-orange-600 text-sm font-black hover:underline"
+                                    className="w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full flex items-center justify-center transition-colors"
                                 >
-                                    CONTINUE SHOPPING
+                                    <i className="fas fa-times"></i>
                                 </button>
                             </div>
-                        ) : (
-                            <>
-                                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+
+                            {/* Mini Profile Section */}
+                            {activeCustomer && (
+                                <div className="p-4 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl text-white shadow-xl relative overflow-hidden border border-white/10">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+
+                                    <div className="relative z-10 flex items-center gap-4">
+                                        {/* Avatar */}
+                                        <div className="relative">
+                                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-inner overflow-hidden border-2 border-white/20 ${activeCustomer.profile?.membership_tier === 'ELITE' ? 'bg-gradient-to-tr from-cyan-400 to-blue-600' :
+                                                activeCustomer.profile?.membership_tier === 'PLATINUM' ? 'bg-gradient-to-tr from-slate-300 to-slate-400' :
+                                                    'bg-gradient-to-tr from-amber-400 to-yellow-600'
+                                                }`}>
+                                                {activeCustomer.profile?.profile_picture ? (
+                                                    <img src={activeCustomer.profile.profile_picture} alt="Avatar" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span>{(activeCustomer.profile?.nick_name || activeCustomer.profile?.first_name || 'C').charAt(0)}</span>
+                                                )}
+                                            </div>
+                                            <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-slate-800"></div>
+                                        </div>
+
+                                        {/* Name & Tier */}
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-bold text-lg leading-tight">
+                                                    {activeCustomer.profile?.nick_name || activeCustomer.profile?.first_name || 'Customer'}
+                                                </p>
+                                                <span className="bg-white/10 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter border border-white/5">
+                                                    {activeCustomer.profile?.membership_tier || 'MEMBER'}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] text-white/40 font-mono tracking-tight mt-1">{activeCustomer.customer_id}</p>
+                                        </div>
+
+                                        {/* Wallet Summary */}
+                                        <div className="text-right">
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[9px] font-black text-orange-400 uppercase tracking-widest leading-none">Wallet</span>
+                                                <span className="text-sm font-black text-white">฿{(activeCustomer.wallet?.balance || 0).toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 mt-1 justify-end">
+                                                <i className="fas fa-coins text-[8px] text-amber-400"></i>
+                                                <span className="text-[10px] font-bold text-white/60">{(activeCustomer.intelligence?.metrics?.total_point || activeCustomer.wallet?.points || 0).toLocaleString()} <span className="text-[8px] opacity-40">pts</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Cart Content - Scrollable Middle Area */}
+                        <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
+                            {cart.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-4">
+                                    <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
+                                        <i className="fas fa-shopping-basket text-4xl opacity-20"></i>
+                                    </div>
+                                    <p className="font-bold">Your cart is empty</p>
+                                    <button
+                                        onClick={() => setIsCartOpen(false)}
+                                        className="text-orange-600 text-sm font-black hover:underline"
+                                    >
+                                        CONTINUE SHOPPING
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4 pr-2">
                                     {cart.map((item, idx) => {
                                         let breakdown = [];
                                         let packageValue = 0;
 
                                         if (item.type === 'bundle' && item.courses && allProducts) {
-                                            // 1. Standard / Swapped courses
                                             item.courses.forEach(cId => {
-                                                // Check for swap
-                                                const targetId = item.swappedCourses && item.swappedCourses[cId]
-                                                    ? item.swappedCourses[cId].id
-                                                    : cId;
-
+                                                const targetId = item.swappedCourses && item.swappedCourses[cId] ? item.swappedCourses[cId].id : cId;
                                                 const course = allProducts.find(p => p.id === targetId);
-
                                                 if (course) {
-                                                    const isSwapped = targetId !== cId;
-                                                    breakdown.push({
-                                                        id: course.id,
-                                                        name: course.name,
-                                                        price: course.price,
-                                                        isSwapped: isSwapped
-                                                    });
+                                                    breakdown.push({ id: course.id, name: course.name, price: course.price, isSwapped: targetId !== cId });
                                                     packageValue += (course.price || 0);
                                                 }
                                             });
-
-                                            // 2. Free Courses (Selected or Default)
-                                            const freeCourseIds = item.selectedFreeCourses && item.selectedFreeCourses.length > 0
-                                                ? item.selectedFreeCourses
-                                                : (item.free_courses || []);
-
+                                            const freeCourseIds = item.selectedFreeCourses && item.selectedFreeCourses.length > 0 ? item.selectedFreeCourses : (item.free_courses || []);
                                             freeCourseIds.forEach(cId => {
                                                 const course = allProducts.find(p => p.id === cId);
                                                 if (course) {
@@ -316,7 +300,7 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                                     </div>
                                                     <button
                                                         onClick={() => removeFromCart(item.id, item.type)}
-                                                        className="w-8 h-8 bg-white text-slate-300 hover:text-red-500 hover:shadow-md rounded-lg flex items-center justify-center transition-all opacity-40 group-hover:opacity-100"
+                                                        className="w-8 h-8 bg-white text-slate-300 hover:bg-red-100 hover:text-red-500 hover:shadow-md rounded-lg flex items-center justify-center transition-all opacity-40 group-hover:opacity-100"
                                                     >
                                                         <i className="fas fa-trash-alt text-xs"></i>
                                                     </button>
@@ -325,7 +309,6 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                                 {(item.type === 'bundle' || item.type === 'package') && breakdown.length > 0 && (
                                                     <div className="mt-4 bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
                                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Package Contents</p>
-
                                                         <div className="space-y-2 mb-4">
                                                             {breakdown.map((c, i) => (
                                                                 <div key={i} className="flex justify-between items-start text-[11px]">
@@ -336,20 +319,13 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                                                 </div>
                                                             ))}
                                                         </div>
-
                                                         <div className="pt-3 border-t border-slate-50 space-y-1">
-                                                            <div className="text-right">
-                                                                <span className="text-xs font-mono text-slate-400">{packageValue.toLocaleString()}</span>
-                                                            </div>
-
+                                                            <div className="text-right"><span className="text-xs font-mono text-slate-400">{packageValue.toLocaleString()}</span></div>
                                                             <div className="flex justify-between items-center text-green-600 font-bold">
                                                                 <span className="text-[10px] uppercase tracking-widest">Bundle Savings</span>
                                                                 <span className="text-sm font-mono">-฿{discount.toLocaleString()}</span>
                                                             </div>
-
-                                                            <div className="flex justify-end pt-1">
-                                                                <span className="text-lg font-black text-slate-800 font-mono">฿{item.price?.toLocaleString()}</span>
-                                                            </div>
+                                                            <div className="flex justify-end pt-1"><span className="text-lg font-black text-slate-800 font-mono">฿{item.price?.toLocaleString()}</span></div>
                                                         </div>
                                                     </div>
                                                 )}
@@ -357,17 +333,15 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                         );
                                     })}
                                 </div>
-
-                            </div>
+                            )}
+                        </div>
 
                         {/* Checkout Footer - Fixed at Bottom */}
                         {cart.length > 0 && (
                             <div className="p-6 border-t border-slate-100 bg-white flex-shrink-0">
                                 <div className="p-6 bg-[#0A1A2F] rounded-3xl text-white shadow-2xl relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-
                                     <div className="relative z-10 space-y-4">
-                                        {/* Slip Upload Area (Mockup for Admin) */}
                                         <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
                                             <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Payment Evidence (Slip)</p>
                                             <div className="flex items-center gap-4">
@@ -375,20 +349,15 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                                                     <i className="fas fa-file-upload mr-2"></i>
                                                     DRAG SLIP OR CLICK TO BROWSE
                                                 </div>
-                                                <button
-                                                    onClick={() => alert("Slip upload simulation triggered.")}
-                                                    className="w-12 h-12 bg-[#C9A34E] text-[#0A1A2F] rounded-xl flex items-center justify-center shadow-lg"
-                                                >
+                                                <button onClick={() => alert("Slip upload simulation triggered.")} className="w-12 h-12 bg-[#C9A34E] text-[#0A1A2F] rounded-xl flex items-center justify-center shadow-lg">
                                                     <i className="fas fa-camera"></i>
                                                 </button>
                                             </div>
                                         </div>
-
                                         <div className="flex justify-between items-center px-4">
                                             <span className="text-white/60 font-black uppercase tracking-widest text-xs">Final Amount</span>
                                             <span className="text-3xl font-black text-orange-400">฿{cartTotal.toLocaleString()}</span>
                                         </div>
-
                                         <button
                                             onClick={() => onCheckout({ slip_url: '/assets/slips/mock-slip.jpg' })}
                                             className="w-full bg-orange-500 hover:bg-orange-400 text-white py-4 rounded-xl font-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 group"
