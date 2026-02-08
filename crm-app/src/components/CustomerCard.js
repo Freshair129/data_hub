@@ -121,15 +121,12 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     {profile.nick_name ? `"${profile.nick_name}"` : 'Premium Member'}
                                 </p>
 
-                                <div className={`flex flex-col items-center justify-center gap-0.5 px-4 py-1.5 ${currentTier.color} rounded-2xl mb-5 shadow-md border border-white/20 transition-all hover:scale-105 cursor-default min-w-[100px]`}>
-                                    <div className="flex items-center gap-1.5">
-                                        <i className={`fas ${currentTier.icon} ${currentTier.textColor} text-[9px]`}></i>
-                                        <span className={`text-[9px] font-black uppercase tracking-widest ${currentTier.textColor}`}>
-                                            {currentTier.label.split(' ')[0]}
-                                        </span>
-                                    </div>
+                                <div className={`flex flex-col items-center justify-center gap-0.5 px-4 py-2 ${currentTier.color} rounded-2xl mb-5 shadow-md border border-white/20 transition-all hover:scale-105 cursor-default min-w-[120px]`}>
+                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#C9A34E]">
+                                        {currentTier.label.split(' ')[0]}
+                                    </span>
                                     {profile.member_id && (
-                                        <span className={`${currentTier.textColor} text-[7px] font-bold opacity-70 tracking-tighter font-mono -mt-0.5`}>
+                                        <span className="text-[#C9A34E] text-[6px] font-bold opacity-80 tracking-widest font-mono">
                                             {profile.member_id}
                                         </span>
                                     )}
