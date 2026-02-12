@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import IntelligencePanel from './IntelligencePanel';
 import InventoryPanel from './InventoryPanel';
 import Timeline from './Timeline';
+import SlipVerificationModal from './SlipVerificationModal';
 
 export default function CustomerCard({ customer, customers, onSelectCustomer, currentUser, onUpdateInventory }) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
 
     if (!customer) return null;
 
@@ -85,17 +87,17 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Session</span>
                     </div>
                     <select
-                        value={customer.id}
+                        value={customer.customer_id}
                         onChange={(e) => {
-                            const selected = customers.find(c => c.id === e.target.value);
+                            const selected = customers.find(c => c.customer_id === e.target.value);
                             if (selected) onSelectCustomer(selected);
                         }}
                         className="pl-4 pr-10 py-2 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-700 appearance-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all outline-none"
                         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23fb923c\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 9l4-4 4 4m0 6l-4 4-4-4\' /%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
                     >
                         {customers.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.profile?.member_id ? `[${c.profile.member_id}]` : `[${c.id}]`} {c.profile?.first_name ? `${c.profile.first_name} ${c.profile.last_name || ''}` : ''}
+                            <option key={c.customer_id} value={c.customer_id}>
+                                {c.profile?.member_id ? `[${c.profile.member_id}]` : `[${c.customer_id}]`} {c.profile?.first_name ? `${c.profile.first_name} ${c.profile.last_name || ''}` : ''}
                             </option>
                         ))}
                     </select>
@@ -120,7 +122,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                 <div className="relative mb-6">
                                     <div className="w-32 h-32 rounded-full bg-[#162A47] p-1 ring-4 ring-[#C9A34E]/20 shadow-2xl overflow-hidden">
                                         <img
-                                            src={profile.profile_picture || 'https://via.placeholder.com/150'}
+                                            src={profile.profile_picture || profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.first_name || 'C'}&background=0A1A2F&color=C9A34E`}
                                             alt="Avatar"
                                             className="w-full h-full object-cover rounded-full"
                                             onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=' + (profile.first_name || 'C') + '&background=0A1A2F&color=C9A34E'; }}
@@ -207,7 +209,10 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                                     {wallet.balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </div>
                                             </div>
-                                            <button className="px-4 py-1.5 bg-[#D9381E] hover:bg-[#b92b14] text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-red-900/20 border border-white/10 transition-all active:scale-95">
+                                            <button
+                                                onClick={() => setIsTopUpModalOpen(true)}
+                                                className="px-4 py-1.5 bg-[#D9381E] hover:bg-[#b92b14] text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-red-900/20 border border-white/10 transition-all active:scale-95"
+                                            >
                                                 Top Up
                                             </button>
                                         </div>
@@ -271,16 +276,65 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
                 {/* Right Column - Intelligence, Inventory & History (8 Units) */}
                 <div className="lg:col-span-8 space-y-6">
-                    <IntelligencePanel intel={intel} />
+                    <IntelligencePanel intel={intel} profile={profile} />
                     <InventoryPanel
                         inventory={inventory}
                         searchTerm={searchTerm}
                         currentUser={currentUser}
-                        onUpdateInventory={onUpdateInventory}
+                        onUpdateInventory={(newInventory, redeemedItem) => {
+                            let updatedCustomer = { ...customer, inventory: newInventory };
+                            if (redeemedItem) {
+                                const logEntry = {
+                                    id: `RED-${Date.now()}`,
+                                    date: new Date().toISOString(),
+                                    type: 'REDEEM',
+                                    summary: `Redeemed ${redeemedItem.type}: ${redeemedItem.name}`,
+                                    details: {
+                                        item_id: redeemedItem.coupon_id || redeemedItem.course_id || redeemedItem.bundle_id,
+                                        name: redeemedItem.name,
+                                        timestamp: new Date().toLocaleTimeString()
+                                    }
+                                };
+                                updatedCustomer.timeline = [logEntry, ...(customer.timeline || [])];
+                            }
+                            onUpdateInventory(updatedCustomer);
+                        }}
                     />
                     <Timeline timeline={timeline} />
                 </div>
             </div>
+
+            <SlipVerificationModal
+                isOpen={isTopUpModalOpen}
+                onClose={() => setIsTopUpModalOpen(false)}
+                onVerifySuccess={(data) => {
+                    const topUpAmount = data.amount;
+                    let updatedCustomer = { ...customer };
+
+                    // Update Wallet
+                    updatedCustomer.wallet = {
+                        ...wallet,
+                        balance: (wallet.balance || 0) + topUpAmount
+                    };
+
+                    // Add Timeline Entry
+                    const logEntry = {
+                        id: `TOP-${Date.now()}`,
+                        date: new Date().toISOString(),
+                        type: 'TOPUP',
+                        summary: `Wallet Top-up: ฿${topUpAmount.toLocaleString()}`,
+                        details: {
+                            amount: topUpAmount,
+                            bank: data.bank,
+                            transaction_id: data.transaction_id,
+                            timestamp: new Date().toLocaleTimeString()
+                        }
+                    };
+                    updatedCustomer.timeline = [logEntry, ...(customer.timeline || [])];
+
+                    onUpdateInventory(updatedCustomer);
+                }}
+            />
         </div>
     );
 }

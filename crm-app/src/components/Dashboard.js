@@ -1,9 +1,51 @@
 'use client';
 
-export default function Dashboard({ customers, products }) {
-    // Generate some mock metrics based on data
+import React, { useState, useEffect } from 'react';
+
+export default function Dashboard({ customers, products, onRefresh }) {
+    const [insights, setInsights] = useState({ spend: 0, reach: 0, impressions: 0 });
+    const [loadingInsights, setLoadingInsights] = useState(false);
+    const [syncing, setSyncing] = useState(false);
+
+    useEffect(() => {
+        const fetchInsights = async () => {
+            setLoadingInsights(true);
+            try {
+                const res = await fetch('/api/marketing/insights');
+                const result = await res.json();
+                if (result.success) {
+                    setInsights(result.insights);
+                }
+            } catch (err) {
+                console.error('Failed to fetch insights:', err);
+            } finally {
+                setLoadingInsights(false);
+            }
+        };
+        fetchInsights();
+    }, []);
+
+    const handleSync = async () => {
+        setSyncing(true);
+        try {
+            const res = await fetch('/api/customers/sync', { method: 'POST' });
+            const result = await res.json();
+            if (result.success) {
+                alert(`Successfully synced! Created: ${result.created}, Skipped: ${result.skipped}`);
+                if (onRefresh) onRefresh();
+            } else {
+                alert(`Sync failed: ${result.error}`);
+            }
+        } catch (err) {
+            console.error('Sync error:', err);
+            alert('Failed to connect to sync API');
+        } finally {
+            setSyncing(false);
+        }
+    };
+
+    // Generate some metrics based on data
     const totalCustomers = customers.length;
-    const totalProducts = products.length;
     const totalPoints = customers.reduce((sum, c) => sum + (c.wallet?.points || 0), 0);
     const totalRevenue = customers.reduce((sum, c) => sum + (c.intelligence?.metrics?.total_spend || 0), 0);
 
@@ -36,17 +78,10 @@ export default function Dashboard({ customers, products }) {
     const stats = [
         { label: 'Total Revenue', value: `฿${totalRevenue.toLocaleString()}`, icon: 'fa-coins', color: 'text-amber-500', bg: 'bg-amber-500/10' },
         { label: 'Active Students', value: totalCustomers - churnedCustomers, icon: 'fa-user-graduate', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        {
-            label: 'Avg. Lifetime Value',
-            value: `฿${Math.round(avgLTV).toLocaleString()}`,
-            subValue: `Avg. Lifespan: ${avgLifespanText}`,
-            icon: 'fa-chart-line',
-            color: 'text-emerald-500',
-            bg: 'bg-emerald-500/10'
-        },
+        { label: 'Avg. Lifetime Value', value: `฿${Math.round(avgLTV).toLocaleString()}`, subValue: `Avg. Lifespan: ${avgLifespanText}`, icon: 'fa-chart-line', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
         { label: 'Churn Rate', value: `${churnRate.toFixed(1)}%`, icon: 'fa-user-minus', color: 'text-rose-500', bg: 'bg-rose-500/10' },
-        { label: 'Course Catalog', value: totalProducts, icon: 'fa-book-open', color: 'text-purple-500', bg: 'bg-purple-500/10' },
-        { label: 'Reward Points', value: totalPoints.toLocaleString(), icon: 'fa-award', color: 'text-orange-500', bg: 'bg-orange-500/10' },
+        { label: 'Marketing Spend (30d)', value: `฿${Number(insights.spend).toLocaleString()}`, icon: 'fa-ads-click', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+        { label: 'Marketing Reach', value: Number(insights.reach).toLocaleString(), icon: 'fa-bullhorn', color: 'text-orange-500', bg: 'bg-orange-500/10' },
     ];
 
     // --- AI Insight Calculations ---
@@ -62,9 +97,19 @@ export default function Dashboard({ customers, products }) {
     return (
         <div className="animate-fade-in space-y-8">
             {/* Page Header */}
-            <div>
-                <h2 className="text-3xl font-black text-[#F8F8F6] tracking-tight mb-2">Executive Dashboard</h2>
-                <p className="text-white/40 text-sm font-bold uppercase tracking-[0.2em]">V SCHOOL METRICS OVERVIEW</p>
+            <div className="flex justify-between items-start">
+                <div>
+                    <h2 className="text-3xl font-black text-[#F8F8F6] tracking-tight mb-2">Executive Dashboard</h2>
+                    <p className="text-white/40 text-sm font-bold uppercase tracking-[0.2em]">V SCHOOL METRICS OVERVIEW</p>
+                </div>
+                <button
+                    onClick={handleSync}
+                    disabled={syncing}
+                    className={`bg-white/5 border border-white/10 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-3 shadow-xl ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    <i className={`fas ${syncing ? 'fa-spinner fa-spin' : 'fa-sync-alt'} text-[#C9A34E]`}></i>
+                    {syncing ? 'Syncing...' : 'Sync Messenger Leads'}
+                </button>
             </div>
 
             {/* Stats Grid */}

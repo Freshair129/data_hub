@@ -1,7 +1,33 @@
 'use client';
 
-export default function IntelligencePanel({ intel }) {
+import React, { useState, useEffect } from 'react';
+
+export default function IntelligencePanel({ intel, profile }) {
     if (!intel) return null;
+
+    const [campaigns, setCampaigns] = useState([]);
+    const [loadingCampaigns, setLoadingCampaigns] = useState(false);
+
+    useEffect(() => {
+        const fetchCampaigns = async () => {
+            setLoadingCampaigns(true);
+            try {
+                const res = await fetch('/api/marketing/campaigns');
+                const result = await res.json();
+                if (result.success) {
+                    setCampaigns(result.data.slice(0, 5)); // Show top 5
+                }
+            } catch (err) {
+                console.error('Failed to fetch campaigns:', err);
+            } finally {
+                setLoadingCampaigns(false);
+            }
+        };
+        fetchCampaigns();
+    }, []);
+
+    const marketing = profile?.marketing_attribution || {};
+    const social = profile?.social_profiles?.facebook || {};
 
     const riskLevel = intel.metrics?.churn_risk_level || 'Low';
     const riskPercent = riskLevel === 'Low' ? 15 : riskLevel === 'Medium' ? 50 : 85;
@@ -60,6 +86,95 @@ export default function IntelligencePanel({ intel }) {
                         </div>
                     </div>
                 )}
+
+                {/* Marketing & Social Attribution Card */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="p-6 bg-indigo-50/30 rounded-2xl border border-indigo-100 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <i className="fas fa-ad text-indigo-400 text-xs"></i>
+                                <h4 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Marketing Attribution</h4>
+                            </div>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Source</p>
+                                    <p className="text-sm font-black text-slate-800">
+                                        {marketing.source || 'Direct / Unknown'}
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Campaign</p>
+                                        <p className="text-[10px] font-bold text-slate-600 truncate">{marketing.campaign || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Conversion</p>
+                                        <p className={`text-[10px] font-bold ${marketing.is_converted ? 'text-green-600' : 'text-amber-600'}`}>
+                                            {marketing.is_converted ? 'PROFITABLE' : 'PENDING'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-blue-50/30 rounded-2xl border border-blue-100 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <i className="fab fa-facebook text-blue-400 text-xs"></i>
+                                <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Social Engagement</h4>
+                            </div>
+                            <div className="flex items-end justify-between">
+                                <div className="space-y-1">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Handle</p>
+                                    <h4 className="text-sm font-black text-blue-600 truncate max-w-[120px]">@{social.handle || 'not_linked'}</h4>
+                                </div>
+                                <div className="flex -space-x-2">
+                                    <div className="w-6 h-6 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center">
+                                        <i className="fas fa-thumbs-up text-[8px] text-blue-500"></i>
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center">
+                                        <i className="fas fa-comment text-[8px] text-blue-500"></i>
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center">
+                                        <i className="fas fa-share text-[8px] text-blue-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="text-[9px] font-medium text-slate-500 mt-4 italic">
+                                {social.last_engagement ? `Last active: ${new Date(social.last_engagement).toLocaleDateString()}` : "No recent activity recorded"}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Live Campaign Insights section */}
+                <div className="mb-8 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <i className="fas fa-chart-line text-slate-400 text-xs"></i>
+                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Campaign Insights</h4>
+                        </div>
+                        {loadingCampaigns && <i className="fas fa-spinner fa-spin text-slate-400 text-xs"></i>}
+                    </div>
+
+                    <div className="space-y-3">
+                        {campaigns.length > 0 ? campaigns.map((camp, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-white/60 rounded-xl border border-slate-100 shadow-sm">
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[10px] font-black text-slate-800 truncate pr-4">{camp.name}</span>
+                                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{camp.objective}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${camp.status === 'ACTIVE' ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`}></div>
+                                    <span className="text-[9px] font-black text-slate-600 uppercase">{camp.status}</span>
+                                </div>
+                            </div>
+                        )) : !loadingCampaigns && (
+                            <p className="text-[10px] font-medium text-slate-400 text-center py-4 italic">No active campaigns found in this account.</p>
+                        )}
+                    </div>
+                </div>
 
                 {/* Strategic Recommendation - Closing Section */}
                 <div className="p-8 bg-[#0A1A2F] rounded-[2.5rem] relative overflow-hidden group shadow-2xl">

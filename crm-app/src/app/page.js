@@ -8,6 +8,7 @@ import ProductModal from '@/components/ProductModal';
 import Dashboard from '@/components/Dashboard';
 import Orders from '@/components/Orders';
 import Analytics from '@/components/Analytics';
+import FacebookAds from '@/components/FacebookAds';
 import Settings from '@/components/Settings';
 import RegistrationModal from '@/components/RegistrationModal';
 import LoginPage from '@/components/LoginPage';
@@ -35,6 +36,7 @@ export default function Home() {
     useEffect(() => {
         if (currentUser) {
             loadCustomers();
+            loadProducts();
         }
     }, [currentUser]);
 
@@ -80,29 +82,44 @@ export default function Home() {
 
     async function loadCustomers() {
         try {
-            const res = await fetch('/api/customers');
+            const apiUrl = `${window.location.origin}/api/customers`;
+            console.log('Loading customers from:', apiUrl);
+            const res = await fetch(apiUrl, { redirect: 'error' });
+            console.log('Customer API response status:', res.status);
             if (res.ok) {
                 const loaded = await res.json();
-                setCustomers(loaded);
-                if (loaded.length > 0) setActiveCustomer(loaded[0]);
+                // Ensure loaded is an array, not an error object
+                if (Array.isArray(loaded)) {
+                    console.log('Loaded', loaded.length, 'customers');
+                    setCustomers(loaded);
+                    if (loaded.length > 0) setActiveCustomer(loaded[0]);
+                } else {
+                    console.error('API returned non-array:', loaded);
+                }
+            } else {
+                const text = await res.text();
+                console.error('Failed to load customers, status:', res.status, 'body:', text);
             }
         } catch (e) {
             console.error('Failed to load customers', e);
+            console.error('Error details:', e.name, e.message);
         }
     }
 
     async function saveCustomer(customer) {
+        if (!customer.profile || !customer.intelligence) {
+            console.error('Refusing to save incomplete customer object:', customer);
+            return;
+        }
         try {
-            const res = await fetch(`/api/customers/${customer.customer_id}`, {
+            const res = await fetch(`${window.location.origin}/api/customers/${customer.customer_id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(customer)
             });
-            if (!res.ok) throw new Error('Failed to save customer');
-            console.log('Customer saved successfully');
+            if (!res.ok) throw new Error('Failed to update customer');
         } catch (e) {
-            console.error('Save error:', e);
-            alert('Warning: Changes could not be saved to disk.');
+            console.error('Failed to save customer', e);
         }
     }
 
@@ -361,10 +378,11 @@ export default function Home() {
                     <Dashboard
                         customers={customers}
                         products={products}
+                        onRefresh={loadCustomers}
                     />
                 )}
 
-                {activeView === 'customers' && activeCustomer && (
+                {activeView === 'customers' && (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
                             <div>
@@ -379,29 +397,44 @@ export default function Home() {
                                 REGISTER NEW CUSTOMER
                             </button>
                         </div>
-                        <CustomerCard
-                            customer={activeCustomer}
-                            customers={customers}
-                            onSelectCustomer={setActiveCustomer}
-                            currentUser={currentUser}
-                            onUpdateInventory={(updatedCustomer) => {
-                                setCustomers(customers.map(c => c.customer_id === updatedCustomer.customer_id ? updatedCustomer : c));
-                                setActiveCustomer(updatedCustomer);
-                            }}
-                        />
+                        {activeCustomer ? (
+                            <CustomerCard
+                                customer={activeCustomer}
+                                customers={customers}
+                                onSelectCustomer={setActiveCustomer}
+                                currentUser={currentUser}
+                                onUpdateInventory={(updatedCustomer) => {
+                                    setCustomers(customers.map(c => c.customer_id === updatedCustomer.customer_id ? updatedCustomer : c));
+                                    setActiveCustomer(updatedCustomer);
+                                    saveCustomer(updatedCustomer);
+                                }}
+                            />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-20 text-white/40">
+                                <i className="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                                <p className="text-sm font-bold uppercase tracking-widest">Loading customer data...</p>
+                            </div>
+                        )}
                     </div>
                 )}
 
                 {activeView === 'store' && (
                     <StoreGrid
                         products={products}
+                        allProducts={products}
+                        activeCustomer={activeCustomer}
+                        onSelectProduct={setSelectedProduct}
                         onAddToCart={addToCart}
-                        onProductClick={setSelectedProduct}
+                        cart={cart}
+                        setCart={setCart}
+                        onCheckout={handleCheckout}
+                        isCartOpen={isCartOpen}
+                        setIsCartOpen={setIsCartOpen}
                     />
                 )}
 
                 {activeView === 'orders' && (
-                    <Orders />
+                    <Orders customers={customers} />
                 )}
 
                 {activeView === 'analytics' && (
@@ -409,7 +442,12 @@ export default function Home() {
                         customers={customers}
                         orders={[]} // Passing empty orders for now as they are not fully implemented in global state
                         products={products}
+                        onRefresh={loadCustomers}
                     />
+                )}
+
+                {activeView === 'facebook-ads' && (
+                    <FacebookAds />
                 )}
 
                 {activeView === 'settings' && (
@@ -427,6 +465,7 @@ export default function Home() {
                             onUpdateInventory={(updatedCustomer) => {
                                 setCustomers(customers.map(c => c.customer_id === updatedCustomer.customer_id ? updatedCustomer : c));
                                 setActiveCustomer(updatedCustomer);
+                                saveCustomer(updatedCustomer);
                             }}
                         />
                     </div>

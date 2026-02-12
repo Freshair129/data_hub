@@ -6,6 +6,7 @@ const menuItems = [
     { id: 'store', icon: 'fa-store', label: 'Store' },
     { id: 'orders', icon: 'fa-receipt', label: 'Orders' },
     { id: 'analytics', icon: 'fa-chart-line', label: 'Analytics' },
+    { id: 'facebook-ads', icon: 'fa-bullhorn', label: 'Facebook Ads' },
     { id: 'settings', icon: 'fa-cog', label: 'Settings' },
 ];
 

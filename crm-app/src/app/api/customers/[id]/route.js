@@ -16,6 +16,7 @@ export async function GET(request, { params }) {
         const data = fs.readFileSync(filePath, 'utf8');
         return NextResponse.json(JSON.parse(data));
     } catch (error) {
+        console.error(`GET /api/customers/${params?.id} error:`, error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
@@ -33,6 +34,7 @@ export async function PUT(request, { params }) {
         fs.writeFileSync(filePath, JSON.stringify(customer, null, 4));
         return NextResponse.json({ success: true, customer });
     } catch (error) {
+        console.error(`PUT /api/customers/${params?.id} error:`, error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

@@ -7,7 +7,7 @@ const DATA_DIR = path.join(process.cwd(), '../customer');
 export async function GET() {
     try {
         if (!fs.existsSync(DATA_DIR)) {
-            return NextResponse.json({ error: 'Customer directory not found' }, { status: 404 });
+            return NextResponse.json([], { status: 200 });
         }
 
         const folders = fs.readdirSync(DATA_DIR).filter(f =>
@@ -24,6 +24,7 @@ export async function GET() {
 
         return NextResponse.json(customers);
     } catch (error) {
+        console.error('GET /api/customers error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
@@ -45,6 +46,7 @@ export async function POST(request) {
 
         return NextResponse.json({ success: true, customer });
     } catch (error) {
+        console.error('POST /api/customers error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
