@@ -1,0 +1,50 @@
+{
+    "customer_id": "MSG-26341268612146758",
+    "profile": {
+        "first_name": "Wisarat",
+        "last_name": "Charoenwong",
+        "nick_name": "Wisarat",
+        "status": "Active",
+        "membership_tier": "GENERAL",
+        "lifecycle_stage": "In Progress",
+        "agent": "พรพล ธนสุวรรณธาร",
+        "join_date": "2026-02-09T13:50:41+0000"
+    },
+    "contact_info": {
+        "facebook": "Wisarat Charoenwong",
+        "facebook_id": "26341268612146758",
+        "lead_channel": "Facebook"
+    },
+    "intelligence": {
+        "metrics": {
+            "total_spend": 0,
+            "total_learning_hours": 0,
+            "total_point": 0,
+            "total_order": 0
+        },
+        "tags": [
+            "Facebook Chat",
+            "Contacted"
+        ]
+    },
+    "inventory": {
+        "coupons": [],
+        "learning_courses": []
+    },
+    "wallet": {
+        "balance": 0,
+        "points": 0,
+        "currency": "THB"
+    },
+    "timeline": [
+        {
+            "id": "SYNC-1770904425500-58",
+            "date": "2026-02-09T13:50:41+0000",
+            "type": "SYSTEM",
+            "summary": "Synced from Facebook Messenger",
+            "details": {
+                "content": "Customer imported from Facebook Page conversation."
+            }
+        }
+    ]
+}

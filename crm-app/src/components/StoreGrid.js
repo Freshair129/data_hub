@@ -1,6 +1,8 @@
 'use client';
+import { useState } from 'react';
 
 export default function StoreGrid({ products, allProducts, activeCustomer, onSelectProduct, onAddToCart, cart, setCart, onCheckout, isCartOpen, setIsCartOpen }) {
+    const [paymentMethod, setPaymentMethod] = useState('wallet'); // 'wallet' or 'transfer'
     const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const cartItemCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
@@ -10,24 +12,44 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
 
     return (
         <div className="animate-fade-in relative min-h-full">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            {/* Sticky Header with Glassmorphism */}
+            <div className="sticky top-0 z-40 -mx-10 px-10 py-4 mb-6 bg-slate-900/50 backdrop-blur-xl border-b border-white/10 flex items-center justify-between shadow-2xl">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800">Course Store</h2>
-                    <p className="text-slate-500">Shopee-style Product Catalog</p>
+                    <h2 className="text-2xl font-black text-white tracking-tight">Course Store</h2>
+                    <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Premium Learning Catalog</p>
                 </div>
-                {activeCustomer && activeCustomer.name && (
-                    <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
+
+                {activeCustomer && (
+                    <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-2 rounded-[2rem] pl-6 shadow-inner">
                         <div className="text-right hidden md:block">
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Shopping For</p>
-                            <p className="text-sm font-black text-slate-800">{activeCustomer.name}</p>
+                            <p className="text-[9px] text-white/30 font-black uppercase tracking-[0.2em] leading-none mb-1">Shopping For</p>
+                            <p className="text-sm font-black text-white leading-none">
+                                {activeCustomer.profile?.nick_name || activeCustomer.profile?.first_name || activeCustomer.name}
+                            </p>
                         </div>
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md ${activeCustomer.level === 'Elite' ? 'bg-gradient-to-br from-cyan-400 to-blue-600' :
-                            activeCustomer.level === 'Platinum' ? 'bg-gradient-to-br from-slate-300 to-slate-500' :
-                                'bg-gradient-to-br from-amber-400 to-orange-500'
+
+                        {/* Avatar */}
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white font-black shadow-lg border border-white/20 ${activeCustomer.profile?.membership_tier === 'ELITE' || activeCustomer.level === 'Elite' ? 'bg-gradient-to-tr from-cyan-400 to-blue-600' :
+                                activeCustomer.profile?.membership_tier === 'PLATINUM' || activeCustomer.level === 'Platinum' ? 'bg-gradient-to-tr from-slate-300 to-slate-500' :
+                                    'bg-gradient-to-tr from-amber-400 to-orange-500'
                             }`}>
-                            {activeCustomer.name.charAt(0)}
+                            {(activeCustomer.profile?.nick_name || activeCustomer.profile?.first_name || activeCustomer.name || 'C').charAt(0)}
                         </div>
+
+                        {/* Integrated Cart Button - Locked to User */}
+                        <div className="h-10 w-[1px] bg-white/10 ml-1 mr-1"></div>
+
+                        <button
+                            onClick={() => setIsCartOpen(true)}
+                            className="w-12 h-12 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-2xl shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all group relative border border-white/20"
+                        >
+                            <i className="fas fa-shopping-basket text-lg group-hover:animate-bounce"></i>
+                            {cartItemCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg animate-bounce-short">
+                                    {cartItemCount}
+                                </span>
+                            )}
+                        </button>
                     </div>
                 )}
             </div>
@@ -149,19 +171,6 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                     </div>
                 )}
             </div>
-
-            {/* Floating Cart Button */}
-            <button
-                onClick={() => setIsCartOpen(true)}
-                className="fixed bottom-10 right-10 w-16 h-16 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 z-50 group"
-            >
-                <i className="fas fa-shopping-cart text-2xl group-hover:animate-bounce"></i>
-                {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white animate-bounce-short">
-                        {cartItemCount}
-                    </span>
-                )}
-            </button>
 
             {/* Cart Popup Overlay */}
             {isCartOpen && (
@@ -341,31 +350,61 @@ export default function StoreGrid({ products, allProducts, activeCustomer, onSel
                             <div className="p-6 border-t border-slate-100 bg-white flex-shrink-0">
                                 <div className="p-6 bg-[#0A1A2F] rounded-3xl text-white shadow-2xl relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-                                    <div className="relative z-10 space-y-4">
-                                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
-                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Payment Evidence (Slip)</p>
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex-1 h-12 bg-white/5 border border-dashed border-white/20 rounded-xl flex items-center justify-center text-[10px] font-bold text-white/30 truncate px-4">
-                                                    <i className="fas fa-file-upload mr-2"></i>
-                                                    DRAG SLIP OR CLICK TO BROWSE
-                                                </div>
-                                                <button onClick={() => alert("Slip upload simulation triggered.")} className="w-12 h-12 bg-[#C9A34E] text-[#0A1A2F] rounded-xl flex items-center justify-center shadow-lg">
-                                                    <i className="fas fa-camera"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-between items-center px-4">
-                                            <span className="text-white/60 font-black uppercase tracking-widest text-xs">Final Amount</span>
-                                            <span className="text-3xl font-black text-orange-400">฿{cartTotal.toLocaleString()}</span>
-                                        </div>
+                                    {/* Payment Method Selector */}
+                                    <div className="grid grid-cols-2 gap-3 mb-2">
                                         <button
-                                            onClick={() => onCheckout({ slip_url: '/assets/slips/mock-slip.jpg' })}
-                                            className="w-full bg-orange-500 hover:bg-orange-400 text-white py-4 rounded-xl font-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 group"
+                                            onClick={() => setPaymentMethod('wallet')}
+                                            className={`p-3 rounded-2xl border transition-all flex flex-col items-center gap-1 ${paymentMethod === 'wallet'
+                                                ? 'bg-orange-500/20 border-orange-500 text-orange-400'
+                                                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'
+                                                }`}
                                         >
-                                            <span>COMPLETE & ATTACH SLIP</span>
-                                            <i className="fas fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
+                                            <i className="fas fa-wallet text-sm"></i>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Wallet</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setPaymentMethod('transfer')}
+                                            className={`p-3 rounded-2xl border transition-all flex flex-col items-center gap-1 ${paymentMethod === 'transfer'
+                                                ? 'bg-blue-500/20 border-blue-500 text-blue-400'
+                                                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'
+                                                }`}
+                                        >
+                                            <i className="fas fa-university text-sm"></i>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Transfer</span>
                                         </button>
                                     </div>
+
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
+                                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                                            {paymentMethod === 'transfer' ? 'Attach Payment Slip (Required)' : 'Payment Evidence (Optional)'}
+                                        </p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-1 h-12 bg-white/5 border border-dashed border-white/20 rounded-xl flex items-center justify-center text-[10px] font-bold text-white/30 truncate px-4 text-center">
+                                                <i className="fas fa-file-upload mr-2"></i>
+                                                {paymentMethod === 'transfer' ? 'CLICK TO UPLOAD SLIP' : 'DRAG SLIP OR CLICK'}
+                                            </div>
+                                            <button onClick={() => alert("Slip upload simulation triggered.")} className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-colors ${paymentMethod === 'transfer' ? 'bg-blue-500 text-white' : 'bg-[#C9A34E] text-[#0A1A2F]'}`}>
+                                                <i className="fas fa-camera"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center px-4">
+                                        <span className="text-white/60 font-black uppercase tracking-widest text-xs">Final Amount</span>
+                                        <span className="text-3xl font-black text-orange-400">฿{cartTotal.toLocaleString()}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => onCheckout({
+                                            method: paymentMethod,
+                                            slip_url: paymentMethod === 'transfer' ? '/assets/slips/mock-slip.jpg' : null
+                                        })}
+                                        className={`w-full py-4 rounded-xl font-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 group ${paymentMethod === 'transfer'
+                                            ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                                            : 'bg-orange-500 hover:bg-orange-400 text-white'
+                                            }`}
+                                    >
+                                        <span>{paymentMethod === 'transfer' ? 'CONFIRM TRANSFER' : 'PAY WITH WALLET'}</span>
+                                        <i className="fas fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
+                                    </button>
                                 </div>
                             </div>
                         )}

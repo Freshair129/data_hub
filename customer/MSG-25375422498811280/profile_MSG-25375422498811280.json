@@ -1,0 +1,50 @@
+{
+    "customer_id": "MSG-25375422498811280",
+    "profile": {
+        "first_name": "Nanny",
+        "last_name": "Watcharee",
+        "nick_name": "Nanny",
+        "status": "Active",
+        "membership_tier": "GENERAL",
+        "lifecycle_stage": "In Progress",
+        "agent": "พรพล ธนสุวรรณธาร",
+        "join_date": "2026-02-08T15:41:43+0000"
+    },
+    "contact_info": {
+        "facebook": "Nanny Watcharee",
+        "facebook_id": "25375422498811280",
+        "lead_channel": "Facebook"
+    },
+    "intelligence": {
+        "metrics": {
+            "total_spend": 0,
+            "total_learning_hours": 0,
+            "total_point": 0,
+            "total_order": 0
+        },
+        "tags": [
+            "Facebook Chat",
+            "Contacted"
+        ]
+    },
+    "inventory": {
+        "coupons": [],
+        "learning_courses": []
+    },
+    "wallet": {
+        "balance": 0,
+        "points": 0,
+        "currency": "THB"
+    },
+    "timeline": [
+        {
+            "id": "SYNC-1770904425518-91",
+            "date": "2026-02-08T15:41:43+0000",
+            "type": "SYSTEM",
+            "summary": "Synced from Facebook Messenger",
+            "details": {
+                "content": "Customer imported from Facebook Page conversation."
+            }
+        }
+    ]
+}

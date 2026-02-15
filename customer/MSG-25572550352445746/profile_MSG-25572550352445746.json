@@ -1,0 +1,50 @@
+{
+    "customer_id": "MSG-25572550352445746",
+    "profile": {
+        "first_name": "Thiwa",
+        "last_name": "Pachana",
+        "nick_name": "Thiwa",
+        "status": "Active",
+        "membership_tier": "GENERAL",
+        "lifecycle_stage": "In Progress",
+        "agent": "พรพล ธนสุวรรณธาร",
+        "join_date": "2026-02-10T10:18:22+0000"
+    },
+    "contact_info": {
+        "facebook": "Thiwa Pachana",
+        "facebook_id": "25572550352445746",
+        "lead_channel": "Facebook"
+    },
+    "intelligence": {
+        "metrics": {
+            "total_spend": 0,
+            "total_learning_hours": 0,
+            "total_point": 0,
+            "total_order": 0
+        },
+        "tags": [
+            "Facebook Chat",
+            "Contacted"
+        ]
+    },
+    "inventory": {
+        "coupons": [],
+        "learning_courses": []
+    },
+    "wallet": {
+        "balance": 0,
+        "points": 0,
+        "currency": "THB"
+    },
+    "timeline": [
+        {
+            "id": "SYNC-1770904425495-45",
+            "date": "2026-02-10T10:18:22+0000",
+            "type": "SYSTEM",
+            "summary": "Synced from Facebook Messenger",
+            "details": {
+                "content": "Customer imported from Facebook Page conversation."
+            }
+        }
+    ]
+}

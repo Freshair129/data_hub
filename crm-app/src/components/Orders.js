@@ -68,8 +68,11 @@ export default function Orders({ customers }) {
                                     </span>
                                 </td>
                                 <td className="px-8 py-6 text-right">
-                                    <span className="bg-green-500/10 border border-green-500/20 text-green-500 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-500/5">
-                                        Completed
+                                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg ${order.inventory_status === 'Pending Verification'
+                                        ? 'bg-orange-500/10 border border-orange-500/20 text-orange-500 shadow-orange-500/5'
+                                        : 'bg-green-500/10 border border-green-500/20 text-green-500 shadow-green-500/5'
+                                        }`}>
+                                        {order.inventory_status || 'Completed'}
                                     </span>
                                 </td>
                             </tr>

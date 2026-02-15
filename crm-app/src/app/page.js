@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import CustomerCard from '@/components/CustomerCard';
+import CustomerList from '@/components/CustomerList';
 import StoreGrid from '@/components/StoreGrid';
 import ProductModal from '@/components/ProductModal';
 import Dashboard from '@/components/Dashboard';
@@ -11,6 +12,9 @@ import Analytics from '@/components/Analytics';
 import Settings from '@/components/Settings';
 import RegistrationModal from '@/components/RegistrationModal';
 import LoginPage from '@/components/LoginPage';
+import SlipVerificationPanel from '@/components/SlipVerificationPanel';
+import FacebookAds from '@/components/FacebookAds';
+import CampaignTracking from '@/components/CampaignTracking';
 
 export default function Home() {
     const [activeView, setActiveView] = useState('customers');
@@ -21,6 +25,7 @@ export default function Home() {
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+    const [customerViewMode, setCustomerViewMode] = useState('list'); // 'list' or 'detail'
 
     // Auth State
     const [currentUser, setCurrentUser] = useState(null);
@@ -187,7 +192,9 @@ export default function Home() {
     }
 
 
-    const handleCheckout = async (slipData = null) => {
+    const handleCheckout = async (paymentData = {}) => {
+        const { method = 'wallet', slip_url = null } = paymentData;
+
         if (!activeCustomer) {
             alert("Please select a customer first!");
             return;
@@ -197,7 +204,7 @@ export default function Home() {
         const currentBalance = activeCustomer.wallet?.balance || 0;
 
         // Wallet Logic: Check if balance is sufficient
-        if (currentBalance < cartTotal) {
+        if (method === 'wallet' && currentBalance < cartTotal) {
             alert(`Insufficient Wallet Balance! (Have: ฿${currentBalance.toLocaleString()}, Need: ฿${cartTotal.toLocaleString()})`);
             return;
         }
@@ -222,7 +229,7 @@ export default function Home() {
                                     description: targetId !== cId ? `Customized (Swapped)` : course.description,
                                     type: 'course',
                                     purchase_date: timestamp,
-                                    status: 'Active',
+                                    status: method === 'wallet' ? 'Active' : 'Pending Verification',
                                     credits_remaining: { sessions: course.duration ? Math.ceil(course.duration / 3) : 1 },
                                     is_bundle_item: true
                                 });
@@ -241,7 +248,7 @@ export default function Home() {
                                 description: "Bonus Course",
                                 type: 'course',
                                 purchase_date: timestamp,
-                                status: 'Active',
+                                status: method === 'wallet' ? 'Active' : 'Pending Verification',
                                 credits_remaining: { sessions: 1 },
                                 is_bonus: true,
                                 is_bundle_item: true
@@ -254,7 +261,7 @@ export default function Home() {
                         description: "Package License",
                         type: 'bundle',
                         purchase_date: timestamp,
-                        status: 'Active',
+                        status: method === 'wallet' ? 'Active' : 'Pending Verification',
                         items: bundleItems
                     });
                 } else {
@@ -264,7 +271,7 @@ export default function Home() {
                         description: item.description,
                         type: 'course',
                         purchase_date: timestamp,
-                        status: 'Active',
+                        status: method === 'wallet' ? 'Active' : 'Pending Verification',
                         credits_remaining: { sessions: 1 }
                     });
                 }
@@ -278,14 +285,17 @@ export default function Home() {
             title: `Order #${Math.floor(Math.random() * 90000) + 10000}`,
             details: {
                 total: cartTotal,
+                method: method,
+                status: method === 'wallet' ? 'Completed' : 'Pending Verification',
+                slip: slip_url,
                 items: cart.map(item => `${item.qty}x ${item.name}`)
             }
         };
 
         const updatedCustomers = customers.map(c => {
             if (c.customer_id === activeCustomer.customer_id) {
-                const updatedTotalSpend = (c.intelligence?.metrics?.total_spend || 0) + cartTotal;
-                const newBalance = (c.wallet?.balance || 0) - cartTotal;
+                const updatedTotalSpend = (c.intelligence?.metrics?.total_spend || 0) + (method === 'wallet' ? cartTotal : 0);
+                const newBalance = method === 'wallet' ? (c.wallet?.balance || 0) - cartTotal : (c.wallet?.balance || 0);
                 return {
                     ...c,
                     wallet: {
@@ -317,15 +327,89 @@ export default function Home() {
         setActiveCustomer(newActive);
 
         // Persist to disk
-        if (newActive) {
-            await saveCustomer(newActive);
+        if (activeCustomer) { // Use activeCustomer directly here
+            const newActive = updatedCustomers.find(c => c.customer_id === activeCustomer.customer_id);
+            if (newActive) {
+                await saveCustomer(newActive);
+                setActiveCustomer(newActive); // Update active customer after saving
+            }
         }
 
+        setCustomers(updatedCustomers);
         setCart([]);
         setIsCartOpen(false);
-        setActiveView('inventory');
-        alert(`Checkout successful! ฿${cartTotal.toLocaleString()} deducted from wallet.`);
+        if (method === 'wallet') {
+            alert("Checkout Successful! Courses added to inventory.");
+        } else {
+            alert("Transfer Received! Pending verification by admin.");
+        }
     };
+
+    const handleVerifySlip = (orderId, ocrData) => {
+        const updatedCustomers = customers.map(c => {
+            const orderTimeline = (c.timeline || []).find(t => t.id === orderId);
+            if (!orderTimeline) return c;
+
+            const orderTotal = orderTimeline.details?.total || 0;
+
+            return {
+                ...c,
+                timeline: c.timeline.map(t => t.id === orderId ? {
+                    ...t,
+                    details: { ...t.details, status: 'Completed', verified_at: new Date().toISOString(), ocr_match: true }
+                } : t),
+                inventory: {
+                    ...c.inventory,
+                    learning_courses: (c.inventory?.learning_courses || []).map(item => {
+                        if (item.status === 'Pending Verification') {
+                            return { ...item, status: 'Active' };
+                        }
+                        if (item.type === 'bundle' && item.items) {
+                            return {
+                                ...item,
+                                status: item.status === 'Pending Verification' ? 'Active' : item.status,
+                                items: item.items.map(sub => ({
+                                    ...sub,
+                                    status: sub.status === 'Pending Verification' ? 'Active' : sub.status
+                                }))
+                            };
+                        }
+                        return item;
+                    })
+                },
+                intelligence: {
+                    ...c.intelligence,
+                    metrics: {
+                        ...c.intelligence?.metrics,
+                        total_spend: (c.intelligence?.metrics?.total_spend || 0) + orderTotal
+                    }
+                }
+            };
+        });
+        setCustomers(updatedCustomers);
+        if (activeCustomer && updatedCustomers.find(c => c.customer_id === activeCustomer.customer_id)) {
+            setActiveCustomer(updatedCustomers.find(c => c.customer_id === activeCustomer.customer_id));
+        }
+        alert("Slip Verified! Inventory activated and revenue updated.");
+    };
+
+    const handleRejectSlip = (orderId) => {
+        alert("Slip Rejected. Order status updated to 'Action Required'.");
+    };
+
+    const pendingVerifications = customers.flatMap(c =>
+        (c.timeline || [])
+            .filter(t => t.type === 'ORDER' && t.details?.status === 'Pending Verification')
+            .map(o => ({
+                ...o,
+                customer_name: c.profile?.nick_name || c.profile?.first_name || 'Unknown',
+                customer_id: c.customer_id,
+                total_amount: o.details?.total || 0,
+                slip_url: o.details?.slip,
+                items: (o.details?.items || []).map(itemStr => ({ name: itemStr })),
+                inventory_status: 'Pending Verification'
+            }))
+    );
 
 
     const nextCustomerId = `c${String(customers.length + 1).padStart(3, '0')}`;
@@ -361,7 +445,10 @@ export default function Home() {
             {/* Sidebar */}
             <Sidebar
                 activeView={activeView}
-                onViewChange={setActiveView}
+                onViewChange={(view) => {
+                    if (view === 'customers') setCustomerViewMode('list');
+                    setActiveView(view);
+                }}
                 cartCount={cartItemCount}
                 currentUser={currentUser}
                 onLogout={handleLogout}
@@ -376,31 +463,57 @@ export default function Home() {
                     />
                 )}
 
-                {activeView === 'customers' && activeCustomer && (
+                {activeView === 'customers' && (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h1 className="text-3xl font-black text-white tracking-tight">Customer Database</h1>
-                                <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] mt-1">TOTAL RECORDS: {customers.length}</p>
+                                <h1 className="text-3xl font-black text-white tracking-tight">
+                                    {customerViewMode === 'list' ? 'Customer Database' : 'Customer Profile'}
+                                </h1>
+                                <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+                                    {customerViewMode === 'list' ? `TOTAL RECORDS: ${customers.length}` : `Viewing Details: ${activeCustomer?.profile?.member_id}`}
+                                </p>
                             </div>
-                            <button
-                                onClick={() => setIsRegistrationOpen(true)}
-                                className="bg-[#C9A34E] text-[#0A1A2F] px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-3 shadow-xl"
-                            >
-                                <i className="fas fa-user-plus"></i>
-                                REGISTER NEW CUSTOMER
-                            </button>
+                            <div className="flex items-center gap-4">
+                                {customerViewMode === 'detail' && (
+                                    <button
+                                        onClick={() => setCustomerViewMode('list')}
+                                        className="bg-white/5 border border-white/10 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-3"
+                                    >
+                                        <i className="fas fa-arrow-left"></i>
+                                        BACK TO LIST
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setIsRegistrationOpen(true)}
+                                    className="bg-[#C9A34E] text-[#0A1A2F] px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-3 shadow-xl"
+                                >
+                                    <i className="fas fa-user-plus"></i>
+                                    REGISTER NEW CUSTOMER
+                                </button>
+                            </div>
                         </div>
-                        <CustomerCard
-                            customer={activeCustomer}
-                            customers={customers}
-                            onSelectCustomer={setActiveCustomer}
-                            currentUser={currentUser}
-                            onUpdateInventory={(updatedCustomer) => {
-                                setCustomers(customers.map(c => c.customer_id === updatedCustomer.customer_id ? updatedCustomer : c));
-                                setActiveCustomer(updatedCustomer);
-                            }}
-                        />
+
+                        {customerViewMode === 'list' ? (
+                            <CustomerList
+                                customers={customers}
+                                onSelectCustomer={(c) => {
+                                    setActiveCustomer(c);
+                                    setCustomerViewMode('detail');
+                                }}
+                            />
+                        ) : activeCustomer && (
+                            <CustomerCard
+                                customer={activeCustomer}
+                                customers={customers}
+                                onSelectCustomer={setActiveCustomer}
+                                currentUser={currentUser}
+                                onUpdateInventory={(updatedCustomer) => {
+                                    setCustomers(customers.map(c => c.customer_id === updatedCustomer.customer_id ? updatedCustomer : c));
+                                    setActiveCustomer(updatedCustomer);
+                                }}
+                            />
+                        )}
                     </div>
                 )}
 
@@ -423,6 +536,14 @@ export default function Home() {
                     <Orders customers={customers} />
                 )}
 
+                {activeView === 'verification' && (
+                    <SlipVerificationPanel
+                        orders={pendingVerifications}
+                        onVerify={handleVerifySlip}
+                        onReject={handleRejectSlip}
+                    />
+                )}
+
                 {activeView === 'analytics' && (
                     <Analytics
                         customers={customers}
@@ -431,8 +552,16 @@ export default function Home() {
                     />
                 )}
 
+                {activeView === 'facebook-ads' && (
+                    <FacebookAds />
+                )}
+
                 {activeView === 'settings' && (
                     <Settings />
+                )}
+
+                {activeView === 'campaign-tracking' && (
+                    <CampaignTracking customers={customers} />
                 )}
 
                 {activeView === 'inventory' && activeCustomer && (
@@ -453,68 +582,12 @@ export default function Home() {
             </main>
 
             {/* Modals & Overlays */}
-            {activeView === 'store' && (
-                <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-2xl transform transition-transform duration-300 z-50 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                    <div className="h-full flex flex-col">
-                        <div className="p-6 bg-[#0A1A2F] text-white flex justify-between items-center">
-                            <h2 className="text-xl font-black">Shopping Cart</h2>
-                            <button onClick={() => setIsCartOpen(false)} className="text-white/60 hover:text-white">
-                                <i className="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                            {cart.length === 0 ? (
-                                <p className="text-center text-slate-400 mt-10">Your cart is empty.</p>
-                            ) : (
-                                cart.map((item, index) => (
-                                    <div key={index} className="flex justify-between items-start border-b border-slate-100 pb-4">
-                                        <div>
-                                            <p className="font-bold text-slate-800">{item.name}</p>
-                                            <p className="text-xs text-slate-500">Qty: {item.qty}</p>
-                                        </div>
-                                        <p className="font-black text-slate-800">฿{(item.price * item.qty).toLocaleString()}</p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        <div className="p-6 bg-slate-50 border-t border-slate-200">
-                            <div className="flex justify-between items-center mb-4">
-                                <span className="font-bold text-slate-600">Total</span>
-                                <span className="text-2xl font-black text-[#0A1A2F]">฿{cartTotal.toLocaleString()}</span>
-                            </div>
-                            <button
-                                onClick={() => handleCheckout()}
-                                disabled={cart.length === 0}
-                                className="w-full bg-[#C9A34E] text-[#0A1A2F] py-4 rounded-xl font-black uppercase tracking-widest hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Checkout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Cart Toggle Button (Floating) */}
-            {activeView === 'store' && !isCartOpen && (
-                <button
-                    onClick={() => setIsCartOpen(true)}
-                    className="fixed bottom-8 right-8 w-16 h-16 bg-[#0A1A2F] text-white rounded-full shadow-2xl flex items-center justify-center z-40 hover:scale-110 transition-transform"
-                >
-                    <div className="relative">
-                        <i className="fas fa-shopping-cart text-xl"></i>
-                        {cartItemCount > 0 && (
-                            <span className="absolute -top-3 -right-3 w-6 h-6 bg-[#C9A34E] text-[#0A1A2F] text-xs font-black rounded-full flex items-center justify-center">
-                                {cartItemCount}
-                            </span>
-                        )}
-                    </div>
-                </button>
-            )}
+            {/* Cart Toggle Button (Floating) - REMOVED: Moved to Sticky Header in StoreGrid */}
 
             <ProductModal
                 product={selectedProduct}
+                allProducts={products}
+                activeCustomer={activeCustomer}
                 isOpen={!!selectedProduct}
                 onClose={() => setSelectedProduct(null)}
                 onAddToCart={(p) => {

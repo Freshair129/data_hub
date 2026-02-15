@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import BusinessIntelligence from './BusinessIntelligence';
 
 export default function Analytics({ customers, products }) {
     const [rankingPeriod, setRankingPeriod] = useState('month');
-    const [activeTab, setActiveTab] = useState('market');
+    const [activeTab, setActiveTab] = useState('strategic');
     const [marketingData, setMarketingData] = useState(null);
 
     const today = new Date();
@@ -43,9 +44,10 @@ export default function Analytics({ customers, products }) {
 
     // Best Sellers Ranking Logic
     const getBestSellers = (period) => {
-        // ... [Existing Logic] ...
         const periodMs = period === 'day' ? 86400000 : period === 'week' ? 604800000 : 2592000000;
         const counts = {};
+
+        // 1. Real CRM Data
         customers.forEach(cust => {
             (cust.timeline || []).forEach(evt => {
                 if (evt.type === 'ORDER' || evt.type === 'PURCHASE') {
@@ -60,27 +62,90 @@ export default function Analytics({ customers, products }) {
             });
         });
 
+        // 2. Inferred from Facebook Ads (Campaign Name Matching)
+        // 2. Inferred from Facebook Ads (Direct Campaign Name)
+        if (marketingData?.campaigns) {
+            marketingData.campaigns.forEach(campaign => {
+                if (campaign.status === 'Active' || period !== 'day') {
+                    // Use Direct Campaign Name
+                    const name = campaign.name;
+                    const salesCount = parseInt(campaign.purchases || campaign.conversions || 0);
+
+                    if (salesCount > 0) {
+                        counts[name] = (counts[name] || 0) + salesCount;
+                    }
+                }
+            });
+        }
+
         if (Object.keys(counts).length === 0) {
-            return [
-                { name: 'Pro Chef Mastery (Package)', sales: 52, growth: '+15%', color: 'bg-indigo-500' },
-                { name: 'Sushi Artistry Pro', sales: 42, growth: '+12%', color: 'bg-orange-500' },
-                { name: 'Ramen Mastery', sales: 38, growth: '+5%', color: 'bg-amber-400' },
-                { name: 'Elite Omakase Bundle', sales: 35, growth: '+22%', color: 'bg-rose-500' },
-                { name: 'Wagyu Precision', sales: 31, growth: '+18%', color: 'bg-red-500' },
-                { name: 'Thai Management', sales: 27, growth: '-2%', color: 'bg-blue-500' },
-                { name: 'Chef Leadership', sales: 22, growth: '+8%', color: 'bg-green-500' },
-                { name: 'Omakase Skills', sales: 19, growth: '+15%', color: 'bg-purple-500' },
-                { name: 'Food Cost Pro', sales: 15, growth: '+3%', color: 'bg-slate-400' },
-                { name: 'Fusion Art', sales: 12, growth: '+1%', color: 'bg-emerald-400' },
-            ];
+            return [];
         }
 
         return Object.entries(counts)
-            .map(([name, sales]) => ({ name, sales, growth: '+5%', color: 'bg-slate-500' }))
+            .map(([name, sales]) => ({ name, sales, growth: '-', color: 'bg-slate-500' }))
             .sort((a, b) => b.sales - a.sales)
             .slice(0, 10);
     };
+
     const bestSellers = getBestSellers(rankingPeriod);
+
+    // --- Product Mix Calculation (Pie Chart) ---
+    const calculateProductMix = () => {
+        const mixCounts = {};
+        let totalItems = 0;
+
+        // 1. Real CRM Data
+        customers.forEach(cust => {
+            (cust.timeline || []).forEach(evt => {
+                if (evt.type === 'ORDER' || evt.type === 'PURCHASE') {
+                    const items = evt.details?.items || [];
+                    items.forEach(itemName => {
+                        const baseName = itemName.split(' (')[0];
+                        mixCounts[baseName] = (mixCounts[baseName] || 0) + 1;
+                        totalItems++;
+                    });
+                }
+            });
+        });
+
+        // 2. Inferred from Facebook Ads
+        // 2. Inferred from Facebook Ads
+        if (marketingData?.campaigns) {
+            marketingData.campaigns.forEach(campaign => {
+                // Use Direct Campaign Name
+                const name = campaign.name;
+                const salesCount = parseInt(campaign.purchases || campaign.conversions || 0);
+
+                if (salesCount > 0) {
+                    mixCounts[name] = (mixCounts[name] || 0) + salesCount;
+                    totalItems += salesCount;
+                }
+            });
+        }
+
+        // If no real data, return empty to show empty state
+        if (totalItems === 0) {
+            return [];
+        }
+
+        const mixData = Object.entries(mixCounts)
+            .map(([name, count]) => ({ name, count, share: Math.round((count / totalItems) * 100) }))
+            .sort((a, b) => b.count - a.count);
+
+        const top4 = mixData.slice(0, 4);
+        const othersCount = mixData.slice(4).reduce((sum, item) => sum + item.count, 0);
+
+        const colors = ['#C9A34E', '#ea580c', '#fbbf24', '#f59e0b', '#94a3b8'];
+        const finalMix = top4.map((item, i) => ({ ...item, color: colors[i] }));
+
+        if (othersCount > 0) {
+            finalMix.push({ name: 'Others', share: Math.round((othersCount / totalItems) * 100), color: '#94a3b8' });
+        }
+
+        return finalMix;
+    };
+    const productMix = calculateProductMix();
 
     // --- Customer & CLV Logic (New) ---
     const clvBuckets = { '0-10K': 0, '10K-30K': 0, '30K-50K': 0, '50K-100K': 0, '100K+': 0 };
@@ -321,10 +386,12 @@ export default function Analytics({ customers, products }) {
         };
     }).sort((a, b) => b.sales - a.sales);
 
-    const totalAdSpend = channelROI.reduce((sum, c) => sum + c.spend, 0);
     const totalAdSales = channelROI.reduce((sum, c) => sum + c.sales, 0);
-    const avgROAS = (totalAdSales / totalAdSpend).toFixed(2);
-    const bestChannel = channelROI.reduce((prev, current) => (parseFloat(current.roas) > parseFloat(prev.roas) ? current : prev));
+    const totalAdSpend = channelROI.reduce((sum, c) => sum + c.spend, 0);
+    const avgROAS = totalAdSpend > 0 ? (totalAdSales / totalAdSpend).toFixed(2) : '0.00';
+    const bestChannel = channelROI.length > 0
+        ? channelROI.reduce((prev, current) => (parseFloat(current.roas) > parseFloat(prev.roas) ? current : prev))
+        : { channel: 'N/A', roas: '0' };
 
     // --- Financial P&L Logic (Real) ---
     const financialConfig = marketingData?.financial_config || { cogs_rate: 0.45, opex: {} };
@@ -350,7 +417,13 @@ export default function Analytics({ customers, products }) {
         ...c,
         utilization: ((c.spend / (c.budget || 1)) * 100).toFixed(1),
         roas: c.spend > 0 ? (c.revenue / c.spend).toFixed(2) : '0.00'
-    }));
+    })).sort((a, b) => {
+        // Prioritize Active campaigns
+        if (a.status === 'Active' && b.status !== 'Active') return -1;
+        if (a.status !== 'Active' && b.status === 'Active') return 1;
+        // Secondary sort: Spend (Desc)
+        return b.spend - a.spend;
+    });
 
 
     // --- V-Insight AI Aggregation ---
@@ -396,6 +469,7 @@ export default function Analytics({ customers, products }) {
                 {/* Tab Navigation */}
                 <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
                     {[
+                        { id: 'strategic', label: 'Strategic Advisor', icon: 'fa-chess' },
                         { id: 'market', label: 'Market & Sales', icon: 'fa-chart-pie' },
                         { id: 'customer', label: 'Customer & CLV', icon: 'fa-users' },
                         { id: 'financial', label: 'Financial Overview', icon: 'fa-coins' },
@@ -420,6 +494,9 @@ export default function Analytics({ customers, products }) {
                     ))}
                 </div>
             </div>
+
+            {/* TAB 0: Strategic Advisor (New) */}
+            {activeTab === 'strategic' && <BusinessIntelligence />}
 
             {/* TAB 1: Market & Sales (Existing ABC & Best Sellers) */}
             {activeTab === 'market' && (
@@ -491,37 +568,51 @@ export default function Analytics({ customers, products }) {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Top Category A Customers */}
-                            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden">
-                                <h3 className="font-black text-white text-xl tracking-tight mb-8">Top Value Drivers (Category A)</h3>
-                                <div className="space-y-4">
-                                    {segments.A.length > 0 ? segments.A.slice(0, 5).map((cust, i) => (
-                                        <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl hover:bg-white/10 transition-colors group">
-                                            <div className="w-12 h-12 rounded-xl bg-[#C9A34E] flex items-center justify-center text-[#0A1A2F] font-black text-lg shadow-inner">
-                                                {cust.profile?.first_name?.charAt(0) || 'C'}
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="text-sm font-black text-white">{cust.profile?.first_name} {cust.profile?.last_name}</p>
-                                                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{cust.profile?.job_title || 'VIP Member'}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-sm font-black text-[#C9A34E]">฿{cust.spend.toLocaleString()}</p>
-                                                <p className="text-[9px] font-bold text-white/20 uppercase">{cust.percent.toFixed(1)}%</p>
-                                            </div>
+                            {/* Product Mix (Pie Chart) */}
+                            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
+                                <h3 className="font-black text-white text-xl tracking-tight mb-8">Product Mix (Volume)</h3>
+                                <div className="flex items-center gap-8">
+                                    {/* Donut Chart */}
+                                    <div className="relative w-40 h-40 flex-shrink-0">
+                                        <div
+                                            className="absolute inset-0 rounded-full"
+                                            style={{
+                                                background: `conic-gradient(${productMix.reduce((acc, curr, i) => {
+                                                    const start = acc.prev;
+                                                    const end = start + curr.share;
+                                                    acc.prev = end;
+                                                    acc.str += `${curr.color} ${start}% ${end}%, `;
+                                                    return acc;
+                                                }, { str: '', prev: 0 }).str.slice(0, -2)
+                                                    })`
+                                            }}
+                                        ></div>
+                                        {/* Center Hole for Glassmorphism Donut */}
+                                        <div className="absolute inset-4 bg-slate-900 border border-white/10 rounded-full flex flex-col items-center justify-center backdrop-blur-3xl shadow-2xl">
+                                            <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-none">Total</p>
+                                            <p className="text-xl font-black text-white">100%</p>
                                         </div>
-                                    )) : (
-                                        <div className="flex flex-col items-center justify-center py-12 opacity-20">
-                                            <i className="fas fa-users text-4xl mb-4"></i>
-                                            <p className="text-[10px] font-black uppercase tracking-widest">No Category A Yet</p>
-                                        </div>
-                                    )}
+                                    </div>
+
+                                    {/* Legend */}
+                                    <div className="flex-1 space-y-3">
+                                        {productMix.map((item, i) => (
+                                            <div key={i} className="flex items-center justify-between group/item">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                                    <span className="text-[10px] font-bold text-white/70 truncate max-w-[100px]">{item.name}</span>
+                                                </div>
+                                                <span className="text-[10px] font-black text-white">{item.share}%</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Top Performance (by Volume) */}
                             <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden group">
                                 <div className="relative z-10">
-                                    <h3 className="font-black text-white text-xl tracking-tight mb-8">Product/Package Yield</h3>
+                                    <h3 className="font-black text-white text-xl tracking-tight mb-8">Product Yield Breakdown</h3>
                                     <div className="space-y-6">
                                         {bestSellers.slice(0, 4).map((item, i) => {
                                             const maxSales = bestSellers[0].sales;
@@ -532,7 +623,7 @@ export default function Analytics({ customers, products }) {
                                                         <span className="text-white/60 truncate max-w-[150px]">{item.name}</span>
                                                         <span className="text-white">{item.sales} Units</span>
                                                     </div>
-                                                    <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                    <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
                                                         <div
                                                             style={{ width: `${val}%` }}
                                                             className={`h-full ${item.color || 'bg-slate-500'} rounded-full shadow-lg shadow-white/5`}

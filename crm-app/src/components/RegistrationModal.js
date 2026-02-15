@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function RegistrationModal({ isOpen, onClose, onRegister, nextId, nextMemberId }) {
     const [formData, setFormData] = useState({
@@ -15,8 +15,30 @@ export default function RegistrationModal({ isOpen, onClose, onRegister, nextId,
         facebook: '',
         lead_channel: 'Facebook Ad',
         membership_tier: 'GENERAL',
-        agent_name: 'Admin'
+        agent_name: 'Admin',
+        attribution_campaign_id: '',
+        attribution_adset_id: ''
     });
+    const [availableCampaigns, setAvailableCampaigns] = useState([]);
+    const [availableAdsets, setAvailableAdsets] = useState([]);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetch('/api/marketing/campaigns')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) setAvailableCampaigns(data.data || []);
+                })
+                .catch(err => console.error('Error fetching campaigns:', err));
+
+            fetch('/api/marketing/adsets')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) setAvailableAdsets(data.data || []);
+                })
+                .catch(err => console.error('Error fetching adsets:', err));
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -44,7 +66,12 @@ export default function RegistrationModal({ isOpen, onClose, onRegister, nextId,
             },
             intelligence: {
                 metrics: { total_spend: 0, total_learning_hours: 0, total_point: 0 },
-                tags: ['New Customer', 'Registration Pending', formData.lead_channel]
+                tags: ['New Customer', 'Registration Pending', formData.lead_channel],
+                attribution: {
+                    campaign_id: formData.attribution_campaign_id,
+                    adset_id: formData.attribution_adset_id,
+                    source: formData.lead_channel
+                }
             },
             inventory: { coupons: [], learning_courses: [] },
             wallet: { balance: 0, points: 0, currency: 'THB' },
@@ -56,7 +83,8 @@ export default function RegistrationModal({ isOpen, onClose, onRegister, nextId,
                 details: {
                     content: 'New customer account created via registration portal.',
                     member_id: nextMemberId,
-                    lead_source: formData.lead_channel
+                    lead_source: formData.lead_channel,
+                    campaign_id: formData.attribution_campaign_id
                 }
             }]
         });
@@ -223,6 +251,35 @@ export default function RegistrationModal({ isOpen, onClose, onRegister, nextId,
                                 onChange={e => setFormData({ ...formData, agent_name: e.target.value })}
                                 placeholder="E.g. Admin, Sales-A"
                             />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Campaign (Marketing)</label>
+                            <select
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-slate-800 font-bold outline-none focus:border-[#C9A34E] transition-colors appearance-none"
+                                value={formData.attribution_campaign_id}
+                                onChange={e => setFormData({ ...formData, attribution_campaign_id: e.target.value })}
+                            >
+                                <option value="">-- No Campaign --</option>
+                                {availableCampaigns.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Ad Set (Marketing)</label>
+                            <select
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-slate-800 font-bold outline-none focus:border-[#C9A34E] transition-colors appearance-none"
+                                value={formData.attribution_adset_id}
+                                onChange={e => setFormData({ ...formData, attribution_adset_id: e.target.value })}
+                            >
+                                <option value="">-- No Ad Set --</option>
+                                {availableAdsets.filter(a => !formData.attribution_campaign_id || a.campaign_id === formData.attribution_campaign_id).map(a => (
+                                    <option key={a.id} value={a.id}>{a.name}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 

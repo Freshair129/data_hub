@@ -43,7 +43,68 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
     // Progress calculation (Dominant by Spending, but checking both)
     const spendProgress = nextTier ? Math.min(100, (totalSpend / nextTier.threshold) * 100) : 100;
     const hourProgress = nextTier && nextTier.hourThreshold > 0 ? Math.min(100, (learningHours / nextTier.hourThreshold) * 100) : 100;
-    const combinedProgress = nextTier && nextTier.hourThreshold > 0 ? (spendProgress + hourProgress) / 2 : spendProgress;
+
+    const [editAgent, setEditAgent] = useState(profile.agent || '');
+    const [editStatus, setEditStatus] = useState(customer.status || 'New Lead');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSaveProfile = async () => {
+        setIsSaving(true);
+        try {
+            const updatedCustomer = {
+                ...customer,
+                profile: { ...profile, agent: editAgent },
+                status: editStatus,
+                timeline: [
+                    {
+                        date: new Date().toISOString(),
+                        type: 'STATUS_CHANGE',
+                        icon: 'fas fa-user-edit',
+                        title: 'Profile Updated',
+                        details: `Assigned Agent: ${editAgent}, Status: ${editStatus}`
+                    },
+                    ...timeline
+                ]
+            };
+            await onUpdateInventory(updatedCustomer);
+
+            const res = await fetch(`/api/customers/${customer.customer_id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedCustomer)
+            });
+
+            if (res.ok) {
+                alert('Profile updated successfully!');
+            }
+        } catch (err) {
+            console.error('Failed to save profile:', err);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleInventoryUpdate = async (newInventory) => {
+        const updatedCustomer = {
+            ...customer,
+            inventory: newInventory
+        };
+
+        // Update local state immediately
+        onUpdateInventory(updatedCustomer);
+
+        // Persist to API
+        try {
+            await fetch(`/api/customers/${customer.customer_id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedCustomer)
+            });
+        } catch (err) {
+            console.error('Failed to save inventory:', err);
+            alert('Failed to save inventory changes.');
+        }
+    };
 
     return (
         <div className="animate-fade-in pb-12 overflow-hidden">
@@ -95,10 +156,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                {/* Left Column - Compact Profile (4 Units) */}
                 <div className="lg:col-span-3 space-y-5">
-
-                    {/* Profile Detail Card - Compact */}
                     <div className="bg-[#162A47]/80 rounded-[1.5rem] shadow-lg border border-white/10 overflow-hidden relative group backdrop-blur-md">
                         <div className="p-[15px] pb-20 bg-gradient-to-br from-[#162A47]/80 to-[#1F3A5F]/80 relative">
                             <div className="flex flex-col items-center text-center">
@@ -122,35 +180,20 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                 </p>
 
                                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#C9A34E] rounded-full mb-5 shadow-lg border border-white/10 transition-all hover:scale-105 cursor-default group/badge">
-                                    <div className="flex items-center justify-center">
-                                        <i className="fas fa-gem text-[#162A47] text-[16px]"></i>
-                                    </div>
+                                    <i className="fas fa-gem text-[#162A47] text-[16px]"></i>
                                     <div className="flex flex-col items-center leading-none py-0.5">
                                         <span className="text-[10px] font-black uppercase tracking-tight text-[#162A47]">
                                             {currentTier.label.split(' ')[0].split('').join(' ')}
                                         </span>
-                                        {profile.member_id && (
-                                            <span className="text-[6.5px] font-black opacity-60 tracking-tighter font-mono mt-0.5">
-                                                {profile.member_id.split('').join(' ')}
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
 
-                                {/* Membership Progress - Full Width */}
                                 <div className="w-full mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
                                             {nextTier ? `Next: ${nextTier.label.split(' ')[0]}` : 'Tier: Elite (Max)'}
                                         </span>
-                                        <div className="flex gap-1">
-                                            <div className={`w-1 h-1 rounded-full ${spendProgress >= 100 ? 'bg-green-400' : 'bg-slate-600'}`}></div>
-                                            {(nextTier?.hourThreshold > 0 || !nextTier) && (
-                                                <div className={`w-1 h-1 rounded-full ${hourProgress >= 100 ? 'bg-blue-400' : 'bg-slate-600'}`}></div>
-                                            )}
-                                        </div>
                                     </div>
-
                                     <div className="space-y-2">
                                         <div>
                                             <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
@@ -158,110 +201,89 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                                 <span>{totalSpend.toLocaleString()} / {nextTier?.threshold?.toLocaleString() || 'MAX'}</span>
                                             </div>
                                             <div className="h-1 w-full bg-black/20 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transition-all duration-1000"
-                                                    style={{ width: `${spendProgress}%` }}
-                                                ></div>
+                                                <div className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transition-all duration-1000" style={{ width: `${spendProgress}%` }}></div>
                                             </div>
-                                        </div>
-
-                                        {(nextTier?.hourThreshold > 0 || !nextTier) && (
-                                            <div>
-                                                <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
-                                                    <span>Hours</span>
-                                                    <span>{learningHours} / {nextTier?.hourThreshold || '100+'} HRS</span>
-                                                </div>
-                                                <div className="h-1 w-full bg-black/20 rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-gradient-to-r from-blue-400 to-blue-200 rounded-full transition-all duration-1000"
-                                                        style={{ width: `${hourProgress}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Wallet Section - Full Width */}
-                                <div className="w-full bg-[#162A47] rounded-xl p-4 mb-4 border border-white/10 relative overflow-hidden">
-                                    <div className="space-y-3 relative z-10">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex flex-col text-left">
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Wallet</span>
-                                                <div className="text-lg font-black text-white flex items-baseline gap-0.5 leading-none">
-                                                    <span className="text-[11px] text-slate-500 font-bold">฿</span>
-                                                    {wallet.balance?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                                </div>
-                                            </div>
-                                            <button className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-md transition-all active:scale-95">
-                                                Top Up
-                                            </button>
-                                        </div>
-
-                                        <div className="h-px w-full bg-white/5"></div>
-
-                                        <div className="flex items-center justify-between text-left">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">VPoints</span>
-                                                <div className="text-lg font-black text-[#C9A34E] flex items-baseline gap-0.5 leading-none">
-                                                    <span className="text-[11px] text-[#C9A34E]/60 font-bold">VP</span>
-                                                    {wallet.points?.toLocaleString()}
-                                                </div>
-                                            </div>
-                                            <button className="px-3 py-1 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-md border border-white/10 transition-all">
-                                                Use
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="flex flex-wrap justify-center gap-1.5 max-w-full px-2">
-                                    {intel.tags?.slice(0, 4).map((tag, i) => (
-                                        <span key={i} className="px-2 py-0.5 bg-[#C9A34E]/10 text-[#C9A34E] text-[7px] font-black uppercase tracking-wider rounded-md border border-[#C9A34E]/20">
-                                            {tag}
-                                        </span>
-                                    ))}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Contact List Aligned - Full Width */}
-                        <div className="px-[15px] -mt-16 pb-6 relative z-10 flex justify-center">
+                        {/* Sales Agent & Status Editor */}
+                        <div className="px-5 pt-4 pb-4 border-t border-white/5 bg-white/5">
+                            <p className="text-[9px] font-black text-[#C9A34E] uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <i className="fas fa-user-tie"></i> Sales Assignment
+                            </p>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-[8px] font-bold text-white/30 uppercase block mb-1">Assigned Agent</label>
+                                    <input
+                                        type="text"
+                                        value={editAgent}
+                                        onChange={(e) => setEditAgent(e.target.value)}
+                                        placeholder="Sales Representative Name"
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-[#C9A34E]/50 transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[8px] font-bold text-white/30 uppercase block mb-1">Follow-up Status</label>
+                                    <select
+                                        value={editStatus}
+                                        onChange={(e) => setEditStatus(e.target.value)}
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-[#C9A34E]/50 transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="New Lead">New Lead</option>
+                                        <option value="Interested">Interested</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="No Answer">No Answer</option>
+                                        <option value="Lost">Lost</option>
+                                        <option value="Won / Enrolled">Won / Enrolled</option>
+                                    </select>
+                                </div>
+                                <button
+                                    onClick={handleSaveProfile}
+                                    disabled={isSaving}
+                                    className="w-full bg-[#C9A34E] text-[#0A1A2F] py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    {isSaving ? <i className="fas fa-spinner animate-spin text-[10px]"></i> : <i className="fas fa-save text-[10px]"></i>}
+                                    {isSaving ? 'SAVING...' : 'UPDATE SALES INFO'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="px-[15px] pt-4 pb-6">
                             <div className="w-full bg-[#162A47] rounded-xl p-4 shadow-2xl border border-white/10 space-y-2.5 backdrop-blur-md">
                                 {[
                                     { icon: 'fa-envelope', label: 'E-mail', val: contact.email || profile.email || '-', color: 'text-blue-400' },
                                     { icon: 'fa-phone', label: 'Phone', val: contact.phone_primary || profile.phone_primary || '-', color: 'text-green-400' },
                                     { icon: 'fa-line', label: 'Line ID', val: contact.line_id || '-', color: 'text-emerald-400' },
-                                    { icon: 'fa-facebook', label: 'Facebook', val: contact.facebook || '-', color: 'text-blue-500' },
-                                    { icon: 'fa-birthday-cake', label: 'Birthday', val: profile.birthday || '-', color: 'text-pink-400' },
-                                    { icon: 'fa-briefcase', label: 'Occupation', val: profile.job_title || '-', color: 'text-orange-400' },
-                                    { icon: 'fa-user-tie', label: 'Agent', val: profile.agent || 'None', color: 'text-[#C9A34E]' }
+                                    { icon: 'fa-user-tie', label: 'Current Agent', val: profile.agent || 'Unassigned', color: 'text-[#C9A34E]' }
                                 ].map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3 group/item hover:bg-white/5 p-1 rounded-lg transition-colors -mx-1">
-                                        <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 group-hover/item:text-[#C9A34E] transition-all border border-white/5">
+                                    <div key={i} className="flex items-center gap-3">
+                                        <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 border border-white/5">
                                             <i className={`fas ${item.icon} text-[10px]`}></i>
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter mb-0">{item.label}</p>
-                                            <p className="text-[11px] font-bold text-[#F8F8F6] truncate group-hover/item:text-white">{item.val}</p>
+                                            <p className="text-[11px] font-bold text-[#F8F8F6] truncate">{item.val}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
-
                 </div>
 
-                {/* Right Column - Compact Content (9 Units) */}
                 <div className="lg:col-span-9 space-y-5">
                     <IntelligencePanel intel={intel} />
                     <InventoryPanel
                         inventory={inventory}
                         searchTerm={searchTerm}
                         currentUser={currentUser}
-                        onUpdateInventory={onUpdateInventory}
+                        onUpdateInventory={handleInventoryUpdate}
+                        activeCustomer={customer}
                     />
+
                     <Timeline timeline={timeline} />
                 </div>
             </div>

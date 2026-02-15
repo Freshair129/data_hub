@@ -1,0 +1,50 @@
+{
+    "customer_id": "MSG-32300146979583672",
+    "profile": {
+        "first_name": "Nyo",
+        "last_name": "Min Lwin",
+        "nick_name": "Nyo",
+        "status": "Active",
+        "membership_tier": "GENERAL",
+        "lifecycle_stage": "New Lead",
+        "agent": "Unassigned",
+        "join_date": "2026-02-12T07:39:17+0000"
+    },
+    "contact_info": {
+        "facebook": "Nyo Min Lwin",
+        "facebook_id": "32300146979583672",
+        "lead_channel": "Facebook"
+    },
+    "intelligence": {
+        "metrics": {
+            "total_spend": 0,
+            "total_learning_hours": 0,
+            "total_point": 0,
+            "total_order": 0
+        },
+        "tags": [
+            "Facebook Chat",
+            "New Lead"
+        ]
+    },
+    "inventory": {
+        "coupons": [],
+        "learning_courses": []
+    },
+    "wallet": {
+        "balance": 0,
+        "points": 0,
+        "currency": "THB"
+    },
+    "timeline": [
+        {
+            "id": "SYNC-1770904425473-9",
+            "date": "2026-02-12T07:39:17+0000",
+            "type": "SYSTEM",
+            "summary": "Synced from Facebook Messenger",
+            "details": {
+                "content": "Customer imported from Facebook Page conversation."
+            }
+        }
+    ]
+}

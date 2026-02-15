@@ -1,0 +1,50 @@
+{
+    "customer_id": "MSG-34641025862209021",
+    "profile": {
+        "first_name": "Ku",
+        "last_name": "Ku",
+        "nick_name": "Ku",
+        "status": "Active",
+        "membership_tier": "GENERAL",
+        "lifecycle_stage": "New Lead",
+        "agent": "Unassigned",
+        "join_date": "2026-02-12T11:15:53+0000"
+    },
+    "contact_info": {
+        "facebook": "Ku Ku",
+        "facebook_id": "34641025862209021",
+        "lead_channel": "Facebook"
+    },
+    "intelligence": {
+        "metrics": {
+            "total_spend": 0,
+            "total_learning_hours": 0,
+            "total_point": 0,
+            "total_order": 0
+        },
+        "tags": [
+            "Facebook Chat",
+            "New Lead"
+        ]
+    },
+    "inventory": {
+        "coupons": [],
+        "learning_courses": []
+    },
+    "wallet": {
+        "balance": 0,
+        "points": 0,
+        "currency": "THB"
+    },
+    "timeline": [
+        {
+            "id": "SYNC-1770904425469-5",
+            "date": "2026-02-12T11:15:53+0000",
+            "type": "SYSTEM",
+            "summary": "Synced from Facebook Messenger",
+            "details": {
+                "content": "Customer imported from Facebook Page conversation."
+            }
+        }
+    ]
+}

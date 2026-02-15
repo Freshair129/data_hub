@@ -1,0 +1,50 @@
+{
+    "customer_id": "MSG-25875894088757497",
+    "profile": {
+        "first_name": "Natchanan",
+        "last_name": "Saengros",
+        "nick_name": "Natchanan",
+        "status": "Active",
+        "membership_tier": "GENERAL",
+        "lifecycle_stage": "In Progress",
+        "agent": "พรพล ธนสุวรรณธาร",
+        "join_date": "2026-02-11T12:07:10+0000"
+    },
+    "contact_info": {
+        "facebook": "Natchanan Saengros",
+        "facebook_id": "25875894088757497",
+        "lead_channel": "Facebook"
+    },
+    "intelligence": {
+        "metrics": {
+            "total_spend": 0,
+            "total_learning_hours": 0,
+            "total_point": 0,
+            "total_order": 0
+        },
+        "tags": [
+            "Facebook Chat",
+            "Contacted"
+        ]
+    },
+    "inventory": {
+        "coupons": [],
+        "learning_courses": []
+    },
+    "wallet": {
+        "balance": 0,
+        "points": 0,
+        "currency": "THB"
+    },
+    "timeline": [
+        {
+            "id": "SYNC-1770904425483-22",
+            "date": "2026-02-11T12:07:10+0000",
+            "type": "SYSTEM",
+            "summary": "Synced from Facebook Messenger",
+            "details": {
+                "content": "Customer imported from Facebook Page conversation."
+            }
+        }
+    ]
+}

@@ -1,12 +1,35 @@
 'use client';
 
-const menuItems = [
-    { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
-    { id: 'customers', icon: 'fa-users', label: 'Customers' },
-    { id: 'store', icon: 'fa-store', label: 'Store' },
-    { id: 'orders', icon: 'fa-receipt', label: 'Orders' },
-    { id: 'analytics', icon: 'fa-chart-line', label: 'Analytics' },
-    { id: 'settings', icon: 'fa-cog', label: 'Settings' },
+const menuGroups = [
+    {
+        label: null,
+        items: [
+            { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' }
+        ]
+    },
+    {
+        label: 'OPERATIONS',
+        items: [
+            { id: 'customers', icon: 'fa-users', label: 'Customers' },
+            { id: 'store', icon: 'fa-store', label: 'Store' },
+            { id: 'orders', icon: 'fa-receipt', label: 'Orders' },
+            { id: 'verification', icon: 'fa-robot', label: 'Verification' }
+        ]
+    },
+    {
+        label: 'GROWTH',
+        items: [
+            { id: 'analytics', icon: 'fa-chart-line', label: 'Analytics' },
+            { id: 'facebook-ads', icon: 'fa-bullhorn', label: 'Facebook Ads' },
+            { id: 'campaign-tracking', icon: 'fa-crosshairs', label: 'Campaign Tracking' }
+        ]
+    },
+    {
+        label: 'SYSTEM',
+        items: [
+            { id: 'settings', icon: 'fa-cog', label: 'Settings' }
+        ]
+    }
 ];
 
 export default function Sidebar({ activeView, onViewChange, cartCount, currentUser, onLogout }) {
@@ -30,45 +53,56 @@ export default function Sidebar({ activeView, onViewChange, cartCount, currentUs
 
             {/* Navigation - High Contrast Ivory on Navy */}
             <nav className="flex-1 p-6 overflow-y-auto custom-scrollbar">
-                <ul className="space-y-2">
-                    {menuItems.map((item) => {
-                        const isActive = activeView === item.id;
-                        // Permission-based visibility
-                        const canAccess = item.id === 'analytics'
-                            ? (currentUser?.permissions?.can_access_analytics || currentUser?.permissions?.can_manage_analytics || currentUser?.permissions?.is_admin)
-                            : true;
+                <div className="space-y-6">
+                    {menuGroups.map((group, groupIndex) => (
+                        <div key={groupIndex}>
+                            {group.label && (
+                                <h3 className="px-5 mb-2 text-[10px] font-black text-white/20 uppercase tracking-widest">
+                                    {group.label}
+                                </h3>
+                            )}
+                            <ul className="space-y-1">
+                                {group.items.map((item) => {
+                                    const isActive = activeView === item.id;
+                                    // Permission-based visibility
+                                    const canAccess = item.id === 'analytics'
+                                        ? (currentUser?.permissions?.can_access_analytics || currentUser?.permissions?.can_manage_analytics || currentUser?.permissions?.is_admin)
+                                        : true;
 
-                        if (!canAccess) return null;
+                                    if (!canAccess) return null;
 
-                        return (
-                            <li key={item.id}>
-                                <button
-                                    onClick={() => onViewChange(item.id)}
-                                    className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 relative group ${isActive
-                                        ? 'bg-red-500 text-white shadow-lg shadow-red-500/20 translate-x-1'
-                                        : 'text-white/60 hover:text-[#F8F8F6] hover:bg-white/5'
-                                        }`}
-                                >
-                                    {/* Active Indicator Light */}
-                                    {isActive && (
-                                        <span className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-full"></span>
-                                    )}
+                                    return (
+                                        <li key={item.id}>
+                                            <button
+                                                onClick={() => onViewChange(item.id)}
+                                                className={`w-full flex items-center gap-4 px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 relative group ${isActive
+                                                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/20 translate-x-1'
+                                                    : 'text-white/60 hover:text-[#F8F8F6] hover:bg-white/5'
+                                                    }`}
+                                            >
+                                                {/* Active Indicator Light */}
+                                                {isActive && (
+                                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"></span>
+                                                )}
 
-                                    <i className={`fas ${item.icon} w-6 text-center text-lg ${isActive ? 'text-white' : 'group-hover:text-red-500 transition-colors'}`}></i>
-                                    <span className="tracking-tight">{item.label}</span>
+                                                <i className={`fas ${item.icon} w-6 text-center text-lg ${isActive ? 'text-white' : 'group-hover:text-red-500 transition-colors'}`}></i>
+                                                <span className="tracking-tight">{item.label}</span>
 
-                                    {/* Cart badge - Japan Red Accent */}
-                                    {item.id === 'store' && cartCount > 0 && (
-                                        <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-black ${isActive ? 'bg-white text-red-500' : 'bg-red-500 text-white'
-                                            }`}>
-                                            {cartCount}
-                                        </span>
-                                    )}
-                                </button>
-                            </li>
-                        );
-                    })}
-                </ul>
+                                                {/* Cart badge - Japan Red Accent */}
+                                                {item.id === 'store' && cartCount > 0 && (
+                                                    <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-black ${isActive ? 'bg-white text-red-500' : 'bg-red-500 text-white'
+                                                        }`}>
+                                                        {cartCount}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
             </nav>
 
             {/* User Profile - Premium Warm Gray & Navy */}

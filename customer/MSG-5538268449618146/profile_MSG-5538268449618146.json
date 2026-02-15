@@ -1,0 +1,50 @@
+{
+    "customer_id": "MSG-5538268449618146",
+    "profile": {
+        "first_name": "ชัช",
+        "last_name": "อรรถวิทย์กุล",
+        "nick_name": "ชัช",
+        "status": "Active",
+        "membership_tier": "GENERAL",
+        "lifecycle_stage": "In Progress",
+        "agent": "พรพล ธนสุวรรณธาร",
+        "join_date": "2026-02-09T02:38:36+0000"
+    },
+    "contact_info": {
+        "facebook": "ชัช อรรถวิทย์กุล",
+        "facebook_id": "5538268449618146",
+        "lead_channel": "Facebook"
+    },
+    "intelligence": {
+        "metrics": {
+            "total_spend": 0,
+            "total_learning_hours": 0,
+            "total_point": 0,
+            "total_order": 0
+        },
+        "tags": [
+            "Facebook Chat",
+            "Contacted"
+        ]
+    },
+    "inventory": {
+        "coupons": [],
+        "learning_courses": []
+    },
+    "wallet": {
+        "balance": 0,
+        "points": 0,
+        "currency": "THB"
+    },
+    "timeline": [
+        {
+            "id": "SYNC-1770904425515-83",
+            "date": "2026-02-09T02:38:36+0000",
+            "type": "SYSTEM",
+            "summary": "Synced from Facebook Messenger",
+            "details": {
+                "content": "Customer imported from Facebook Page conversation."
+            }
+        }
+    ]
+}
