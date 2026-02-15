@@ -25,3 +25,4 @@ cd crm-app
 (sleep 5 && open "http://localhost:3000") &
 
 npm run dev
+g=8
