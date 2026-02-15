@@ -15,17 +15,20 @@ graph TD
         A --> D["StoreGrid"]
         A --> E["Analytics"]
         A --> F["Dashboard"]
+        A --> FB["FacebookAds"]
     end
     
     subgraph Data["JSON Data Layer"]
         G["customer/"]
         H["catalog.json"]
         I["employee/"]
+        J["marketing/"]
     end
     
     A --> G
     A --> H
     A --> I
+    FB --> J
 ```
 
 ---
@@ -86,11 +89,11 @@ flowchart LR
 
 | Module | File | Purpose |
 |--------|------|---------|
-| **Customer 360** | `CustomerCard.js` | Profile, Wallet, Inventory, Timeline |
-| **Store** | `StoreGrid.js`, `ProductModal.js` | Course & Package Sales |
-| **Analytics** | `Analytics.js` | 8-Tab Dashboard (Sales, CLV, Funnel, etc.) |
-| **Dashboard** | `Dashboard.js` | Executive KPIs |
-| **Auth** | `LoginPage.js` | Role-based Login |
+| **Customer 360** | `CustomerCard.js` | Profile, Wallet, Inventory, Intelligence, Timeline |
+| **Facebook Ads** | `FacebookAds.js` | Real-time Ad Monitoring, Budget Tracking, AI Insights |
+| **Analytics** | `Analytics.js` | 8-Tab Dashboard (Sales, CLV, Funnel, ROI Tabs) |
+| **Store** | `StoreGrid.js` | Course & Package Sales |
+| **Dashboard** | `Dashboard.js` | Executive KPIs & Ad Summary |
 
 ---
 
@@ -215,10 +218,10 @@ erDiagram
 |----------|----------|--------|
 | Registration | Member ID | ✅ Integrated |
 | Store Checkout | Inventory | ✅ Integrated |
-| Orders | Timeline | ✅ Integrated |
-| Analytics (RFM) | Customer Data | ✅ Integrated |
-| Analytics (ROI) | Real Data | ⏳ Mock Data |
-| Wallet Top-up | Transaction Log | ⏳ UI Only |
+| Facebook Ads | CRM Dashboard | ✅ Live Feed |
+| AI Strategic Advisor| Intelligence Panel | ✅ Active |
+| Analytics (ROI) | Facebook Data | ✅ Automated |
+| Wallet Top-up | Slip Verification | ✅ Integrated |
 
 ---
 
@@ -232,11 +235,10 @@ erDiagram
 │       └── components/
 │           ├── Analytics.js
 │           ├── CustomerCard.js
-│           ├── StoreGrid.js
+│           ├── FacebookAds.js
 │           └── ...
-├── customer/
-│   ├── c001/profile_c001.json
-│   └── ...
+├── customer/                    # Account Data
+├── marketing/                   # Ad Performance Logs
 ├── catalog.json                 # Products & Packages
 └── employee/                    # Staff Profiles
 ```
