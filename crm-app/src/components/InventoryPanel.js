@@ -131,16 +131,49 @@ export default function InventoryPanel({ inventory, searchTerm = '', currentUser
     const handleRedeem = (item, type, e) => {
         if (e) e.stopPropagation();
         setRedeeming({ ...item, type });
-        // In a real app, this would call an API
+
         setTimeout(() => {
-            alert(`Successfully redeemed: ${item.name}`);
+            const updatedInventory = { ...inventory };
+            let redeemedForLog = null;
+
+            if (type === 'coupon') {
+                updatedInventory.coupons = (inventory.coupons || []).map(c => {
+                    if (c.coupon_id === item.coupon_id) {
+                        redeemedForLog = { ...c, type: 'COUPON' };
+                        return { ...c, status: 'Inactive' };
+                    }
+                    return c;
+                });
+            } else if (type === 'course') {
+                updatedInventory.learning_courses = (inventory.learning_courses || []).map(c => {
+                    if (c.course_id === item.course_id) {
+                        redeemedForLog = { ...c, type: 'COURSE' };
+                        return { ...c, status: 'Inactive' };
+                    }
+                    return c;
+                });
+            } else if (type === 'bundle' || type === 'package') {
+                updatedInventory.learning_courses = (inventory.learning_courses || []).map(c => {
+                    if (c.bundle_id === item.bundle_id) {
+                        redeemedForLog = { ...c, type: 'PACKAGE' };
+                        return { ...c, status: 'Inactive' };
+                    }
+                    return c;
+                });
+            }
+
+            console.log(`Redeemed ${type}: ${item.name}. Status set to Inactive.`);
+            // Pass the redeemed item as a second argument for timeline logging
+            onUpdateInventory(updatedInventory, redeemedForLog);
             setRedeeming(null);
             setSelectedItem(null);
+            alert(`Successfully redeemed: ${item.name}`);
         }, 1500);
     };
 
     // Helper to render a consistent ticket card with correct proportions
     const TicketCard = ({ item, type }) => {
+        const isInactive = item.status === 'Inactive';
         const isFreeDrink = item.name?.toLowerCase().includes('drink');
         const isSushiCourse = item.name?.toLowerCase().includes('sushi');
         const isWagyu = item.name?.toLowerCase().includes('wagyu');
@@ -161,12 +194,12 @@ export default function InventoryPanel({ inventory, searchTerm = '', currentUser
 
         return (
             <div
-                onClick={() => setSelectedItem({ ...item, type: item.type })}
-                className="group relative transition-all duration-500 hover:scale-[1.02] hover:z-20 cursor-pointer aspect-[10/6]"
+                onClick={() => !isInactive && setSelectedItem({ ...item, type: type })}
+                className={`group relative transition-all duration-500 ${isInactive ? 'opacity-70 scale-[0.98]' : 'hover:scale-[1.02] hover:z-20 cursor-pointer'} aspect-[10/6]`}
             >
                 {/* Main Card Boundary with Background */}
                 <div
-                    className={`absolute inset-0 rounded-3xl border shadow-xl group-hover:shadow-2xl transition-all duration-500 overflow-hidden ${isFreeDrink || isSushiCourse || isWagyu || !isFreeDrink ? 'border-transparent text-white ring-1 ring-white/10' : 'bg-slate-50 border-slate-100'
+                    className={`absolute inset-0 rounded-3xl border shadow-xl transition-all duration-500 overflow-hidden ${isInactive ? 'grayscale border-slate-300' : 'group-hover:shadow-2xl'} ${isFreeDrink || isSushiCourse || isWagyu || !isFreeDrink ? 'border-transparent text-white ring-1 ring-white/10' : 'bg-slate-50 border-slate-100'
                         }`}
                     style={{
                         ...bgStyle,
@@ -177,9 +210,9 @@ export default function InventoryPanel({ inventory, searchTerm = '', currentUser
                         maskComposite: 'intersect'
                     }}
                 >
-                    <div className={`absolute inset-0 transition-all duration-500 ${isFreeDrink || isSushiCourse || isWagyu
+                    <div className={`absolute inset-0 transition-all duration-500 ${isInactive ? 'bg-black/40' : (isFreeDrink || isSushiCourse || isWagyu
                         ? 'bg-black/0 group-hover:bg-black/10' // Transparent by default to show full image
-                        : 'bg-black/20 group-hover:bg-black/10'
+                        : 'bg-black/20 group-hover:bg-black/10')
                         }`}></div>
                 </div>
 
@@ -191,7 +224,7 @@ export default function InventoryPanel({ inventory, searchTerm = '', currentUser
                 <div className="relative z-20 h-full p-6 flex flex-col justify-between">
                     <div>
                         <div className="flex items-start justify-between mb-2">
-                            {canEdit && (
+                            {canEdit && !isInactive && (
                                 <button
                                     onClick={(e) => handleDelete(item, type, e)}
                                     className="w-8 h-8 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-all border border-red-500/20 backdrop-blur-md"
@@ -199,11 +232,16 @@ export default function InventoryPanel({ inventory, searchTerm = '', currentUser
                                     <i className="fas fa-trash-alt text-[10px]"></i>
                                 </button>
                             )}
+                            {isInactive && (
+                                <div className="bg-slate-900/60 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-white/20 backdrop-blur-md">
+                                    <i className="fas fa-check-circle mr-1 text-green-400"></i> REDEEMED
+                                </div>
+                            )}
                             <div className="text-right ml-auto">
                                 <div className="text-[7px] font-black uppercase tracking-[0.1em] text-white/70 drop-shadow-lg">
                                     {isBundle ? 'Package License' : (isCourse ? 'Course Credit' : 'Valid Until')}
                                 </div>
-                                <div className="text-[10px] font-black leading-none mt-1 drop-shadow-md">{isCourse || isBundle ? 'Active' : item.expiry_date}</div>
+                                <div className="text-[10px] font-black leading-none mt-1 drop-shadow-md">{isInactive ? 'EXPIRED/USED' : (isCourse || isBundle ? 'Active' : item.expiry_date)}</div>
                             </div>
                         </div>
                         {(!isFreeDrink && !isWagyu) && (
@@ -215,17 +253,19 @@ export default function InventoryPanel({ inventory, searchTerm = '', currentUser
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <span className="text-[8px] font-black uppercase tracking-widest bg-[#C9A34E]/20 text-[#C9A34E] px-2 py-0.5 rounded-md backdrop-blur-md border border-[#C9A34E]/30 shadow-lg">
+                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md backdrop-blur-md border shadow-lg ${isInactive ? 'bg-slate-500/20 text-slate-300 border-slate-400/30' : 'bg-[#C9A34E]/20 text-[#C9A34E] border-[#C9A34E]/30'}`}>
                             {isBundle ? `PKG: ${item.bundle_id}` : (isCourse ? `ID: ${item.course_id || 'CRS'}` : `ID: ${item.coupon_id || 'COUP'}`)}
                         </span>
-                        <div className="flex items-center gap-3">
-                            <div className="text-[9px] font-black flex items-center gap-1 group-hover:gap-2 transition-all drop-shadow-lg text-white/80">
-                                VIEW <i className="fas fa-chevron-right text-[7px]"></i>
+                        {!isInactive && (
+                            <div className="flex items-center gap-3">
+                                <div className="text-[9px] font-black flex items-center gap-1 group-hover:gap-2 transition-all drop-shadow-lg text-white/80">
+                                    VIEW <i className="fas fa-chevron-right text-[7px]"></i>
+                                </div>
+                                <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-lg">
+                                    <i className={`fas ${isBundle ? 'fa-box-open' : (isCourse ? 'fa-graduation-cap' : 'fa-ticket-alt')} text-xs text-white`}></i>
+                                </div>
                             </div>
-                            <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-lg">
-                                <i className={`fas ${isBundle ? 'fa-box-open' : (isCourse ? 'fa-graduation-cap' : 'fa-ticket-alt')} text-xs text-white`}></i>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>

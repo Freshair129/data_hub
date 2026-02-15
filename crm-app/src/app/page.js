@@ -9,11 +9,11 @@ import ProductModal from '@/components/ProductModal';
 import Dashboard from '@/components/Dashboard';
 import Orders from '@/components/Orders';
 import Analytics from '@/components/Analytics';
+import FacebookAds from '@/components/FacebookAds';
 import Settings from '@/components/Settings';
 import RegistrationModal from '@/components/RegistrationModal';
 import LoginPage from '@/components/LoginPage';
 import SlipVerificationPanel from '@/components/SlipVerificationPanel';
-import FacebookAds from '@/components/FacebookAds';
 import CampaignTracking from '@/components/CampaignTracking';
 
 export default function Home() {
@@ -40,6 +40,7 @@ export default function Home() {
     useEffect(() => {
         if (currentUser) {
             loadCustomers();
+            loadProducts();
         }
     }, [currentUser]);
 
@@ -85,7 +86,10 @@ export default function Home() {
 
     async function loadCustomers() {
         try {
-            const res = await fetch('/api/customers');
+            const apiUrl = `${window.location.origin}/api/customers`;
+            console.log('Loading customers from:', apiUrl);
+            const res = await fetch(apiUrl, { redirect: 'error' });
+            console.log('Customer API response status:', res.status);
             if (res.ok) {
                 const loaded = await res.json();
                 // Ensure each customer object has both id and customer_id for stability
@@ -105,21 +109,24 @@ export default function Home() {
             }
         } catch (e) {
             console.error('Failed to load customers', e);
+            console.error('Error details:', e.name, e.message);
         }
     }
 
     async function saveCustomer(customer) {
+        if (!customer.profile || !customer.intelligence) {
+            console.error('Refusing to save incomplete customer object:', customer);
+            return;
+        }
         try {
-            const res = await fetch(`/api/customers/${customer.customer_id}`, {
+            const res = await fetch(`${window.location.origin}/api/customers/${customer.customer_id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(customer)
             });
-            if (!res.ok) throw new Error('Failed to save customer');
-            console.log('Customer saved successfully');
+            if (!res.ok) throw new Error('Failed to update customer');
         } catch (e) {
-            console.error('Save error:', e);
-            alert('Warning: Changes could not be saved to disk.');
+            console.error('Failed to save customer', e);
         }
     }
 
@@ -460,6 +467,7 @@ export default function Home() {
                     <Dashboard
                         customers={customers}
                         products={products}
+                        onRefresh={loadCustomers}
                     />
                 )}
 
@@ -493,7 +501,6 @@ export default function Home() {
                                 </button>
                             </div>
                         </div>
-
                         {customerViewMode === 'list' ? (
                             <CustomerList
                                 customers={customers}
@@ -522,8 +529,8 @@ export default function Home() {
                         products={products}
                         allProducts={products}
                         activeCustomer={activeCustomer}
-                        onAddToCart={addToCart}
                         onSelectProduct={setSelectedProduct}
+                        onAddToCart={addToCart}
                         cart={cart}
                         setCart={setCart}
                         onCheckout={handleCheckout}
@@ -549,6 +556,7 @@ export default function Home() {
                         customers={customers}
                         orders={[]} // Passing empty orders for now as they are not fully implemented in global state
                         products={products}
+                        onRefresh={loadCustomers}
                     />
                 )}
 
@@ -575,6 +583,7 @@ export default function Home() {
                             onUpdateInventory={(updatedCustomer) => {
                                 setCustomers(customers.map(c => c.customer_id === updatedCustomer.customer_id ? updatedCustomer : c));
                                 setActiveCustomer(updatedCustomer);
+                                saveCustomer(updatedCustomer);
                             }}
                         />
                     </div>

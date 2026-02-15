@@ -11,6 +11,8 @@ export default function Analytics({ customers, products }) {
     const today = new Date();
     const now = new Date(); // Reuse for best sellers
 
+    const marketingData = { campaigns, insights }; // Compatibility shim for existing logic
+
     // --- Market & Sales Logic (Existing) ---
     // ABC Analysis Calculation
     const sortedCustomers = [...customers].sort((a, b) =>
@@ -283,6 +285,7 @@ export default function Analytics({ customers, products }) {
     // --- Retention & Follow-up Logic (Real) ---
     // Real Course Expiry (Scan Inventory)
     const expiringCourses = [];
+    const today = new Date();
     customers.forEach(c => {
         (c.inventory?.learning_courses || []).forEach(course => {
             const enrollDate = new Date(course.enrolled_at || '2025-01-01');
@@ -413,9 +416,11 @@ export default function Analytics({ customers, products }) {
     const pastEvents = marketingData?.events?.past || [];
 
     // --- Campaign Tracker Logic (Dynamic) ---
-    const campaigns = (marketingData?.campaigns || []).map(c => ({
+    const processedCampaigns = (campaigns || []).map(c => ({
         ...c,
-        utilization: ((c.spend / (c.budget || 1)) * 100).toFixed(1),
+        spend: c.insights?.spend || 0,
+        revenue: c.insights?.revenue || 0,
+        utilization: c.budget ? ((c.spend / c.budget) * 100).toFixed(1) : '0',
         roas: c.spend > 0 ? (c.revenue / c.spend).toFixed(2) : '0.00'
     })).sort((a, b) => {
         // Prioritize Active campaigns
@@ -448,10 +453,10 @@ export default function Analytics({ customers, products }) {
 
 
     const campaignStats = {
-        active: campaigns.filter(c => c.status === 'Active').length,
-        totalBudget: campaigns.reduce((sum, c) => sum + c.budget, 0),
-        totalSpend: campaigns.reduce((sum, c) => sum + c.spend, 0),
-        totalRevenue: campaigns.reduce((sum, c) => sum + c.revenue, 0)
+        active: (campaigns || []).filter(c => c.status === 'Active' || c.status === 'ACTIVE').length,
+        totalBudget: (campaigns || []).reduce((sum, c) => sum + (c.budget || 0), 0),
+        totalSpend: Number(insights.spend || 0),
+        totalRevenue: (campaigns || []).reduce((sum, c) => sum + (c.revenue || 0), 0)
     };
 
     return (
@@ -515,7 +520,7 @@ export default function Analytics({ customers, products }) {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Total Portfolio Value</p>
-                                        <p className="text-2xl font-black text-white">฿{totalRevenue.toLocaleString()}</p>
+                                        <p className="text-2xl font-black text-white">฿{formatCurrency(totalRevenue)}</p>
                                     </div>
                                 </div>
 
@@ -530,7 +535,7 @@ export default function Analytics({ customers, products }) {
                                                     {cat === 'A' ? 'High Value' : cat === 'B' ? 'Mid Tier' : 'Low Frequency'}
                                                 </p>
                                             </div>
-                                            <p className="text-2xl font-black text-white mb-1">฿{segmentStats[cat].spend.toLocaleString()}</p>
+                                            <p className="text-2xl font-black text-white mb-1">฿{formatCurrency(segmentStats[cat].spend)}</p>
                                             <div className="flex justify-between items-center text-[10px] font-bold">
                                                 <span className="text-white/60">{segmentStats[cat].count} Customers</span>
                                                 <span className={cat === 'A' ? 'text-[#C9A34E]' : 'text-white/40'}>
@@ -750,7 +755,7 @@ export default function Analytics({ customers, products }) {
                                         {c.profile?.join_date ? new Date(c.profile.join_date).toLocaleDateString() : 'N/A'}
                                     </div>
                                     <div className="col-span-3 text-right font-black text-[#C9A34E]">
-                                        ฿{(c.intelligence?.metrics?.total_spend || 0).toLocaleString()}
+                                        ฿{formatCurrency(c.intelligence?.metrics?.total_spend || 0)}
                                     </div>
                                 </div>
                             ))}
@@ -765,7 +770,7 @@ export default function Analytics({ customers, products }) {
                                 <div key={i}>
                                     <div className="flex justify-between text-[10px] font-bold text-white mb-2">
                                         <span>{ch.name}</span>
-                                        <span className="text-white/60">฿{ch.value.toLocaleString()} Avg.</span>
+                                        <span className="text-white/60">฿{formatCurrency(ch.value)} Avg.</span>
                                     </div>
                                     <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                                         <div
@@ -851,7 +856,7 @@ export default function Analytics({ customers, products }) {
                         ].map((stat, i) => (
                             <div key={i} className={`p-6 rounded-[2rem] border border-white/10 ${stat.highlight ? 'bg-gradient-to-br from-emerald-900/40 to-emerald-900/10 border-emerald-500/30' : 'bg-[#0A1A2F]/50'}`}>
                                 <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">{stat.label}</p>
-                                <p className={`text-2xl font-black ${stat.color} mb-1`}>฿{stat.val.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                                <p className={`text-2xl font-black ${stat.color} mb-1`}>฿{formatCurrency(stat.val, { maximumFractionDigits: 0 })}</p>
                                 <p className="text-[10px] font-bold text-white/30">{stat.sub} of Revenue</p>
                             </div>
                         ))}
@@ -862,19 +867,17 @@ export default function Analytics({ customers, products }) {
                         <h3 className="font-black text-white text-xl tracking-tight mb-8">Profitability Waterfall</h3>
                         <div className="space-y-6">
                             {/* Revenue Bar */}
-                            <div className="relative">
-                                <div className="flex justify-between text-xs font-bold text-white mb-2">
-                                    <span>Revenue</span>
-                                    <span>฿{totalRevenue.toLocaleString()}</span>
-                                </div>
-                                <div className="h-8 w-full bg-blue-600 rounded-r-xl relative"></div>
+                            <div className="flex justify-between text-xs font-bold text-white mb-2">
+                                <span>Revenue</span>
+                                <span>฿{formatCurrency(totalRevenue)}</span>
                             </div>
+                            <div className="h-8 w-full bg-blue-600 rounded-r-xl relative"></div>
 
                             {/* COGS Deduction */}
                             <div className="relative pl-12 opacity-80">
                                 <div className="flex justify-between text-xs font-bold text-rose-300 mb-2">
                                     <span>- Cost of Goods (40%)</span>
-                                    <span>(฿{cogs.toLocaleString()})</span>
+                                    <span>(฿{formatCurrency(cogs)})</span>
                                 </div>
                                 <div className="h-6 w-[40%] bg-rose-500/30 border border-rose-500 rounded-r-xl relative border-dashed"></div>
                             </div>
@@ -883,7 +886,7 @@ export default function Analytics({ customers, products }) {
                             <div className="relative pl-12 opacity-80">
                                 <div className="flex justify-between text-xs font-bold text-orange-300 mb-2">
                                     <span>- Operating Expenses</span>
-                                    <span>(฿{totalOpex.toLocaleString()})</span>
+                                    <span>(฿{formatCurrency(totalOpex)})</span>
                                 </div>
                                 <div style={{ width: `${(totalOpex / totalRevenue) * 100}%` }} className="h-6 bg-orange-500/30 border border-orange-500 rounded-r-xl relative border-dashed"></div>
                             </div>
@@ -892,7 +895,7 @@ export default function Analytics({ customers, products }) {
                             <div className="relative">
                                 <div className="flex justify-between text-xs font-bold text-emerald-400 mb-2">
                                     <span>Net Profit</span>
-                                    <span>฿{netProfit.toLocaleString()}</span>
+                                    <span>฿{formatCurrency(netProfit)}</span>
                                 </div>
                                 <div style={{ width: `${profitMargin}%` }} className="h-8 bg-emerald-500 rounded-r-xl relative shadow-[0_0_15px_rgba(16,185,129,0.3)]"></div>
                             </div>
@@ -909,7 +912,7 @@ export default function Analytics({ customers, products }) {
                                         <p className="text-xs font-bold text-white capitalize">{key}</p>
                                         <p className="text-[9px] text-white/40 uppercase tracking-wider">Fixed/Variable</p>
                                     </div>
-                                    <p className="font-black text-white text-sm">฿{val.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                                    <p className="font-black text-white text-sm">฿{formatCurrency(val, { maximumFractionDigits: 0 })}</p>
                                 </div>
                             ))}
                             <div className="pt-4 mt-4 border-t border-white/10 text-center">
@@ -938,7 +941,7 @@ export default function Analytics({ customers, products }) {
                                 <div className="space-y-1 relative z-10">
                                     <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{stat.label}</p>
                                     <p className={`text-3xl font-black text-white`}>
-                                        {typeof stat.val === 'number' ? stat.val.toLocaleString() : stat.val}
+                                        {typeof stat.val === 'number' ? formatCurrency(stat.val) : stat.val}
                                     </p>
                                     <div className="inline-flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded text-[10px] font-bold text-green-400">
                                         <i className="fas fa-arrow-up text-[8px]"></i> {stat.diff}
@@ -960,7 +963,7 @@ export default function Analytics({ customers, products }) {
                                             <span className="text-xs font-bold text-white">{stage.label}</span>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-sm font-black text-white block">{stage.value.toLocaleString()}</span>
+                                            <span className="text-sm font-black text-white block">{formatCurrency(stage.value)}</span>
                                             <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{stage.sub} of Leads</span>
                                         </div>
                                     </div>
@@ -994,8 +997,8 @@ export default function Analytics({ customers, products }) {
                                     {channelConversion.map((ch, i) => (
                                         <tr key={i} className="hover:bg-white/5 transition-colors">
                                             <td className={`p-4 ${ch.color}`}>{ch.channel}</td>
-                                            <td className="p-4 text-right">{ch.leads.toLocaleString()}</td>
-                                            <td className="p-4 text-right">{ch.paid.toLocaleString()}</td>
+                                            <td className="p-4 text-right">{formatCurrency(ch.leads)}</td>
+                                            <td className="p-4 text-right">{formatCurrency(ch.paid)}</td>
                                             <td className="p-4 text-right">{ch.conv}%</td>
                                         </tr>
                                     ))}
@@ -1098,11 +1101,11 @@ export default function Analytics({ customers, products }) {
                     <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="p-6 bg-blue-600/10 border border-blue-500/30 rounded-3xl">
                             <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Total Ad Spend</p>
-                            <p className="text-3xl font-black text-white">฿{totalAdSpend.toLocaleString()}</p>
+                            <p className="text-3xl font-black text-white">฿{formatCurrency(totalAdSpend)}</p>
                         </div>
                         <div className="p-6 bg-emerald-600/10 border border-emerald-500/30 rounded-3xl">
                             <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">Total Sales</p>
-                            <p className="text-3xl font-black text-white">฿{totalAdSales.toLocaleString()}</p>
+                            <p className="text-3xl font-black text-white">฿{formatCurrency(totalAdSales)}</p>
                         </div>
                         <div className="p-6 bg-purple-600/10 border border-purple-500/30 rounded-3xl">
                             <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">Avg ROAS</p>
@@ -1153,10 +1156,10 @@ export default function Analytics({ customers, products }) {
                                     {channelROI.map((ch, i) => (
                                         <tr key={i} className="hover:bg-white/5 transition-colors">
                                             <td className="p-4">{ch.channel}</td>
-                                            <td className="p-4 text-right text-white/60">{ch.spend.toLocaleString()}</td>
-                                            <td className="p-4 text-right">{ch.sales.toLocaleString()}</td>
+                                            <td className="p-4 text-right text-white/60">{formatCurrency(ch.spend)}</td>
+                                            <td className="p-4 text-right">{formatCurrency(ch.sales)}</td>
                                             <td className="p-4 text-right font-black text-[#C9A34E]">{ch.roas}x</td>
-                                            <td className="p-4 text-right text-emerald-400">+{ch.profit.toLocaleString()}</td>
+                                            <td className="p-4 text-right text-emerald-400">+{formatCurrency(ch.profit)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -1182,7 +1185,7 @@ export default function Analytics({ customers, products }) {
                         </div>
                         <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
                             <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-money-bill-wave text-[#C9A34E]"></i> Sales from Events</h4>
-                            <p className="text-4xl font-black text-slate-800">฿{eventStats.sales.toLocaleString()}</p>
+                            <p className="text-4xl font-black text-slate-800">฿{formatCurrency(eventStats.sales)}</p>
                         </div>
                     </div>
 
@@ -1252,7 +1255,7 @@ export default function Analytics({ customers, products }) {
                                             <td className="p-4 text-right">{evt.leads}</td>
                                             <td className="p-4 text-right">{evt.reg}</td>
                                             <td className="p-4 text-right">{evt.closed}</td>
-                                            <td className="p-4 text-right pr-6 font-black text-emerald-600">฿{evt.sales.toLocaleString()}</td>
+                                            <td className="p-4 text-right pr-6 font-black text-emerald-600">฿{formatCurrency(evt.sales)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -1274,7 +1277,7 @@ export default function Analytics({ customers, products }) {
                         </div>
                         <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
                             <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-wallet text-slate-600"></i> Total Budget</h4>
-                            <p className="text-4xl font-black text-slate-800">฿{campaignStats.totalBudget.toLocaleString()}</p>
+                            <p className="text-4xl font-black text-slate-800">฿{formatCurrency(campaignStats.totalBudget)}</p>
                             <span className="text-[10px] text-slate-400 font-bold">Planned Spend</span>
                         </div>
                         <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100 relative overflow-hidden">
@@ -1286,7 +1289,7 @@ export default function Analytics({ customers, products }) {
                         </div>
                         <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
                             <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-sack-dollar text-[#C9A34E]"></i> Revenue Generated</h4>
-                            <p className="text-4xl font-black text-slate-800">฿{campaignStats.totalRevenue.toLocaleString()}</p>
+                            <p className="text-4xl font-black text-slate-800">฿{formatCurrency(campaignStats.totalRevenue)}</p>
                             <span className="text-[10px] text-green-500 font-bold bg-green-50 px-2 py-0.5 rounded">{(campaignStats.totalRevenue / campaignStats.totalSpend).toFixed(2)}x ROAS</span>
                         </div>
                     </div>
@@ -1297,15 +1300,15 @@ export default function Analytics({ customers, products }) {
                             <i className="fas fa-chart-pie text-slate-400"></i> Budget Utilization
                         </h3>
                         <div className="space-y-6">
-                            {campaigns.map((c, i) => (
+                            {processedCampaigns.map((c, i) => (
                                 <div key={i}>
                                     <div className="flex justify-between items-end mb-2">
                                         <div>
                                             <p className="text-sm font-bold text-slate-700">{c.name}</p>
-                                            <p className="text-[10px] font-bold text-slate-400">{c.platform}</p>
+                                            <p className="text-[10px] font-bold text-slate-400">{c.platform || 'Facebook'}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-black text-slate-800">฿{c.spend.toLocaleString()} <span className="text-slate-400 text-xs font-normal">/ ฿{c.budget.toLocaleString()}</span></p>
+                                            <p className="text-sm font-black text-slate-800">฿{formatCurrency(c.spend)} <span className="text-slate-400 text-xs font-normal">/ ฿{formatCurrency(c.budget)}</span></p>
                                             <p className={`text-[10px] font-bold ${parseFloat(c.utilization) > 90 ? 'text-red-500' : 'text-slate-400'}`}>{c.utilization}% Used</p>
                                         </div>
                                     </div>
@@ -1336,27 +1339,27 @@ export default function Analytics({ customers, products }) {
                                     </tr>
                                 </thead>
                                 <tbody className="text-sm font-bold text-slate-700 divide-y divide-slate-100">
-                                    {campaigns.map((c, i) => (
+                                    {processedCampaigns.map((c, i) => (
                                         <tr key={i} className="hover:bg-slate-50 transition-colors">
                                             <td className="p-4 pl-6">
                                                 <p className="font-bold text-slate-800">{c.name}</p>
                                                 <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${c.color}`}></span>
-                                                    {c.platform}
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${c.color || 'bg-slate-500'}`}></span>
+                                                    {c.platform || 'Facebook'}
                                                 </p>
                                             </td>
                                             <td className="p-4">
-                                                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${c.status === 'Active' ? 'bg-green-100 text-green-600' :
-                                                    c.status === 'Paused' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'
+                                                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${c.status === 'Active' || c.status === 'ACTIVE' ? 'bg-green-100 text-green-600' :
+                                                    c.status === 'Paused' || c.status === 'PAUSED' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'
                                                     }`}>
                                                     {c.status}
                                                 </span>
                                             </td>
                                             <td className="p-4 text-xs text-slate-500">
-                                                {c.start} - {c.end}
+                                                {c.start || 'N/A'} - {c.end || 'N/A'}
                                             </td>
-                                            <td className="p-4 text-right">฿{c.spend.toLocaleString()}</td>
-                                            <td className="p-4 text-right">฿{c.revenue.toLocaleString()}</td>
+                                            <td className="p-4 text-right">฿{formatCurrency(c.spend)}</td>
+                                            <td className="p-4 text-right">฿{formatCurrency(c.revenue)}</td>
                                             <td className="p-4 text-right pr-6">
                                                 <span className={`text-[#C9A34E] font-black hover:underline decoration-dashed decoration-slate-300 underline-offset-4 cursor-help`} title="Return on Ad Spend">
                                                     {c.roas}x

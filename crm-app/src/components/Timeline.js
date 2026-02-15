@@ -49,6 +49,7 @@ export default function Timeline({ timeline }) {
                         // Premium Icon Strategy
                         const iconMap = {
                             'ORDER': { icon: 'fa-shopping-cart', color: 'bg-orange-500 shadow-orange-100', text: 'text-orange-600', label: 'Purchase' },
+                            'REDEEM': { icon: 'fa-ticket-alt', color: 'bg-rose-500 shadow-rose-100', text: 'text-rose-600', label: 'Redemption' },
                             'CHAT': { icon: 'fa-comment-alt', color: 'bg-indigo-500 shadow-indigo-100', text: 'text-indigo-600', label: 'Inquiry' },
                             'CALL': { icon: 'fa-phone-alt', color: 'bg-green-500 shadow-green-100', text: 'text-green-600', label: 'Contact' },
                             'TOPUP': { icon: 'fa-wallet', color: 'bg-emerald-500 shadow-emerald-100', text: 'text-emerald-600', label: 'Top-up' },

@@ -198,6 +198,7 @@ export async function GET() {
 
         return NextResponse.json(customers);
     } catch (error) {
+        console.error('GET /api/customers error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
@@ -219,6 +220,7 @@ export async function POST(request) {
 
         return NextResponse.json({ success: true, customer });
     } catch (error) {
+        console.error('POST /api/customers error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

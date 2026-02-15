@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import IntelligencePanel from './IntelligencePanel';
 import InventoryPanel from './InventoryPanel';
 import Timeline from './Timeline';
+import SlipVerificationModal from './SlipVerificationModal';
 
 export default function CustomerCard({ customer, customers, onSelectCustomer, currentUser, onUpdateInventory }) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
 
     if (!customer) return null;
 
@@ -148,7 +150,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                     >
                         {customers.map((c) => (
                             <option key={c.customer_id} value={c.customer_id}>
-                                {c.profile?.member_id ? `[${c.profile.member_id}]` : `[${c.customer_id}]`} {c.profile?.first_name || ''}
+                                {c.profile?.member_id ? `[${c.profile.member_id}]` : `[${c.customer_id}]`} {c.profile?.first_name ? `${c.profile.first_name} ${c.profile.last_name || ''}` : ''}
                             </option>
                         ))}
                     </select>
@@ -163,7 +165,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                 <div className="relative mb-4">
                                     <div className="w-[140px] h-[140px] rounded-full bg-[#162A47] p-0.5 ring-2 ring-[#C9A34E]/20 shadow-xl overflow-hidden">
                                         <img
-                                            src={profile.profile_picture || 'https://via.placeholder.com/150'}
+                                            src={profile.profile_picture || profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.first_name || 'C'}&background=0A1A2F&color=C9A34E`}
                                             alt="Avatar"
                                             className="w-full h-full object-cover rounded-full"
                                             onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=' + (profile.first_name || 'C') + '&background=0A1A2F&color=C9A34E'; }}
@@ -179,37 +181,132 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     {profile.nick_name ? `"${profile.nick_name}"` : 'Premium Member'}
                                 </p>
 
-                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#C9A34E] rounded-full mb-5 shadow-lg border border-white/10 transition-all hover:scale-105 cursor-default group/badge">
-                                    <i className="fas fa-gem text-[#162A47] text-[16px]"></i>
-                                    <div className="flex flex-col items-center leading-none py-0.5">
-                                        <span className="text-[10px] font-black uppercase tracking-tight text-[#162A47]">
-                                            {currentTier.label.split(' ')[0].split('').join(' ')}
-                                        </span>
-                                    </div>
+                                {/* Membership Badge */}
+                                <div className={`flex items-center gap-2 px-4 py-1.5 ${currentTier.color} rounded-full mb-6 shadow-lg shadow-black/20 border border-white/20 transition-all hover:scale-105 cursor-default`}>
+                                    <i className={`fas ${currentTier.icon} ${currentTier.textColor} text-xs`}></i>
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${currentTier.textColor}`}>
+                                        {currentTier.label}
+                                    </span>
                                 </div>
 
-                                <div className="w-full mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                            {nextTier ? `Next: ${nextTier.label.split(' ')[0]}` : 'Tier: Elite (Max)'}
-                                        </span>
+                                {/* Membership Progress */}
+                                {nextTier && (
+                                    <div className="w-full max-w-[240px] mb-6 p-4 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Next Tier: {nextTier.label.split(' ')[0]}</span>
+                                            <div className="flex gap-1.5">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${spendProgress >= 100 ? 'bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]' : 'bg-slate-600'}`}></div>
+                                                {nextTier.hourThreshold > 0 && (
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${hourProgress >= 100 ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.5)]' : 'bg-slate-600'}`}></div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Spending Progress Bar */}
+                                        <div className="space-y-3">
+                                            <div>
+                                                <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-1 px-1">
+                                                    <span>SPEND</span>
+                                                    <span>{totalSpend.toLocaleString()} / {nextTier.threshold.toLocaleString()}</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transition-all duration-1000 ease-out"
+                                                        style={{ width: `${spendProgress}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            {/* Hours Progress Bar (if applicable) */}
+                                            {nextTier.hourThreshold > 0 && (
+                                                <div>
+                                                    <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-1 px-1">
+                                                        <span>HOURS</span>
+                                                        <span>{learningHours} / {nextTier.hourThreshold} HRS</span>
+                                                    </div>
+                                                    <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-blue-400 to-blue-200 rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(96,165,250,0.3)]"
+                                                            style={{ width: `${hourProgress}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <div>
-                                            <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
-                                                <span>Spend</span>
-                                                <span>{totalSpend.toLocaleString()} / {nextTier?.threshold?.toLocaleString() || 'MAX'}</span>
+                                )}
+
+                                {/* Wallet Section - 2-Row Grid with Actions */}
+                                <div className="w-full max-w-[240px] bg-[#162A47] rounded-2xl p-5 mb-6 border border-white/10 relative overflow-hidden">
+                                    <div className="space-y-4 relative z-10">
+                                        {/* Row 1: Wallet */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">W. Wallet</span>
+                                                <div className="text-xl font-black text-white flex items-baseline gap-1">
+                                                    <span className="text-xs text-slate-500 font-bold">฿</span>
+                                                    {wallet.balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </div>
                                             </div>
-                                            <div className="h-1 w-full bg-black/20 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transition-all duration-1000" style={{ width: `${spendProgress}%` }}></div>
+                                            <button
+                                                onClick={() => setIsTopUpModalOpen(true)}
+                                                className="px-4 py-1.5 bg-[#D9381E] hover:bg-[#b92b14] text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-red-900/20 border border-white/10 transition-all active:scale-95"
+                                            >
+                                                Top Up
+                                            </button>
+                                        </div>
+
+                                        {/* Divider */}
+                                        <div className="h-px w-full bg-white/5"></div>
+
+                                        {/* Row 2: VP Points */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">P. VP</span>
+                                                <div className="text-xl font-black text-[#C9A34E] flex items-baseline gap-1">
+                                                    <span className="text-xs text-[#C9A34E]/60 font-bold">VP</span>
+                                                    {wallet.points?.toLocaleString()}
+                                                </div>
                                             </div>
+                                            <button className="px-4 py-1.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg border border-white/10 transition-all active:scale-95">
+                                                Transfer
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div className="flex flex-wrap justify-center gap-2 max-w-full px-2">
+                                    {intel.tags?.map((tag, i) => (
+                                        <span key={i} className="px-3 py-1 bg-[#C9A34E]/10 text-[#C9A34E] text-[10px] font-bold uppercase tracking-wider rounded-lg border border-[#C9A34E]/20 whitespace-nowrap shadow-sm">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Sales Agent & Status Editor */}
+                    <div className="w-full mb-4 p-3 bg-[#162A47] rounded-xl border border-white/10 shadow-inner">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                {nextTier ? `Next: ${nextTier.label.split(' ')[0]}` : 'Tier: Elite (Max)'}
+                            </span>
+                        </div>
+                        <div className="space-y-2">
+                            <div>
+                                <div className="flex justify-between text-[8px] font-bold text-slate-500 mb-0.5 px-0.5 uppercase tracking-tighter">
+                                    <span>Spend</span>
+                                    <span>{totalSpend.toLocaleString()} / {nextTier?.threshold?.toLocaleString() || 'MAX'}</span>
+                                </div>
+                                <div className="h-1 w-full bg-black/20 rounded-full overflow-hidden">
+                                    <div className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transition-all duration-1000" style={{ width: `${spendProgress}%` }}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sales Agent & Status Editor */}
+                    <div className="bg-[#162A47]/80 rounded-[1.5rem] shadow-lg border border-white/10 overflow-hidden relative group backdrop-blur-md">
                         <div className="px-5 pt-4 pb-4 border-t border-white/5 bg-white/5">
                             <p className="text-[9px] font-black text-[#C9A34E] uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <i className="fas fa-user-tie"></i> Sales Assignment
@@ -222,7 +319,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                         value={editAgent}
                                         onChange={(e) => setEditAgent(e.target.value)}
                                         placeholder="Sales Representative Name"
-                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-[#C9A34E]/50 transition-all"
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-[#C9A34E]/50 transition-all font-inter"
                                     />
                                 </div>
                                 <div>
@@ -252,7 +349,7 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                         </div>
 
                         <div className="px-[15px] pt-4 pb-6">
-                            <div className="w-full bg-[#162A47] rounded-xl p-4 shadow-2xl border border-white/10 space-y-2.5 backdrop-blur-md">
+                            <div className="w-full bg-black/20 rounded-xl p-4 space-y-2.5">
                                 {[
                                     { icon: 'fa-envelope', label: 'E-mail', val: contact.email || profile.email || '-', color: 'text-blue-400' },
                                     { icon: 'fa-phone', label: 'Phone', val: contact.phone_primary || profile.phone_primary || '-', color: 'text-green-400' },
@@ -274,19 +371,66 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                     </div>
                 </div>
 
-                <div className="lg:col-span-9 space-y-5">
-                    <IntelligencePanel intel={intel} />
+                <div className="lg:col-span-9 space-y-6">
+                    <IntelligencePanel intel={intel} profile={profile} />
                     <InventoryPanel
                         inventory={inventory}
                         searchTerm={searchTerm}
                         currentUser={currentUser}
-                        onUpdateInventory={handleInventoryUpdate}
-                        activeCustomer={customer}
+                        onUpdateInventory={(newInventory, redeemedItem) => {
+                            let updatedCustomer = { ...customer, inventory: newInventory };
+                            if (redeemedItem) {
+                                const logEntry = {
+                                    id: `RED-${Date.now()}`,
+                                    date: new Date().toISOString(),
+                                    type: 'REDEEM',
+                                    summary: `Redeemed ${redeemedItem.type}: ${redeemedItem.name}`,
+                                    details: {
+                                        item_id: redeemedItem.coupon_id || redeemedItem.course_id || redeemedItem.bundle_id,
+                                        name: redeemedItem.name,
+                                        timestamp: new Date().toLocaleTimeString()
+                                    }
+                                };
+                                updatedCustomer.timeline = [logEntry, ...(customer.timeline || [])];
+                            }
+                            onUpdateInventory(updatedCustomer);
+                        }}
                     />
-
                     <Timeline timeline={timeline} />
                 </div>
             </div>
-        </div>
+
+            <SlipVerificationModal
+                isOpen={isTopUpModalOpen}
+                onClose={() => setIsTopUpModalOpen(false)}
+                onVerifySuccess={(data) => {
+                    const topUpAmount = data.amount;
+                    let updatedCustomer = { ...customer };
+
+                    // Update Wallet
+                    updatedCustomer.wallet = {
+                        ...wallet,
+                        balance: (wallet.balance || 0) + topUpAmount
+                    };
+
+                    // Add Timeline Entry
+                    const logEntry = {
+                        id: `TOP-${Date.now()}`,
+                        date: new Date().toISOString(),
+                        type: 'TOPUP',
+                        summary: `Wallet Top-up: ฿${topUpAmount.toLocaleString()}`,
+                        details: {
+                            amount: topUpAmount,
+                            bank: data.bank,
+                            transaction_id: data.transaction_id,
+                            timestamp: new Date().toLocaleTimeString()
+                        }
+                    };
+                    updatedCustomer.timeline = [logEntry, ...(customer.timeline || [])];
+
+                    onUpdateInventory(updatedCustomer);
+                }}
+            />
+        </div >
     );
 }

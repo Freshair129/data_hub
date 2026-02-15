@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     // Enable static export for simple deployment
-    output: 'export',
+    // output: 'export',
 
     // Allow images from external sources
     images: {
@@ -9,7 +9,7 @@ const nextConfig = {
     },
 
     // Trailing slash for static hosting compatibility
-    trailingSlash: true,
+    // trailingSlash: true,
 };
 
 module.exports = nextConfig;
