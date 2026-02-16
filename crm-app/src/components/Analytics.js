@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import BusinessIntelligence from './BusinessIntelligence';
 
+const formatCurrency = (val) => {
+    return (Number(val) || 0).toLocaleString('th-TH');
+};
+
 export default function Analytics({ customers, products }) {
     const [rankingPeriod, setRankingPeriod] = useState('month');
     const [activeTab, setActiveTab] = useState('strategic');
@@ -11,7 +15,22 @@ export default function Analytics({ customers, products }) {
     const today = new Date();
     const now = new Date(); // Reuse for best sellers
 
-    const marketingData = { campaigns, insights }; // Compatibility shim for existing logic
+    useEffect(() => {
+        const fetchMarketingData = async () => {
+            try {
+                const res = await fetch('/api/marketing/insights');
+                const result = await res.json();
+                if (result.success) {
+                    setMarketingData(result.insights);
+                }
+            } catch (err) {
+                console.error('Failed to fetch marketing metrics:', err);
+            }
+        };
+        fetchMarketingData();
+    }, []);
+
+    const { campaigns = [], insights = {} } = marketingData || {};
 
     // --- Market & Sales Logic (Existing) ---
     // ABC Analysis Calculation
@@ -285,7 +304,6 @@ export default function Analytics({ customers, products }) {
     // --- Retention & Follow-up Logic (Real) ---
     // Real Course Expiry (Scan Inventory)
     const expiringCourses = [];
-    const today = new Date();
     customers.forEach(c => {
         (c.inventory?.learning_courses || []).forEach(course => {
             const enrollDate = new Date(course.enrolled_at || '2025-01-01');
