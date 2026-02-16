@@ -11,16 +11,25 @@ export default function LoginPage({ onLogin, employees, error }) {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const result = await res.json();
 
-        const user = employees.find(emp =>
-            emp.contact_info?.email === email &&
-            emp.credentials?.password === password
-        );
-
-        onLogin(user);
-        setIsLoading(false);
+            if (result.success) {
+                onLogin(result.user);
+            } else {
+                onLogin(null); // Triggers error handling in parent
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            onLogin(null);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

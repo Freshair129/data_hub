@@ -46,24 +46,11 @@ export default function Home() {
 
     async function loadEmployees() {
         try {
-            const employeeIds = [
-                { folder: 'em01', file: 'profile_e01' },
-                { folder: 'e002', file: 'profile_e002' },
-                { folder: 'e003', file: 'profile_e003' }
-            ];
-            const loaded = [];
-            for (const emp of employeeIds) {
-                try {
-                    const res = await fetch(`/data/employee/${emp.folder}/${emp.file}.json`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        loaded.push({ id: emp.folder, ...data });
-                    }
-                } catch (e) {
-                    console.log(`Could not load employee ${emp.folder}`);
-                }
+            const res = await fetch('/api/employees');
+            if (res.ok) {
+                const loaded = await res.json();
+                setEmployees(loaded);
             }
-            setEmployees(loaded);
         } catch (e) {
             console.error('Failed to load employees', e);
         }
