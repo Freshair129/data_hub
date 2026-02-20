@@ -52,3 +52,6 @@ ERR-*
 
 # IDE Agent context
 .agent/
+
+# Mapping files
+crm-app/docs/customer_id_mapping.json
