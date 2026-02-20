@@ -3,34 +3,118 @@
 import { useState, useEffect } from 'react';
 import BusinessIntelligence from './BusinessIntelligence';
 
-const formatCurrency = (val) => {
-    return (Number(val) || 0).toLocaleString('th-TH');
-};
-
 export default function Analytics({ customers, products }) {
     const [rankingPeriod, setRankingPeriod] = useState('month');
     const [activeTab, setActiveTab] = useState('strategic');
     const [marketingData, setMarketingData] = useState(null);
+    const [adMapping, setAdMapping] = useState({ campaign_mappings: [], ad_mappings: [] });
+    const [isLoadingMapping, setIsLoadingMapping] = useState(false);
+    const [campaigns, setCampaigns] = useState([]);
+    const [insights, setInsights] = useState({});
+    const [loadingMarketing, setLoadingMarketing] = useState(true);
+
+    useEffect(() => {
+        const fetchMarketing = async () => {
+            try {
+                // Fetch with preset to match rankingPeriod
+                const preset = rankingPeriod === 'day' ? 'today' : rankingPeriod === 'week' ? 'last_7d' : 'last_30d';
+                const [cRes, iRes] = await Promise.all([
+                    fetch(`/api/marketing/campaigns?range=${rankingPeriod === 'month' ? 'last_30d' : rankingPeriod === 'week' ? 'last_7d' : 'today'}`),
+                    fetch('/api/marketing/insights')
+                ]);
+                const cData = await cRes.json();
+                const iData = await iRes.json();
+
+                if (cData.success) {
+                    setCampaigns(cData.data || []);
+                    setMarketingData({
+                        campaigns: cData.data || [],
+                        insights: iData.insights || {}
+                    });
+                }
+                if (iData.success) setInsights(iData.insights || {});
+            } catch (err) {
+                console.error('Analytics marketing fetch error:', err);
+            } finally {
+                setLoadingMarketing(false);
+            }
+        };
+        fetchMarketing();
+    }, [rankingPeriod]);
+
+    useEffect(() => {
+        const fetchMapping = async () => {
+            setIsLoadingMapping(true);
+            try {
+                const res = await fetch('/api/marketing/mapping');
+                const data = await res.json();
+                setAdMapping(data);
+            } catch (err) {
+                console.error('Failed to fetch mapping:', err);
+            } finally {
+                setIsLoadingMapping(false);
+            }
+        };
+        fetchMapping();
+    }, []);
+
+    const handleSaveMapping = async (type, data) => {
+        try {
+            const res = await fetch('/api/marketing/mapping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, data })
+            });
+            const result = await res.json();
+            if (result.success) {
+                setAdMapping(result.mapping);
+            }
+        } catch (err) { console.error('Failed to save mapping:', err); }
+    };
+
+    const handleDeleteMapping = async (type, name) => {
+        try {
+            const res = await fetch(`/api/marketing/mapping?type=${type}&name=${encodeURIComponent(name)}`, {
+                method: 'DELETE'
+            });
+            const result = await res.json();
+            if (result.success) {
+                setAdMapping(result.mapping);
+            }
+        } catch (err) { console.error('Failed to delete mapping:', err); }
+    };
+
+    const handleAiAutoMap = async () => {
+        // This will call the AI to suggest mappings
+        // For now, let's mock the logic or implement a basic version that looks for substrings
+        const suggestions = [];
+        const allProducts = products || [];
+
+        // Example: Scan unmapped campaigns
+        marketingData?.campaigns?.forEach(camp => {
+            const isMapped = adMapping.campaign_mappings?.some(m => m.campaign_name === camp.name);
+            if (!isMapped) {
+                // Fuzzy match
+                const match = allProducts.find(p =>
+                    camp.name.toLowerCase().includes(p.name.toLowerCase().split(' ')[0]) ||
+                    p.name.toLowerCase().includes(camp.name.toLowerCase())
+                );
+                if (match) {
+                    suggestions.push({ type: 'campaign', data: { campaign_name: camp.name, product_id: match.id, product_name: match.name } });
+                }
+            }
+        });
+
+        // Apply suggestions to state (could also use a prompt to confirm)
+        for (const sug of suggestions) {
+            await handleSaveMapping(sug.type, sug.data);
+        }
+    };
 
     const today = new Date();
     const now = new Date(); // Reuse for best sellers
 
-    useEffect(() => {
-        const fetchMarketingData = async () => {
-            try {
-                const res = await fetch('/api/marketing/insights');
-                const result = await res.json();
-                if (result.success) {
-                    setMarketingData(result.insights);
-                }
-            } catch (err) {
-                console.error('Failed to fetch marketing metrics:', err);
-            }
-        };
-        fetchMarketingData();
-    }, []);
 
-    const { campaigns = [], insights = {} } = marketingData || {};
 
     // --- Market & Sales Logic (Existing) ---
     // ABC Analysis Calculation
@@ -83,18 +167,76 @@ export default function Analytics({ customers, products }) {
             });
         });
 
-        // 2. Inferred from Facebook Ads (Campaign Name Matching)
-        // 2. Inferred from Facebook Ads (Direct Campaign Name)
+        // 2. Scan Real CRM Data: orders array & inventory (New)
+        customers.forEach(cust => {
+            // Check orders array
+            (cust.orders || []).forEach(order => {
+                if (order.status === 'PAID' || order.status === 'Completed') {
+                    const orderDate = new Date(order.date || now);
+                    if (now - orderDate <= periodMs) {
+                        (order.items || []).forEach(item => {
+                            const name = item.name || item.product_id;
+                            counts[name] = (counts[name] || 0) + 1;
+                        });
+                    }
+                }
+            });
+
+            // Check inventory (learning courses)
+            (cust.inventory?.learning_courses || []).forEach(course => {
+                if (course.status === 'PAID' || course.status === 'Active') {
+                    const enrollDate = new Date(course.enroll_date || now);
+                    if (now - enrollDate <= periodMs) {
+                        const name = course.name || course.id;
+                        counts[name] = (counts[name] || 0) + 1;
+                    }
+                }
+            });
+        });
+
+        // 3. Smart Attribution: "Won" customers + Ad Detection (Existing Enhanced)
+        customers.forEach(cust => {
+            const isWon = cust.status === 'Won / Enrolled' ||
+                cust.lifecycle_stage === 'Customer' ||
+                (cust.intelligence?.tags || []).some(t => t.toLowerCase().includes('paid'));
+
+            let adName = cust.intelligence?.attribution?.smart_detected_ad?.name;
+
+            // Check Mapping Matrix override
+            const mapping = adMapping.ad_mappings?.find(m => m.ad_name === adName);
+            const useName = mapping?.product_name || adName;
+
+            const joinDate = new Date(cust.profile?.join_date || cust.timeline?.[0]?.date || now);
+
+            if (isWon && useName && (now - joinDate <= periodMs)) {
+                // Avoid double counting if already in orders
+                const hasOrder = (cust.orders || []).some(o => (o.status === 'PAID' || o.status === 'Completed'));
+                if (!hasOrder) {
+                    counts[useName] = (counts[useName] || 0) + 1;
+                }
+            }
+        });
+
+        // 4. Inferred from Facebook Ads API (Corrected Action Types + Mapping Matrix)
         if (marketingData?.campaigns) {
             marketingData.campaigns.forEach(campaign => {
-                if (campaign.status === 'Active' || period !== 'day') {
-                    // Use Direct Campaign Name
-                    const name = campaign.name;
-                    const salesCount = parseInt(campaign.purchases || campaign.conversions || 0);
+                const campaignName = campaign.name;
 
-                    if (salesCount > 0) {
-                        counts[name] = (counts[name] || 0) + salesCount;
+                // Prioritize Mapping Matrix
+                const campaignMap = adMapping.campaign_mappings?.find(m => m.campaign_name === campaignName);
+                const targetProductName = campaignMap?.product_name || campaignName;
+
+                // Search for purchase-like actions
+                let salesCount = 0;
+                (campaign.actions || []).forEach(action => {
+                    const type = action.action_type || '';
+                    if (type.includes('purchase') || type.includes('conversion.purchase') || type === 'onsite_conversion.messaging_user_depth_5_message_send') {
+                        salesCount += parseInt(action.value || 0);
                     }
+                });
+
+                if (salesCount > 0) {
+                    counts[targetProductName] = (counts[targetProductName] || 0) + salesCount;
                 }
             });
         }
@@ -117,7 +259,7 @@ export default function Analytics({ customers, products }) {
         let totalItems = 0;
 
         // 1. Real CRM Data
-        customers.forEach(cust => {
+        (customers || []).forEach(cust => {
             (cust.timeline || []).forEach(evt => {
                 if (evt.type === 'ORDER' || evt.type === 'PURCHASE') {
                     const items = evt.details?.items || [];
@@ -130,16 +272,64 @@ export default function Analytics({ customers, products }) {
             });
         });
 
-        // 2. Inferred from Facebook Ads
-        // 2. Inferred from Facebook Ads
+        // 2. Comprehensive CRM Sales (Orders & Inventory)
+        (customers || []).forEach(cust => {
+            // Check orders
+            (cust.orders || []).forEach(order => {
+                if (order.status === 'PAID' || order.status === 'Completed') {
+                    (order.items || []).forEach(item => {
+                        const baseName = (item.name || item.product_id).split(' (')[0];
+                        mixCounts[baseName] = (mixCounts[baseName] || 0) + 1;
+                        totalItems++;
+                    });
+                }
+            });
+
+            // Check inventory
+            (cust.inventory?.learning_courses || []).forEach(course => {
+                const baseName = (course.name || course.id).split(' (')[0];
+                mixCounts[baseName] = (mixCounts[baseName] || 0) + 1;
+                totalItems++;
+            });
+
+            // Smart Attribution (Only if no explicit order)
+            const isWon = cust.status === 'Won / Enrolled' ||
+                cust.lifecycle_stage === 'Customer' ||
+                (cust.intelligence?.tags || []).some(t => t.toLowerCase().includes('paid'));
+
+            let adName = cust.intelligence?.attribution?.smart_detected_ad?.name;
+
+            // Check Mapping Matrix override
+            const mapping = adMapping.ad_mappings?.find(m => m.ad_name === adName);
+            const useName = (mapping?.product_name || adName)?.split(' (')[0];
+
+            const hasOrder = (cust.orders || []).length > 0;
+
+            if (isWon && useName && !hasOrder) {
+                mixCounts[useName] = (mixCounts[useName] || 0) + 1;
+                totalItems++;
+            }
+        });
+
+        // 3. Facebook Ads Action-based Sales
         if (marketingData?.campaigns) {
             marketingData.campaigns.forEach(campaign => {
-                // Use Direct Campaign Name
-                const name = campaign.name;
-                const salesCount = parseInt(campaign.purchases || campaign.conversions || 0);
+                const campaignName = campaign.name;
+
+                // Prioritize Mapping Matrix
+                const campaignMap = adMapping.campaign_mappings?.find(m => m.campaign_name === campaignName);
+                const targetProductName = (campaignMap?.product_name || campaignName).split(' (')[0];
+
+                let salesCount = 0;
+                (campaign.actions || []).forEach(action => {
+                    const type = action.action_type || '';
+                    if (type.includes('purchase') || type.includes('conversion.purchase')) {
+                        salesCount += parseInt(action.value || 0);
+                    }
+                });
 
                 if (salesCount > 0) {
-                    mixCounts[name] = (mixCounts[name] || 0) + salesCount;
+                    mixCounts[targetProductName] = (mixCounts[targetProductName] || 0) + salesCount;
                     totalItems += salesCount;
                 }
             });
@@ -304,6 +494,7 @@ export default function Analytics({ customers, products }) {
     // --- Retention & Follow-up Logic (Real) ---
     // Real Course Expiry (Scan Inventory)
     const expiringCourses = [];
+
     customers.forEach(c => {
         (c.inventory?.learning_courses || []).forEach(course => {
             const enrollDate = new Date(course.enrolled_at || '2025-01-01');
@@ -434,16 +625,25 @@ export default function Analytics({ customers, products }) {
     const pastEvents = marketingData?.events?.past || [];
 
     // --- Campaign Tracker Logic (Dynamic) ---
-    const processedCampaigns = (campaigns || []).map(c => ({
-        ...c,
-        spend: c.insights?.spend || 0,
-        revenue: c.insights?.revenue || 0,
-        utilization: c.budget ? ((c.spend / c.budget) * 100).toFixed(1) : '0',
-        roas: c.spend > 0 ? (c.revenue / c.spend).toFixed(2) : '0.00'
-    })).sort((a, b) => {
+    const processedCampaigns = (campaigns || []).map(c => {
+        const spend = c.spend || 0;
+        const revenue = c.action_values?.filter(a => ['purchase', 'onsite_conversion.purchase', 'offsite_conversion.fb_pixel_purchase'].includes(a.action_type))
+            .reduce((sum, a) => sum + parseFloat(a.value || 0), 0) || 0;
+        const budget = c.daily_budget || c.lifetime_budget || 0;
+
+        return {
+            ...c,
+            spend,
+            revenue,
+            budget,
+            utilization: budget > 0 ? ((spend / budget) * 100).toFixed(1) : '0',
+            roas: spend > 0 ? (revenue / spend).toFixed(2) : '1.00',
+            color: (c.status === 'Active' || c.status === 'ACTIVE') ? 'bg-indigo-500' : 'bg-slate-400'
+        };
+    }).sort((a, b) => {
         // Prioritize Active campaigns
-        if (a.status === 'Active' && b.status !== 'Active') return -1;
-        if (a.status !== 'Active' && b.status === 'Active') return 1;
+        if ((a.status === 'Active' || a.status === 'ACTIVE') && !(b.status === 'Active' || b.status === 'ACTIVE')) return -1;
+        if (!(a.status === 'Active' || a.status === 'ACTIVE') && (b.status === 'Active' || b.status === 'ACTIVE')) return 1;
         // Secondary sort: Spend (Desc)
         return b.spend - a.spend;
     });
@@ -472,9 +672,9 @@ export default function Analytics({ customers, products }) {
 
     const campaignStats = {
         active: (campaigns || []).filter(c => c.status === 'Active' || c.status === 'ACTIVE').length,
-        totalBudget: (campaigns || []).reduce((sum, c) => sum + (c.budget || 0), 0),
-        totalSpend: Number(insights.spend || 0),
-        totalRevenue: (campaigns || []).reduce((sum, c) => sum + (c.revenue || 0), 0)
+        totalBudget: (campaigns || []).reduce((sum, c) => sum + (c.daily_budget || c.lifetime_budget || 0), 0),
+        totalSpend: parseFloat(insights.spend || 0),
+        totalRevenue: (processedCampaigns || []).reduce((sum, c) => sum + (c.revenue || 0), 0)
     };
 
     return (
@@ -501,7 +701,9 @@ export default function Analytics({ customers, products }) {
                         { id: 'roi', label: 'Channel ROI', icon: 'fa-sack-dollar' },
                         { id: 'vinsight', label: 'V-Insight AI', icon: 'fa-brain' },
                         { id: 'event', label: 'Event Calendar', icon: 'fa-calendar-check' },
-                        { id: 'campaign', label: 'Campaign Tracker', icon: 'fa-bullhorn' }
+                        { id: 'campaign', label: 'Campaign Tracker', icon: 'fa-bullhorn' },
+                        { id: 'team', label: 'Sales Team', icon: 'fa-user-tie' },
+                        { id: 'mapping', label: 'Mapping Matrix', icon: 'fa-sitemap' }
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -1286,6 +1488,7 @@ export default function Analytics({ customers, products }) {
             {/* TAB 8: Campaign Tracker (New) */}
             {activeTab === 'campaign' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
+                    {/* ... (Campaign Tracker content stays the same) ... */}
                     {/* KPI Cards */}
                     <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
@@ -1309,35 +1512,6 @@ export default function Analytics({ customers, products }) {
                             <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-sack-dollar text-[#C9A34E]"></i> Revenue Generated</h4>
                             <p className="text-4xl font-black text-slate-800">฿{formatCurrency(campaignStats.totalRevenue)}</p>
                             <span className="text-[10px] text-green-500 font-bold bg-green-50 px-2 py-0.5 rounded">{(campaignStats.totalRevenue / campaignStats.totalSpend).toFixed(2)}x ROAS</span>
-                        </div>
-                    </div>
-
-                    {/* Budget Utilization Chart */}
-                    <div className="lg:col-span-12 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
-                        <h3 className="font-black text-slate-800 text-xl tracking-tight mb-6 flex items-center gap-2">
-                            <i className="fas fa-chart-pie text-slate-400"></i> Budget Utilization
-                        </h3>
-                        <div className="space-y-6">
-                            {processedCampaigns.map((c, i) => (
-                                <div key={i}>
-                                    <div className="flex justify-between items-end mb-2">
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-700">{c.name}</p>
-                                            <p className="text-[10px] font-bold text-slate-400">{c.platform || 'Facebook'}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-black text-slate-800">฿{formatCurrency(c.spend)} <span className="text-slate-400 text-xs font-normal">/ ฿{formatCurrency(c.budget)}</span></p>
-                                            <p className={`text-[10px] font-bold ${parseFloat(c.utilization) > 90 ? 'text-red-500' : 'text-slate-400'}`}>{c.utilization}% Used</p>
-                                        </div>
-                                    </div>
-                                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            style={{ width: `${c.utilization}%` }}
-                                            className={`h-full ${c.color} rounded-full transition-all duration-1000 ease-out`}
-                                        ></div>
-                                    </div>
-                                </div>
-                            ))}
                         </div>
                     </div>
 
@@ -1391,6 +1565,251 @@ export default function Analytics({ customers, products }) {
                     </div>
                 </div>
             )}
+
+            {/* TAB 9: Sales Team Performance (New) */}
+            {activeTab === 'team' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
+                    <div className="lg:col-span-12 bg-[#0A1A2F]/50 border border-white/10 rounded-[2.5rem] p-8">
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h3 className="font-black text-white text-xl tracking-tight mb-2">Sales Team Performance</h3>
+                                <p className="text-xs text-white/40">Revenue contribution by assigned agent.</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            {/* Calculate Agent Stats */}
+                            {(() => {
+                                const agentStats = {};
+                                customers.forEach(c => {
+                                    const agent = c.profile?.agent || 'Unassigned';
+                                    if (!agentStats[agent]) agentStats[agent] = { name: agent, revenue: 0, leads: 0, customers: 0 };
+
+                                    agentStats[agent].leads++;
+                                    const spend = c.intelligence?.metrics?.total_spend || 0;
+                                    agentStats[agent].revenue += spend;
+                                    if (spend > 0) agentStats[agent].customers++;
+                                });
+
+                                const topAgents = Object.values(agentStats).sort((a, b) => b.revenue - a.revenue);
+
+                                return topAgents.map((agent, i) => (
+                                    <div key={i} className="bg-white/5 border border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:bg-white/10 transition-all">
+                                        <div className="absolute top-0 right-0 p-4 opacity-5 text-white">
+                                            <i className="fas fa-trophy text-6xl"></i>
+                                        </div>
+
+                                        <div className="relative z-10">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg shadow-lg ${i === 0 ? 'bg-gradient-to-br from-[#C9A34E] to-amber-600 text-[#0A1A2F]' :
+                                                    i === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800' :
+                                                        'bg-white/10 text-white'
+                                                    }`}>
+                                                    {agent.name.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-black text-white text-lg">{agent.name}</p>
+                                                    <p className="text-[10px] text-white/40 uppercase tracking-widest">{i === 0 ? 'Top Performer' : 'Sales Agent'}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-xs text-white/60">Revenue</span>
+                                                    <span className="text-lg font-black text-[#C9A34E]">฿{formatCurrency(agent.revenue)}</span>
+                                                </div>
+                                                <div className="h-px w-full bg-white/5"></div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-xs text-white/60">Conversion Rate</span>
+                                                    <span className="text-xs font-bold text-white">
+                                                        {agent.leads > 0 ? ((agent.customers / agent.leads) * 100).toFixed(1) : 0}%
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-xs text-white/60">Leads Managed</span>
+                                                    <span className="text-xs font-bold text-white">{agent.leads}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ));
+                            })()}
+                        </div>
+                    </div>
+
+                    {/* Ad-Product Attribution Table */}
+                    <div className="lg:col-span-12 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+                        <h3 className="font-black text-slate-800 text-xl tracking-tight mb-6 flex items-center gap-2">
+                            <i className="fas fa-tags text-indigo-500"></i> Product x Ad Attribution
+                        </h3>
+                        <p className="text-sm text-slate-500 mb-6">See which ads are selling which products.</p>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-50">
+                                    <tr className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                                        <th className="p-4 pl-6 rounded-l-xl">Product Name</th>
+                                        <th className="p-4">Top Source (Ad/Campaign)</th>
+                                        <th className="p-4 text-right">Units Sold</th>
+                                        <th className="p-4 text-right rounded-r-xl pr-6">Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="text-sm font-bold text-slate-700 divide-y divide-slate-100">
+                                    {(() => {
+                                        // Attribution Logic
+                                        const productAttribution = {};
+
+                                        customers.forEach(c => {
+                                            const source = c.intelligence?.attribution?.source || 'Organic/Direct';
+                                            (c.timeline || []).forEach(evt => {
+                                                if (evt.type === 'ORDER' || evt.type === 'PURCHASE') {
+                                                    const items = evt.details?.items || [];
+                                                    const amount = evt.details?.total || 0; // Approximate per order
+
+                                                    items.forEach(item => {
+                                                        const cleanName = item.split(' (')[0];
+                                                        if (!productAttribution[cleanName]) {
+                                                            productAttribution[cleanName] = {
+                                                                name: cleanName,
+                                                                totalUnits: 0,
+                                                                totalRevenue: 0,
+                                                                sources: {}
+                                                            };
+                                                        }
+                                                        productAttribution[cleanName].totalUnits += 1;
+                                                        // Distribute revenue evenly among items if multiple (rough estimate)
+                                                        productAttribution[cleanName].totalRevenue += (amount / items.length);
+
+                                                        if (!productAttribution[cleanName].sources[source]) {
+                                                            productAttribution[cleanName].sources[source] = 0;
+                                                        }
+                                                        productAttribution[cleanName].sources[source]++;
+                                                    });
+                                                }
+                                            });
+                                        });
+
+                                        return Object.values(productAttribution)
+                                            .sort((a, b) => b.totalRevenue - a.totalRevenue)
+                                            .map((prod, i) => {
+                                                // Find top source
+                                                const topSource = Object.entries(prod.sources).sort((a, b) => b[1] - a[1])[0];
+
+                                                return (
+                                                    <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                                        <td className="p-4 pl-6 font-bold text-slate-800">{prod.name}</td>
+                                                        <td className="p-4">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-indigo-600 font-bold">{topSource ? topSource[0] : 'N/A'}</span>
+                                                                <span className="text-[10px] text-slate-400">
+                                                                    {topSource ? `${Math.round((topSource[1] / prod.totalUnits) * 100)}% of sales` : ''}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4 text-right">{prod.totalUnits}</td>
+                                                        <td className="p-4 text-right pr-6 font-black text-emerald-600">฿{formatCurrency(prod.totalRevenue)}</td>
+                                                    </tr>
+                                                );
+                                            });
+                                    })()}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* TAB 9: Mapping Matrix (New) */}
+            {activeTab === 'mapping' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
+                    <div className="lg:col-span-12 bg-[#0A1A2F]/50 border border-white/10 rounded-[2.5rem] p-8">
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h3 className="font-black text-white text-xl tracking-tight leading-none mb-2">Ad-to-Course Mapping Matrix</h3>
+                                <p className="text-[10px] font-black text-[#C9A34E] uppercase tracking-widest">DEFINITIVE PRODUCT ATTRIBUTION</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleAiAutoMap}
+                                    className="bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-colors"
+                                >
+                                    <i className="fas fa-magic mr-2"></i> AI Auto-Map
+                                </button>
+                                <button className="bg-[#C9A34E] hover:bg-amber-400 text-[#0A1A2F] text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-colors">
+                                    Add New Mapping
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-8">
+                            {/* Campaign Mappings Row */}
+                            <div>
+                                <h4 className="text-sm font-black text-white/60 uppercase tracking-widest mb-4 border-l-4 border-[#C9A34E] pl-3">Campaign Mappings</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {(adMapping.campaign_mappings || []).map((m, i) => (
+                                        <div key={i} className="bg-white/5 border border-white/10 p-5 rounded-2xl relative group overflow-hidden">
+                                            <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button className="text-white/40 hover:text-white mr-2"><i className="fas fa-edit"></i></button>
+                                                <button className="text-white/40 hover:text-rose-400"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Campaign</p>
+                                            <p className="text-sm font-bold text-white mb-4 truncate">{m.campaign_name}</p>
+                                            <div className="p-3 bg-black/40 rounded-xl border border-[#C9A34E]/30">
+                                                <p className="text-[9px] font-black text-[#C9A34E] uppercase tracking-widest mb-1">Maps To Product</p>
+                                                <p className="text-xs font-bold text-white truncate">{m.product_name}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Ad Mappings Row */}
+                            <div>
+                                <h4 className="text-sm font-black text-white/60 uppercase tracking-widest mb-4 border-l-4 border-blue-500 pl-3">Specific Ad Mappings</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {(adMapping.ad_mappings || []).map((m, i) => (
+                                        <div key={i} className="bg-white/5 border border-white/10 p-5 rounded-2xl relative group">
+                                            <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button className="text-white/40 hover:text-white mr-2"><i className="fas fa-edit"></i></button>
+                                                <button className="text-white/40 hover:text-rose-400"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Ad Creative</p>
+                                            <p className="text-sm font-bold text-white mb-4 truncate">{m.ad_name}</p>
+                                            <div className="p-3 bg-black/40 rounded-xl border border-blue-500/30">
+                                                <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Maps To Product</p>
+                                                <p className="text-xs font-bold text-white truncate">{m.product_name}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recommendation Card */}
+                        <div className="mt-12 p-6 bg-gradient-to-r from-[#C9A34E]/10 to-transparent border border-[#C9A34E]/20 rounded-3xl">
+                            <div className="flex items-start gap-4">
+                                <div className="p-3 bg-[#C9A34E]/20 rounded-2xl text-[#C9A34E]">
+                                    <i className="fas fa-lightbulb text-xl"></i>
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-black text-white text-lg tracking-tight mb-1">Why use Mapping Matrix?</h4>
+                                    <p className="text-sm text-white/60 leading-relaxed max-w-2xl">
+                                        Facebook campaign names often don&apos;t match your catalog exactly. By mapping them here, we ensure your
+                                        <strong> Best Seller rankings</strong>, <strong>Inventory planning</strong>, and <strong>Campaign ROI</strong>
+                                        are based on actual products, not just campaign aliases.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
+const formatCurrency = (value, options = {}) => {
+    return new Intl.NumberFormat('th-TH', {
+        ...options
+    }).format(value);
+};

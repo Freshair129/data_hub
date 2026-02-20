@@ -10,6 +10,7 @@ import Dashboard from '@/components/Dashboard';
 import Orders from '@/components/Orders';
 import Analytics from '@/components/Analytics';
 import FacebookAds from '@/components/FacebookAds';
+import FacebookChat from '@/components/FacebookChat';
 import Settings from '@/components/Settings';
 import RegistrationModal from '@/components/RegistrationModal';
 import LoginPage from '@/components/LoginPage';
@@ -26,6 +27,7 @@ export default function Home() {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
     const [customerViewMode, setCustomerViewMode] = useState('list'); // 'list' or 'detail'
+    const [initialChatCustomerId, setInitialChatCustomerId] = useState(null);
 
     // Auth State
     const [currentUser, setCurrentUser] = useState(null);
@@ -119,7 +121,7 @@ export default function Home() {
 
     async function loadProducts() {
         try {
-            const res = await fetch('/data/catalog.json');
+            const res = await fetch('/api/catalog');
             const catalog = await res.json();
             const allProducts = [
                 ...catalog.packages.map(p => ({ ...p, type: 'bundle' })),
@@ -406,7 +408,16 @@ export default function Home() {
     );
 
 
-    const nextCustomerId = `c${String(customers.length + 1).padStart(3, '0')}`;
+    // Standard IDs (TVS-CUS Stable V7)
+    const currentYearShort = new Date().getFullYear().toString().slice(-2);
+    const maxSerial = customers.reduce((max, c) => {
+        if (c.customer_id && c.customer_id.startsWith(`TVS-CUS-WB-${currentYearShort}-`)) {
+            const num = parseInt(c.customer_id.split('-').pop());
+            return num > max ? num : max;
+        }
+        return max;
+    }, 0);
+    const nextCustomerId = `TVS-CUS-WB-${currentYearShort}-${String(maxSerial + 1).padStart(4, '0')}`;
 
     // Calculate Next Member ID (MEM-YYYY-XXXX)
     const currentYear = new Date().getFullYear();
@@ -495,6 +506,11 @@ export default function Home() {
                                     setActiveCustomer(c);
                                     setCustomerViewMode('detail');
                                 }}
+                                onGoToChat={(c) => {
+                                    const fbId = c.contact_info?.facebook_id || c.facebook_id || c.customer_id;
+                                    setInitialChatCustomerId(fbId);
+                                    setActiveView('facebook-chat');
+                                }}
                             />
                         ) : activeCustomer && (
                             <CustomerCard
@@ -505,6 +521,11 @@ export default function Home() {
                                 onUpdateInventory={(updatedCustomer) => {
                                     setCustomers(customers.map(c => c.customer_id === updatedCustomer.customer_id ? updatedCustomer : c));
                                     setActiveCustomer(updatedCustomer);
+                                }}
+                                onGoToChat={(c) => {
+                                    const fbId = c.contact_info?.facebook_id || c.facebook_id || c.customer_id;
+                                    setInitialChatCustomerId(fbId);
+                                    setActiveView('facebook-chat');
                                 }}
                             />
                         )}
@@ -548,7 +569,23 @@ export default function Home() {
                 )}
 
                 {activeView === 'facebook-ads' && (
-                    <FacebookAds />
+                    <FacebookAds
+                        customers={customers}
+                    />
+                )}
+
+                {activeView === 'facebook-chat' && (
+                    <FacebookChat
+                        initialCustomerId={initialChatCustomerId}
+                        onViewCustomer={(customer) => {
+                            if (customer) {
+                                const fullCustomer = customers.find(c => c.customer_id === customer.customer_id) || customer;
+                                setActiveCustomer(fullCustomer);
+                                setCustomerViewMode('detail');
+                                setActiveView('customers');
+                            }
+                        }}
+                    />
                 )}
 
                 {activeView === 'settings' && (

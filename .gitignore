@@ -35,3 +35,20 @@ next-env.d.ts
 # data logs
 marketing/
 customer/
+customer_backup_*
+backup_reconciliation_*/
+crm-app/
+*.tmp
+
+# Employee data (stored in DB)
+employee/
+
+# Product JSON data files (stored in DB)
+products/courses/*.json
+
+# Logs & error files
+logs/
+ERR-*
+
+# IDE Agent context
+.agent/

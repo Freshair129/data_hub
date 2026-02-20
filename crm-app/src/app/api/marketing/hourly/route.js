@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route to fetch Hourly Facebook Ads insights for a specific date
  * usage: /api/marketing/hourly?date=YYYY-MM-DD

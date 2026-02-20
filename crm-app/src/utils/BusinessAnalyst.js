@@ -120,6 +120,49 @@ class BusinessAnalyst {
         const result = await chat.sendMessage(question);
         return result.response.text();
     }
+
+    /**
+     * Extracts potential products and prices from chat history
+     */
+    async extractProductsFromChat(messages) {
+        const chatContext = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
+
+        const prompt = `
+        Role: Product Discovery AI for "The V School" culinary school.
+        Task: Analyze the following chat history and extract any products (courses, bundles, or kitchen equipment) that the customer is interested in or has purchased.
+        
+        Chat History:
+        ${chatContext}
+        
+        Requirements:
+        1. Extract the "product_name" (be specific).
+        2. Extract "price" as a number (THB).
+        3. Identify "category" (e.g., Japan, Business, Hobby, Equipment).
+        4. Provide a "justification" quoting the chat.
+        5. Return a list of objects. If none found, return an empty array [].
+        
+        Output Format (JSON Only):
+        [
+            {
+                "product_name": "...",
+                "price": 5000,
+                "category": "...",
+                "justification": "..."
+            }
+        ]
+        `;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(jsonStr);
+        } catch (error) {
+            console.error("Product Extraction Failed:", error);
+            return [];
+        }
+    }
 }
 
 module.exports = BusinessAnalyst;

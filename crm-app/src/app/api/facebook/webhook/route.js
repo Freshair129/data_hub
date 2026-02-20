@@ -32,17 +32,32 @@ export async function POST(req) {
         // 3. Process Webhook Payload
         if (body.object === 'page') {
             body.entry.forEach(async (entry) => {
-                const webhook_event = entry.messaging[0];
-                console.log('Received FB Event:', webhook_event);
+                if (!entry.messaging) return;
 
-                const sender_psid = webhook_event.sender.id;
-                const message_text = webhook_event.message?.text;
+                const webhook_event = entry.messaging[0];
+                const sender_id = webhook_event.sender.id;
+                const recipient_id = webhook_event.recipient.id;
+                const message = webhook_event.message;
+
+                // LOGGING: Save raw event for Boss to inspect metadata
+                try {
+                    const logDir = path.join(process.cwd(), '..', 'marketing', 'logs', 'webhook');
+                    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+                    const logFile = path.join(logDir, `${new Date().toISOString().split('T')[0]}.json`);
+                    fs.appendFileSync(logFile, JSON.stringify(body, null, 2) + '\n---\n');
+                } catch (e) { console.error('Webhook log error:', e); }
+
+                // DETECT ADMIN REPLY: If sender is NOT the customer (recipient is customer or sender matches Page ID)
+                // In Messenger Webhooks, the customer is usually the one with the long PSID.
+                // If the message contains metadata like 'tags' or 'app_id', it might be from a specific admin tool.
+
+                console.log(`[Webhook] Event from ${sender_id} to ${recipient_id}: "${message?.text}"`);
+
+                // If we detect an admin reply, we could trigger a profile update here.
 
                 // LOGIC: Map PSID to CRM Customer
                 // In a real system, you would query your DB to find which customer 
                 // has this Facebook PSID and then add to their Timeline.
-
-                console.log(`Action: Adding chat log for PSID ${sender_psid}: "${message_text}"`);
             });
 
             return NextResponse.json({ status: 'EVENT_RECEIVED' });

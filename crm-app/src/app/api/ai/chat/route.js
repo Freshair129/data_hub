@@ -41,13 +41,14 @@ export async function POST(req) {
             return NextResponse.json({ success: false, error: 'Gemini API Key missing' }, { status: 500 });
         }
 
-        // 1. Gather Context (Similar to Analyze route, but cached ideally - simplified here)
-        const publicDir = path.join(process.cwd(), 'public');
+        // 1. Gather Context
         const customerDir = path.join(process.cwd(), '../customer');
         const customers = fs.existsSync(customerDir) ? readDirectoryFiles(customerDir) : [];
-        const marketingDir = path.join(publicDir, 'data/marketing');
-        const campaigns = readDirectoryFiles(path.join(marketingDir, 'campaigns'));
-        const productsDir = path.join(publicDir, 'data/products');
+
+        const marketingDir = path.join(process.cwd(), '../marketing/logs/daily');
+        const campaigns = readDirectoryFiles(marketingDir);
+
+        const productsDir = path.join(process.cwd(), '../products');
         const courses = readDirectoryFiles(path.join(productsDir, 'courses'));
         const packages = readDirectoryFiles(path.join(productsDir, 'packages'));
         const allProducts = [...courses, ...packages];

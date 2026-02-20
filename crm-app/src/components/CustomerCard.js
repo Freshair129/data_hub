@@ -6,9 +6,12 @@ import InventoryPanel from './InventoryPanel';
 import Timeline from './Timeline';
 import SlipVerificationModal from './SlipVerificationModal';
 
-export default function CustomerCard({ customer, customers, onSelectCustomer, currentUser, onUpdateInventory }) {
+export default function CustomerCard({ customer, customers, onSelectCustomer, currentUser, onUpdateInventory, onGoToChat }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+    const [editAgent, setEditAgent] = useState(customer?.profile?.agent || '');
+    const [editStatus, setEditStatus] = useState(customer?.status || 'New Lead');
+    const [isSaving, setIsSaving] = useState(false);
 
     if (!customer) return null;
 
@@ -45,10 +48,6 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
     // Progress calculation (Dominant by Spending, but checking both)
     const spendProgress = nextTier ? Math.min(100, (totalSpend / nextTier.threshold) * 100) : 100;
     const hourProgress = nextTier && nextTier.hourThreshold > 0 ? Math.min(100, (learningHours / nextTier.hourThreshold) * 100) : 100;
-
-    const [editAgent, setEditAgent] = useState(profile.agent || '');
-    const [editStatus, setEditStatus] = useState(customer.status || 'New Lead');
-    const [isSaving, setIsSaving] = useState(false);
 
     const handleSaveProfile = async () => {
         setIsSaving(true);
@@ -188,6 +187,47 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                         {currentTier.label}
                                     </span>
                                 </div>
+
+                                {/* AI Intelligence Badges - Phase 5 🧠 */}
+                                {intel.score !== undefined && (
+                                    <div className="flex flex-col items-center gap-2 mb-6 animate-bounce-slow">
+                                        <div className="flex items-center gap-3">
+                                            {/* Lead Score Circle */}
+                                            <div className="relative w-12 h-12 flex items-center justify-center">
+                                                <svg className="w-full h-full -rotate-90">
+                                                    <circle cx="24" cy="24" r="20" fill="transparent" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+                                                    <circle
+                                                        cx="24" cy="24" r="20" fill="transparent"
+                                                        stroke={intel.score > 70 ? '#4ade80' : intel.score > 40 ? '#fbbf24' : '#f87171'}
+                                                        strokeWidth="4"
+                                                        strokeDasharray={125.6}
+                                                        strokeDashoffset={125.6 * (1 - intel.score / 100)}
+                                                        strokeLinecap="round"
+                                                        className="transition-all duration-1000 ease-out"
+                                                    />
+                                                </svg>
+                                                <span className="absolute text-[10px] font-black text-white">{intel.score}%</span>
+                                            </div>
+
+                                            {/* Intent Badge */}
+                                            <div className="flex flex-col items-start">
+                                                <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">AI Intent</span>
+                                                <div className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-md border border-blue-500/30 text-[9px] font-black uppercase tracking-tighter shadow-glow-blue flex items-center gap-1">
+                                                    <i className={`fas ${intel.intent === 'Purchase' ? 'fa-shopping-cart' :
+                                                        intel.intent === 'Question' ? 'fa-question-circle' :
+                                                            intel.intent === 'Complaint' ? 'fa-exclamation-triangle' : 'fa-comment'
+                                                        } text-[8px]`}></i>
+                                                    {intel.intent || 'Analyzing...'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {intel.main_interest && (
+                                            <p className="text-[9px] font-bold text-[#C9A34E] italic">
+                                                Interest: {intel.main_interest}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Membership Progress */}
                                 {nextTier && (
@@ -345,6 +385,14 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                                     {isSaving ? <i className="fas fa-spinner animate-spin text-[10px]"></i> : <i className="fas fa-save text-[10px]"></i>}
                                     {isSaving ? 'SAVING...' : 'UPDATE SALES INFO'}
                                 </button>
+
+                                <button
+                                    onClick={() => onGoToChat && onGoToChat(customer)}
+                                    className="w-full bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/30 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-[#1877F2]/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <i className="fab fa-facebook-messenger"></i>
+                                    OPEN FACEBOOK CHAT
+                                </button>
                             </div>
                         </div>
 
@@ -431,6 +479,6 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
                     onUpdateInventory(updatedCustomer);
                 }}
             />
-        </div >
+        </div>
     );
 }

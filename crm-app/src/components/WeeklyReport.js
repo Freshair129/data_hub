@@ -130,13 +130,31 @@ export default function WeeklyReport({ dailyData }) {
                 </div>
 
                 {/* Week Picker */}
-                <div className="relative">
-                    <input
-                        type="week"
-                        value={selectedWeek}
-                        onChange={(e) => setSelectedWeek(e.target.value)}
-                        className="bg-[#0A1A2F] border border-white/20 rounded-xl px-4 py-2 text-white font-bold uppercase tracking-wider focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
+                <div className="relative group">
+                    <div className="flex items-center gap-3 bg-[#0A1A2F] border border-white/20 rounded-xl px-4 py-2 transition-all group-hover:border-indigo-500">
+                        <i className="fas fa-calendar-alt text-indigo-400"></i>
+                        <input
+                            type="date"
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    const date = new Date(e.target.value);
+                                    setSelectedWeek(getWeekVal(date));
+                                }
+                            }}
+                            className="bg-transparent text-white font-bold uppercase tracking-wider focus:outline-none w-32 cursor-pointer"
+                        />
+                        <div className="text-white/40 text-xs font-bold border-l border-white/10 pl-3">
+                            {selectedWeek ? (() => {
+                                const dates = getDateRangeFromWeek(selectedWeek);
+                                const start = new Date(dates[0]);
+                                const end = new Date(dates[6]);
+                                return `${start.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}`;
+                            })() : 'Select a date'}
+                        </div>
+                    </div>
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] text-white/30 font-bold uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        Select any date in the desired week
+                    </div>
                 </div>
             </div>
 

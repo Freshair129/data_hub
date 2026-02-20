@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route to fetch Facebook Ad Sets with per-adset insights
  */

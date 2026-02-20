@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 
-const PURCHASE_TYPES = ['purchase', 'onsite_conversion.purchase', 'offsite_conversion.fb_pixel_purchase', 'omni_purchase', 'onsite_web_purchase', 'onsite_app_purchase', 'onsite_web_app_purchase'];
-const MESSAGE_TYPES = ['onsite_conversion.messaging_conversation_started_7d', 'onsite_conversion.messaging_first_reply', 'messenger.conversation_started', 'onsite_conversion.total_messaging_connection'];
+const PURCHASE_TYPES = ['purchase'];
+const MESSAGE_TYPES = ['onsite_conversion.messaging_conversation_started_7d'];
 
 export default function AIAnalytics({ campaigns }) {
     const [report, setReport] = useState(null);
@@ -162,7 +162,7 @@ export default function AIAnalytics({ campaigns }) {
                             <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                             <h3 className="text-blue-400 font-black text-xs uppercase tracking-widest">แคมเปญที่ต้องโฟกัส: {report.campaignName || 'รวมท้งบัญชี'}</h3>
                         </div>
-                        <p className="text-2xl lg:text-3xl font-black text-white leading-tight">"{report.summary}"</p>
+                        <p className="text-2xl lg:text-3xl font-black text-white leading-tight">&quot;{report.summary}&quot;</p>
 
                         <div className="mt-8 grid grid-cols-2 lg:grid-cols-3 gap-4">
                             <div className="bg-black/20 p-5 rounded-2xl border border-white/5">

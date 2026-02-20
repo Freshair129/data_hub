@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * API Route to fetch real Facebook Ads Insights (Spend, Reach, etc.)
  */
@@ -22,7 +24,7 @@ export async function GET() {
             console.error('Facebook Marketing API Error:', data);
 
             // Handle Token Expiration (Error Code 190)
-            if (data.error?.code === 190) {
+            if (data.error?.code === 190 || data.error?.type === 'OAuthException') {
                 return NextResponse.json({
                     success: false,
                     errorType: 'TOKEN_EXPIRED',

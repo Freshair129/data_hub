@@ -1,38 +1,58 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getAllProducts } from '@/lib/db';
+import { readCacheEntry, writeCacheEntry } from '@/lib/cacheSync';
+
+// Cache key for full product list snapshot
+const CACHE_ENTITY = 'products';
+const CACHE_ID = '__all__';
 
 export async function GET() {
     try {
-        const productsDir = path.join(process.cwd(), 'public/data/products');
-        const coursesDir = path.join(productsDir, 'courses');
-        const packagesDir = path.join(productsDir, 'packages');
+        // ── 1. Cache-First: return instantly if fresh ──
+        const cached = readCacheEntry(CACHE_ENTITY, CACHE_ID);
+        if (cached) {
+            console.log('[Products] 🗃 Serving from local cache');
 
-        const readProducts = (dir, type) => {
-            if (!fs.existsSync(dir)) return [];
-            const files = fs.readdirSync(dir).filter(file => file.endsWith('.json'));
-            return files.map(file => {
-                const filePath = path.join(dir, file);
-                const content = fs.readFileSync(filePath, 'utf8');
-                try {
-                    const data = JSON.parse(content);
-                    return {
-                        id: data.id || file.replace('.json', ''),
-                        ...data,
-                        type: type // 'course' or 'bundle'
-                    };
-                } catch (e) {
-                    console.error(`Error parsing ${file}:`, e);
-                    return null;
-                }
-            }).filter(Boolean);
-        };
+            // Background refresh
+            setImmediate(() => _fetchAndCacheProducts().catch(console.error));
 
-        const courses = readProducts(coursesDir, 'course');
-        const packages = readProducts(packagesDir, 'bundle');
+            return NextResponse.json({ ...cached, _source: 'cache' });
+        }
 
-        return NextResponse.json({ courses, packages });
+        // ── 2. Cache Miss: fetch from DB, write cache ──
+        console.log('[Products] Cache miss — fetching from DB...');
+        return NextResponse.json(await _fetchAndCacheProducts());
+
     } catch (error) {
+        console.error('GET /api/products error:', error);
         return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
     }
+}
+
+async function _fetchAndCacheProducts() {
+    const allProducts = await getAllProducts();
+
+    const courses = allProducts.filter(p => ['course', 'japan', 'business'].includes(p.category) || (!p.productId?.startsWith('TVS-PKG') && !p.productId?.startsWith('EQ-')));
+    const packages = allProducts.filter(p => p.category === 'bundle' || p.category === 'package' || p.productId?.startsWith('TVS-PKG'));
+    const equipment = allProducts.filter(p => p.category === 'equipment' || p.productId?.startsWith('EQ-'));
+
+    const payload = { courses, packages, equipment };
+
+    // Cache individual products into category subdirs only
+    for (const p of allProducts) {
+        if (p.productId) {
+            let subEntity = 'products/courses';
+            if (p.category === 'equipment' || p.productId.startsWith('EQ-')) {
+                subEntity = 'products/cooking_eqt';
+            } else if (p.category === 'bundle' || p.category === 'package' || p.productId.startsWith('TVS-PKG')) {
+                subEntity = 'products/packages';
+            }
+            writeCacheEntry(subEntity, p.productId, p);
+        }
+    }
+
+    // Cache full list snapshot
+    writeCacheEntry(CACHE_ENTITY, CACHE_ID, payload);
+
+    return payload;
 }

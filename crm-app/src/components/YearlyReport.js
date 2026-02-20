@@ -36,7 +36,7 @@ export default function YearlyReport({ dailyData }) {
             s.days += 1;
 
             // Deep conversions logic
-            const purchaseTypes = ['purchase', 'onsite_conversion.purchase', 'offsite_conversion.fb_pixel_purchase', 'omni_purchase'];
+            const purchaseTypes = ['purchase'];
             const purchaseValue = day.action_values?.filter(a => purchaseTypes.includes(a.action_type)).reduce((sum, a) => sum + parseFloat(a.value || 0), 0) || 0;
             const purchaseCount = day.actions?.filter(a => purchaseTypes.includes(a.action_type)).reduce((sum, a) => sum + parseInt(a.value || 0), 0) || 0;
 

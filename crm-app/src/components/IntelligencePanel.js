@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-export default function IntelligencePanel({ intel, profile }) {
-    if (!intel) return null;
-
+export default function IntelligencePanel({ intel, profile, products = [] }) {
     const [campaigns, setCampaigns] = useState([]);
     const [loadingCampaigns, setLoadingCampaigns] = useState(false);
 
@@ -25,6 +23,8 @@ export default function IntelligencePanel({ intel, profile }) {
         };
         fetchCampaigns();
     }, []);
+
+    if (!intel) return null;
 
     const marketing = profile?.marketing_attribution || {};
     const social = profile?.social_profiles?.facebook || {};
@@ -147,6 +147,54 @@ export default function IntelligencePanel({ intel, profile }) {
                         </div>
                     </div>
                 </div>
+
+
+                {/* Commercial Intent - New Section */}
+                {profile?.intelligence?.attribution?.smart_detected_ad && (
+                    <div className="mb-8 p-6 bg-amber-500/10 rounded-[2rem] border border-amber-500/20 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-6 opacity-5 transform group-hover:scale-110 transition-transform">
+                            <i className="fas fa-shopping-cart text-7xl text-amber-500"></i>
+                        </div>
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-4">
+                                <i className="fas fa-search-dollar text-amber-500 text-xs"></i>
+                                <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Commercial Intent Analysis</h4>
+                            </div>
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <div className="flex-1">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">Detected Interest</p>
+                                    <h5 className="text-white font-black text-lg mb-1">{profile.intelligence.attribution.smart_detected_ad.name}</h5>
+                                    <p className="text-xs text-slate-400 font-bold leading-relaxed">
+                                        Matching this customer against your current store catalog based on ad conversion data.
+                                    </p>
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">Suggested Products</p>
+                                    {products.filter(p =>
+                                        profile.intelligence.attribution.smart_detected_ad.name.toLowerCase().includes(p.name.replace('หลักสูตร ', '').substring(0, 10).toLowerCase()) ||
+                                        (profile.intelligence.attribution.smart_detected_ad.name.includes('Chinese') && p.name.includes('จีน'))
+                                    ).slice(0, 2).map(p => (
+                                        <div key={p.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all cursor-pointer">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-500 text-[10px]">
+                                                    <i className="fas fa-star"></i>
+                                                </div>
+                                                <span className="text-[10px] font-black text-white">{p.name}</span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-amber-400">฿{p.price?.toLocaleString()}</span>
+                                        </div>
+                                    ))}
+                                    {products.filter(p =>
+                                        profile.intelligence.attribution.smart_detected_ad.name.toLowerCase().includes(p.name.replace('หลักสูตร ', '').substring(0, 10).toLowerCase()) ||
+                                        (profile.intelligence.attribution.smart_detected_ad.name.includes('Chinese') && p.name.includes('จีน'))
+                                    ).length === 0 && (
+                                            <p className="text-[10px] text-white/20 italic">Searching catalog for best match...</p>
+                                        )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Strategic Recommendation - Compact */}
                 <div className="p-8 bg-[#0A1A2F] rounded-[2.5rem] relative overflow-hidden group shadow-2xl">

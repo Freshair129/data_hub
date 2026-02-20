@@ -6,6 +6,7 @@ export default function Dashboard({ customers, products, onRefresh }) {
     const [insights, setInsights] = useState({ spend: 0, reach: 0, impressions: 0 });
     const [loadingInsights, setLoadingInsights] = useState(false);
     const [syncing, setSyncing] = useState(false);
+    const [isTokenExpired, setIsTokenExpired] = useState(false);
 
     useEffect(() => {
         const fetchInsights = async () => {
@@ -15,6 +16,9 @@ export default function Dashboard({ customers, products, onRefresh }) {
                 const result = await res.json();
                 if (result.success) {
                     setInsights(result.insights);
+                    setIsTokenExpired(false);
+                } else if (result.errorType === 'TOKEN_EXPIRED') {
+                    setIsTokenExpired(true);
                 }
             } catch (err) {
                 console.error('Failed to fetch insights:', err);
@@ -102,14 +106,25 @@ export default function Dashboard({ customers, products, onRefresh }) {
                     <h2 className="text-3xl font-black text-[#F8F8F6] tracking-tight mb-2">Executive Dashboard</h2>
                     <p className="text-white/40 text-sm font-bold uppercase tracking-[0.2em]">V SCHOOL METRICS OVERVIEW</p>
                 </div>
-                <button
-                    onClick={handleSync}
-                    disabled={syncing}
-                    className={`bg-white/5 border border-white/10 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-3 shadow-xl ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                    <i className={`fas ${syncing ? 'fa-spinner fa-spin' : 'fa-sync-alt'} text-[#C9A34E]`}></i>
-                    {syncing ? 'Syncing...' : 'Sync Messenger Leads'}
-                </button>
+                <div className="flex items-center gap-4">
+                    {isTokenExpired && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 rounded-xl animate-pulse">
+                            <i className="fas fa-key text-rose-500 text-xs shadow-[0_0_10px_rgba(244,63,94,0.3)]"></i>
+                            <div>
+                                <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Token Expired</p>
+                                <p className="text-[8px] text-rose-500/70 font-bold leading-tight uppercase">Live Ads Sync Paused</p>
+                            </div>
+                        </div>
+                    )}
+                    <button
+                        onClick={handleSync}
+                        disabled={syncing}
+                        className={`bg-white/5 border border-white/10 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-3 shadow-xl ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        <i className={`fas ${syncing ? 'fa-spinner fa-spin' : 'fa-sync-alt'} text-[#C9A34E]`}></i>
+                        {syncing ? 'Syncing...' : 'Sync Messenger Leads'}
+                    </button>
+                </div>
             </div>
 
             {/* Stats Grid */}

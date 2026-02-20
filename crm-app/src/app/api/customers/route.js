@@ -1,224 +1,157 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DATA_DIR = path.join(process.cwd(), '../customer');
+import { getAllCustomers, upsertCustomer } from '@/lib/db';
+import { readCacheList, writeCacheEntry, readCacheEntry } from '@/lib/cacheSync';
+import { emitCacheSyncJob, emitRebuildIndex, emitRebuildSummary } from '@/workers/cacheSyncWorker';
 
 /**
  * GET Customers - Now syncs with Facebook Leads automatically
  */
-export async function GET() {
+export async function GET(request) {
     try {
-        if (!fs.existsSync(DATA_DIR)) {
-            fs.mkdirSync(DATA_DIR, { recursive: true });
-        }
+        const { searchParams } = new URL(request.url);
+        const useIndex = searchParams.get('index') === 'true';
 
-        const ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
-        const AD_ACCOUNT_ID = process.env.FB_AD_ACCOUNT_ID;
-        const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
-        const PAGE_ID = process.env.FB_PAGE_ID;
-
-        // 1. Sync Customers from Facebook Conversations (Chat)
-        if (PAGE_ACCESS_TOKEN && PAGE_ID) {
-            try {
-                // Step A: Fetch Page Admin names to auto-assign as agent
-                let pageAdminName = 'The V School'; // Default fallback
-                try {
-                    const rolesUrl = `https://graph.facebook.com/v19.0/${PAGE_ID}/roles?access_token=${PAGE_ACCESS_TOKEN}`;
-                    const rolesRes = await fetch(rolesUrl);
-                    const rolesData = await rolesRes.json();
-                    if (rolesRes.ok && rolesData.data?.length > 0) {
-                        // Use the first admin found (primary responder)
-                        pageAdminName = rolesData.data[0].name;
-                        console.log(`[Agent] Page admin detected: ${pageAdminName}`);
-                    }
-                } catch (e) { console.error('Roles fetch error:', e.message); }
-
-                // Step B: Fetch conversations with participant details
-                const convUrl = `https://graph.facebook.com/v19.0/${PAGE_ID}/conversations?fields=participants,updated_time,messages.limit(3){from,message,created_time}&limit=100&access_token=${PAGE_ACCESS_TOKEN}`;
-                const convRes = await fetch(convUrl);
-                const convData = await convRes.json();
-
-                if (convRes.ok && convData.data) {
-                    let syncedCount = 0;
-                    let updatedCount = 0;
-
-                    convData.data.forEach(conv => {
-                        const customer = conv.participants?.data?.find(p => p.id !== PAGE_ID);
-                        if (!customer) return;
-
-                        const customerId = `MSG-${customer.id}`;
-                        const customerDir = path.join(DATA_DIR, customerId);
-                        const filePath = path.join(customerDir, `profile_${customerId}.json`);
-
-                        // Check if there's a staff reply (page replied)
-                        const messages = conv.messages?.data || [];
-                        const hasStaffReply = messages.some(m => m.from.id === PAGE_ID);
-                        const assignedAgent = hasStaffReply ? pageAdminName : 'Unassigned';
-
-                        if (!fs.existsSync(filePath)) {
-                            // Create new customer profile
-                            if (!fs.existsSync(customerDir)) fs.mkdirSync(customerDir, { recursive: true });
-
-                            const customerProfile = {
-                                customer_id: customerId,
-                                profile: {
-                                    first_name: customer.name?.split(' ')[0] || 'Facebook',
-                                    last_name: customer.name?.split(' ').slice(1).join(' ') || 'User',
-                                    nick_name: customer.name?.split(' ')[0] || '',
-                                    status: 'Active',
-                                    membership_tier: 'GENERAL',
-                                    lifecycle_stage: hasStaffReply ? 'In Progress' : 'New Lead',
-                                    agent: assignedAgent,
-                                    join_date: conv.updated_time || new Date().toISOString()
-                                },
-                                contact_info: {
-                                    facebook: customer.name,
-                                    facebook_id: customer.id,
-                                    lead_channel: 'Facebook'
-                                },
-                                intelligence: {
-                                    metrics: { total_spend: 0, total_learning_hours: 0, total_point: 0, total_order: 0 },
-                                    tags: ['Facebook Chat', hasStaffReply ? 'Contacted' : 'New Lead']
-                                },
-                                inventory: { coupons: [], learning_courses: [] },
-                                wallet: { balance: 0, points: 0, currency: 'THB' },
-                                timeline: [{
-                                    id: `SYNC-${Date.now()}-${syncedCount}`,
-                                    date: conv.updated_time || new Date().toISOString(),
-                                    type: 'SYSTEM',
-                                    summary: 'Synced from Facebook Messenger',
-                                    details: { content: `Customer imported from Facebook Page conversation.` }
-                                }]
-                            };
-
-                            fs.writeFileSync(filePath, JSON.stringify(customerProfile, null, 4));
-                            syncedCount++;
-                        } else {
-                            // Update existing profiles: auto-assign agent if still 'Unassigned' and page replied
-                            try {
-                                const existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                                const currentAgent = existing.profile?.agent || existing.agent;
-                                if (hasStaffReply && (!currentAgent || currentAgent === 'Unassigned')) {
-                                    if (existing.profile) {
-                                        existing.profile.agent = assignedAgent;
-                                        existing.profile.lifecycle_stage = existing.profile.lifecycle_stage === 'New Lead' ? 'In Progress' : existing.profile.lifecycle_stage;
-                                    } else {
-                                        existing.agent = assignedAgent;
-                                    }
-                                    fs.writeFileSync(filePath, JSON.stringify(existing, null, 4));
-                                    updatedCount++;
-                                }
-                            } catch (e) { /* skip corrupt files */ }
-                        }
-                    });
-                    if (syncedCount > 0) console.log(`[Sync] Imported ${syncedCount} new customers from Facebook Conversations.`);
-                    if (updatedCount > 0) console.log(`[Sync] Auto-assigned agent "${pageAdminName}" to ${updatedCount} existing customers.`);
-                }
-            } catch (e) { console.error('Conversation Sync Error:', e.message); }
-        }
-
-        // 2. Fallback: Attempt to Sync Leads from Facebook Lead Forms (requires leads_retrieval permission)
-        if (ACCESS_TOKEN && AD_ACCOUNT_ID) {
-            try {
-                const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/leads?fields=created_time,id,ad_id,ad_name,field_data&limit=50&access_token=${ACCESS_TOKEN}`;
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (response.ok && data.data) {
-                    data.data.forEach(lead => {
-                        const mappedData = {};
-                        lead.field_data.forEach(field => {
-                            const name = field.name.toLowerCase();
-                            const value = field.values?.[0] || '';
-                            if (name.includes('name')) mappedData.name = value;
-                            if (name.includes('email')) mappedData.email = value;
-                            if (name.includes('phone')) mappedData.phone = value;
-                        });
-
-                        const customerId = `FB-${lead.id}`;
-                        const customerDir = path.join(DATA_DIR, customerId);
-                        const filePath = path.join(customerDir, `profile_${customerId}.json`);
-
-                        if (!fs.existsSync(filePath)) {
-                            if (!fs.existsSync(customerDir)) fs.mkdirSync(customerDir, { recursive: true });
-
-                            const customerProfile = {
-                                customer_id: customerId,
-                                profile: {
-                                    first_name: mappedData.name?.split(' ')[0] || 'Facebook',
-                                    last_name: mappedData.name?.split(' ').slice(1).join(' ') || 'Lead',
-                                    status: 'Active',
-                                    membership_tier: 'GENERAL',
-                                    lifecycle_stage: 'New Lead',
-                                    agent: 'Unassigned',
-                                    join_date: lead.created_time
-                                },
-                                contact_info: {
-                                    email: mappedData.email || '',
-                                    phone_primary: mappedData.phone || '',
-                                    lead_channel: 'Facebook Ads'
-                                },
-                                intelligence: {
-                                    metrics: { total_spend: 0, total_learning_hours: 0, total_point: 0 },
-                                    tags: ['Facebook Lead'],
-                                    attribution: { source: `Facebook Ads (${lead.ad_name || lead.ad_id})` }
-                                },
-                                inventory: { coupons: [], learning_courses: [] },
-                                wallet: { balance: 0, points: 0, currency: 'THB' },
-                                timeline: [{
-                                    id: `LEAD-${Date.now()}`,
-                                    date: lead.created_time,
-                                    type: 'SYSTEM',
-                                    summary: 'Lead Captured from Facebook Ads',
-                                    details: { content: `Direct sync from Facebook Ads: ${lead.ad_name || lead.ad_id}` }
-                                }]
-                            };
-                            fs.writeFileSync(filePath, JSON.stringify(customerProfile, null, 4));
-                        }
-                    });
-                }
-            } catch (syncError) {
-                console.error('Lead Sync Error:', syncError.message);
+        // ── 1. Cache-First: Return lightweight index if requested ──
+        if (useIndex) {
+            const indexData = readCacheEntry('customer', '__index__');
+            if (indexData) {
+                console.log(`[Customers] 📋 Serving index (${indexData.total} entries)`);
+                return NextResponse.json(indexData);
             }
         }
 
-        // 2. Read all customers from local storage
-        const folders = fs.readdirSync(DATA_DIR).filter(f =>
-            fs.statSync(path.join(DATA_DIR, f)).isDirectory()
-        );
+        // ── 2. Normal Cache-First: Return full profiles list ──
+        const cached = readCacheList('customer');
+        if (cached.length > 0) {
+            console.log(`[Customers] 🗃 Serving ${cached.length} customers from local cache`);
 
-        const customers = folders.map(id => {
-            const filePath = path.join(DATA_DIR, id, `profile_${id}.json`);
-            if (fs.existsSync(filePath)) {
-                return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            }
-            return null;
-        }).filter(Boolean);
+            // Background refresh: sync from DB & Facebook without blocking UI
+            setImmediate(() => _syncCustomersFromSources().catch(console.error));
 
+            return NextResponse.json(cached.map(c => ({ ...c, _source: 'cache' })));
+        }
+
+        // ── 2. Cache Miss: Fetch fresh from sources, cache result ──
+        console.log('[Customers] Cache miss — fetching from DB/Facebook...');
+        const customers = await _syncCustomersFromSources();
         return NextResponse.json(customers);
+
     } catch (error) {
         console.error('GET /api/customers error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-export async function POST(request) {
+/**
+ * Internal: Sync customers from Facebook + DB, update cache.
+ */
+async function _syncCustomersFromSources() {
+    const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
+    const PAGE_ID = process.env.FB_PAGE_ID;
+
     try {
-        const customer = await request.json();
-        const id = customer.customer_id;
+        // Step A: Fetch conversations with participant details and labels
+        const convUrl = `https://graph.facebook.com/v19.0/${PAGE_ID}/conversations?fields=participants,updated_time,labels,messages.limit(3){from,message,created_time}&limit=100&access_token=${PAGE_ACCESS_TOKEN}`;
+        const convRes = await fetch(convUrl);
+        const convData = await convRes.json();
 
-        if (!id) return NextResponse.json({ error: 'Missing customer_id' }, { status: 400 });
+        if (convRes.ok && convData.data) {
+            const { generateCustomerId, getOrigin } = await import('@/lib/idUtils');
+            const allExisting = await getAllCustomers();
 
-        const customerDir = path.join(DATA_DIR, id);
-        if (!fs.existsSync(customerDir)) {
-            fs.mkdirSync(customerDir, { recursive: true });
+            for (const conv of convData.data) {
+                const customer = conv.participants?.data?.[0] || { name: 'Unknown', id: '0' };
+                const fbLabels = (conv.labels?.data || []).map(l => l.name);
+                const hasStaffReply = (conv.messages?.data || []).some(m => m.from?.id === PAGE_ID);
+                const detectedAgent = (conv.messages?.data || []).find(m => m.from?.id === PAGE_ID)?.from?.name || 'Unassigned';
+
+                // Standard ID Resolution (TVS-CUS V7)
+                let targetCustomer = allExisting.find(c =>
+                    c.contact_info?.facebook_id === customer.id ||
+                    c.facebookId === customer.id
+                );
+
+                const nameEn = customer.name.replace(/[^\x00-\x7F]/g, '').replace(/\s+/g, '') || 'User';
+                const origin = (fbLabels.length > 0) ? 'AD' : 'OG';
+
+                let customerId = targetCustomer?.customer_id || targetCustomer?.customerId;
+
+                if (!customerId) {
+                    customerId = generateCustomerId('facebook', origin, nameEn, customer.id);
+                    console.log(`[Sync] Assigning new standardized ID: ${customerId} for Facebook User ${customer.id}`);
+                }
+
+                const profileUpdate = {
+                    customer_id: customerId,
+                    conversation_id: conv.id,
+                    profile: {
+                        first_name: targetCustomer?.profile?.first_name || customer.name?.split(' ')[0] || 'Facebook',
+                        last_name: targetCustomer?.profile?.last_name || customer.name?.split(' ').slice(1).join(' ') || 'User',
+                        status: targetCustomer?.profile?.status || 'Active',
+                        membership_tier: targetCustomer?.profile?.membership_tier || 'GENERAL',
+                        lifecycle_stage: targetCustomer?.profile?.lifecycle_stage || (hasStaffReply ? 'In Progress' : 'New Lead'),
+                        agent: targetCustomer?.profile?.agent && targetCustomer.profile.agent !== 'Unassigned' ? targetCustomer.profile.agent : detectedAgent,
+                        join_date: targetCustomer?.profile?.join_date || conv.updated_time || new Date().toISOString()
+                    },
+                    contact_info: {
+                        facebook: customer.name,
+                        facebook_id: customer.id,
+                        lead_channel: 'Facebook'
+                    },
+                    intelligence: {
+                        metrics: targetCustomer?.intelligence?.metrics || { total_spend: 0, total_order: 0 },
+                        tags: Array.from(new Set([...(targetCustomer?.intelligence?.tags || []), 'Facebook Chat', ...fbLabels]))
+                    }
+                };
+
+                await upsertCustomer(profileUpdate);
+            }
         }
 
-        const filePath = path.join(customerDir, `profile_${id}.json`);
-        fs.writeFileSync(filePath, JSON.stringify(customer, null, 4));
+        // Fetch all customers from DB
+        const customers = await getAllCustomers();
 
-        return NextResponse.json({ success: true, customer });
+        // Write each customer to local cache (Now using split-file structure)
+        for (const customer of customers) {
+            const cacheId = customer.customer_id || customer.customerId || customer.id;
+            if (cacheId) {
+                // This will now trigger writeCustomerCache via emitCacheSyncJob 
+                // Or we can call it directly for the first-time migration
+                emitCacheSyncJob('customer', cacheId, customer);
+            }
+        }
+
+        // Rebuild lightweight index + analytics summary in background
+        emitRebuildIndex(customers).catch(console.error);
+        emitRebuildSummary(customers).catch(console.error);
+
+        return customers;
+    } catch (e) {
+        console.error('[Sync] Conversation Sync Error:', e.message);
+        return [];
+    }
+}
+
+
+/**
+ * POST /api/customers - Save or Update Customer
+ */
+export async function POST(request) {
+    try {
+        const customerData = await request.json();
+        if (!customerData.customer_id) {
+            return NextResponse.json({ error: 'Missing customer_id' }, { status: 400 });
+        }
+
+        // 1. Write to DB first
+        const result = await upsertCustomer(customerData);
+
+        // 2. Emit cache sync job (async, non-blocking)
+        const cacheId = result.customerId || customerData.customer_id;
+        emitCacheSyncJob('customer', cacheId, result).catch(console.error);
+
+        return NextResponse.json({ success: true, customer: result });
+
     } catch (error) {
         console.error('POST /api/customers error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
