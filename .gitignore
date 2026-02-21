@@ -68,3 +68,7 @@ crm-app/lint_output.txt
 
 # Browser Automation Cache
 crm-app/automation/user_data/
+
+# Knowledge Vector DB
+knowledge/vector_index.json
+
