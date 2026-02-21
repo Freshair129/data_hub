@@ -66,5 +66,5 @@ crm-app/docs/customer_id_mapping.json
 # Lint output
 crm-app/lint_output.txt
 
-# Generated AI Knowledge Index
-knowledge/vector_index.json
+# Browser Automation Cache
+crm-app/automation/user_data/
