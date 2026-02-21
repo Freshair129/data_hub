@@ -1,0 +1,211 @@
+
+import fs from 'fs';
+import path from 'path';
+
+const DATA_DIR = path.join(process.cwd(), '../customer');
+const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
+
+/**
+ * Chat Service
+ * Handles fetching and persisting chat messages.
+ */
+
+// 1. Fetch Messages (Live -> Cache + DB)
+export async function syncChat(conversationId) {
+    if (!conversationId) return { success: false, error: 'Missing Conversation ID' };
+
+    let messages = [];
+    const sanitizedConvId = conversationId.replace('t_', ''); // Handle 't_' prefix for FB threads
+
+    // Try Facebook API
+    try {
+        if (PAGE_ACCESS_TOKEN) {
+            const url = `https://graph.facebook.com/v19.0/${sanitizedConvId}/messages?fields=id,message,from,created_time,attachments{id,mime_type,name,file_url,image_data,url}&limit=50&access_token=${PAGE_ACCESS_TOKEN}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (response.ok) {
+                // Facebook returns newest first
+                messages = data.data || [];
+
+                // 1. Save to Local Cache (JSON)
+                await saveChatToCache(sanitizedConvId, messages);
+
+                // 2. Sync to DB (Supabase/Prisma) if configured
+                const { getPrisma } = await import('./db.js');
+                const { generateSessionId, generateMessageId, mapChannel, getOrigin } = await import('./idUtils.js');
+                const prisma = await getPrisma();
+                if (prisma) {
+                    try {
+                        console.log(`[ChatService] Syncing ${messages.length} messages to DB for ${sanitizedConvId}...`);
+
+                        // Find conversation to get ID mapping
+                        let dbConv = await prisma.conversation.findUnique({
+                            where: { conversationId: sanitizedConvId },
+                            include: { customer: true }
+                        });
+
+                        if (dbConv) {
+                            const lastMessage = await prisma.message.findFirst({
+                                where: { conversation: { id: dbConv.id } },
+                                orderBy: { createdAt: 'desc' }
+                            });
+
+                            const channel = mapChannel(dbConv.channel || 'facebook');
+                            const origin = getOrigin(dbConv.metadata);
+
+                            // Process messages (FB returns newest first)
+                            // We need to decide sessionId for EACH message potentially, 
+                            // but usually they come in a batch that belongs together.
+                            // Let's iterate chronologically for consistent logic.
+                            const sortedMessages = [...messages].sort((a, b) => new Date(a.created_time) - new Date(b.created_time));
+
+                            let currentSessionId = lastMessage?.sessionId;
+                            let lastMsgTime = lastMessage?.createdAt ? new Date(lastMessage.createdAt) : null;
+                            const lastAdId = lastMessage?.metadata?.ad_id || null;
+
+                            for (const msg of sortedMessages) {
+                                const msgTime = new Date(msg.created_time);
+                                const currentAdId = dbConv.metadata?.ad_id || null;
+
+                                // Boundary Check: 30 minutes OR Ad ID change OR missing session
+                                const isTimedOut = lastMsgTime && (msgTime - lastMsgTime) > 30 * 60 * 1000;
+                                const isNewIntent = currentAdId !== lastAdId && lastAdId !== null;
+
+                                if (!currentSessionId || isTimedOut || isNewIntent) {
+                                    currentSessionId = generateSessionId(dbConv.participantId || sanitizedConvId, msg.created_time);
+                                    console.log(`[ChatService] New Session Created: ${currentSessionId} (Reason: ${isTimedOut ? 'Timeout' : (isNewIntent ? 'Ad Shift' : 'Init')})`);
+                                }
+
+                                const attachment = msg.attachments?.data?.[0];
+
+                                await prisma.message.upsert({
+                                    where: { messageId: msg.id },
+                                    update: {
+                                        sessionId: currentSessionId,
+                                        metadata: {
+                                            customer_id: dbConv.customerId,
+                                            agent_id: dbConv.assignedAgent,
+                                            lead_id: dbConv.customerId,
+                                            channel: channel,
+                                            origin: origin,
+                                            ad_id: dbConv.metadata?.ad_id,
+                                            campaign_id: dbConv.metadata?.campaign_id,
+                                            ad_set_id: dbConv.metadata?.ad_set_id
+                                        }
+                                    },
+                                    create: {
+                                        messageId: msg.id,
+                                        conversation: { connect: { id: dbConv.id } },
+                                        sessionId: currentSessionId,
+                                        fromId: msg.from?.id,
+                                        fromName: msg.from?.name,
+                                        content: msg.message,
+                                        hasAttachment: !!attachment,
+                                        attachmentId: attachment?.id,
+                                        attachmentType: attachment?.mime_type,
+                                        attachmentUrl: attachment?.image_data?.url || attachment?.video_data?.url || attachment?.file_url,
+                                        createdAt: msgTime,
+                                        metadata: {
+                                            customer_id: dbConv.customerId,
+                                            agent_id: dbConv.assignedAgent,
+                                            lead_id: dbConv.customerId,
+                                            channel: channel,
+                                            origin: origin,
+                                            ad_id: dbConv.metadata?.ad_id,
+                                            campaign_id: dbConv.metadata?.campaign_id,
+                                            ad_set_id: dbConv.metadata?.ad_set_id
+                                        }
+                                    }
+                                });
+                                lastMsgTime = msgTime;
+                            }
+
+                            // Update lastMessageAt
+                            if (messages.length > 0) {
+                                await prisma.conversation.update({
+                                    where: { id: dbConv.id },
+                                    data: { lastMessageAt: new Date(messages[0].created_time) }
+                                });
+                            }
+                        }
+                    } catch (dbError) {
+                        console.error('[ChatService] DB Sync Error:', dbError.message);
+                    }
+                }
+
+                return { success: true, data: messages.slice().reverse(), source: 'facebook' };
+            } else {
+                console.warn(`FB API Error (${sanitizedConvId}):`, data.error?.message);
+            }
+        }
+    } catch (error) {
+        console.error('FB Fetch Error:', error);
+    }
+
+    // Fallback to Local Cache
+    return getLocalChat(sanitizedConvId);
+}
+
+// 2. Save to Cache
+async function saveChatToCache(conversationId, messages) {
+    if (!fs.existsSync(DATA_DIR)) return;
+
+    const folders = fs.readdirSync(DATA_DIR);
+    for (const folder of folders) {
+        const historyDir = path.join(DATA_DIR, folder, 'chathistory');
+        // Check for standard naming or prefixed naming
+        const possibleFiles = [
+            path.join(historyDir, `conv_${conversationId}.json`),
+            path.join(historyDir, `conv_t_${conversationId}.json`) // Some might have 't_' prefix
+        ];
+
+        for (const convFile of possibleFiles) {
+            if (fs.existsSync(convFile)) {
+                try {
+                    const existing = JSON.parse(fs.readFileSync(convFile, 'utf8'));
+                    // Update content
+                    existing.messages = { data: messages }; // Save newest first (raw FB format)
+                    existing.updated_time = new Date().toISOString();
+                    fs.writeFileSync(convFile, JSON.stringify(existing, null, 4));
+                    console.log(`[ChatService] Cached ${messages.length} messages for ${conversationId}`);
+                    return;
+                } catch (e) {
+                    console.error('Cache Write Error:', e);
+                }
+            }
+        }
+    }
+    // If not found, we currently don't create new files here (that's done by the sync/profile creation logic)
+    // In a full implementation, we might want to create the folder structure if missing.
+}
+
+// 3. Read Local Cache
+function getLocalChat(conversationId) {
+    if (!fs.existsSync(DATA_DIR)) return { success: false, error: 'No Data Directory' };
+
+    const folders = fs.readdirSync(DATA_DIR);
+    for (const folder of folders) {
+        const historyDir = path.join(DATA_DIR, folder, 'chathistory');
+        const possibleFiles = [
+            path.join(historyDir, `conv_${conversationId}.json`),
+            path.join(historyDir, `conv_t_${conversationId}.json`)
+        ];
+
+        for (const filePath of possibleFiles) {
+            if (fs.existsSync(filePath)) {
+                try {
+                    const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                    return {
+                        success: true,
+                        data: (content.messages?.data || []).slice().reverse(),
+                        source: 'local'
+                    };
+                } catch (e) {
+                    return { success: false, error: 'Corrupt Cache File' };
+                }
+            }
+        }
+    }
+    return { success: false, error: 'Chat not found' };
+}

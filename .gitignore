@@ -32,12 +32,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Python virtual environments
+.venv/
+node_env/
+
 # data logs
 marketing/
 customer/
 customer_backup_*
 backup_reconciliation_*/
-crm-app/
 *.tmp
 
 # Employee data (stored in DB)
@@ -52,6 +55,13 @@ ERR-*
 
 # IDE Agent context
 .agent/
+.agents/
 
-# Mapping files
+# Archive (non-essential files)
+archive/
+
+# Mapping files (local reference only)
 crm-app/docs/customer_id_mapping.json
+
+# Lint output
+crm-app/lint_output.txt
