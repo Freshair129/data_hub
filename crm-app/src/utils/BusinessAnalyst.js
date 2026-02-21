@@ -162,27 +162,31 @@ export default class BusinessAnalyst {
     /**
      * Detects if an agent should be assigned based on chat content
      */
-    async detectAgentFromChat(messages) {
+    async detectAgentFromChat(messages, staffList = []) {
         const chatContext = messages.map(m => `${m.from?.name || m.sender}: ${m.message || m.text}`).join('\n');
+
+        const staffNames = staffList.length > 0
+            ? staffList.join(', ')
+            : 'Boss (Developer/Admin), Sales A, Sales B, Jutamat, Pornpon';
 
         const prompt = `
         Role: Staff Assignment AI for "The V School".
         Task: Analyze the chat history and determine if a specific staff member/agent should be assigned to this conversation.
         
         Context:
-        Common Staff Names: Boss (Developer/Admin), Sales A, Sales B, Jutamat, Pornpon.
+        Available Staff: ${staffNames}.
         
         Chat History:
         ${chatContext}
         
         Logic:
         1. Look for phrases like "ฝากคุณ...ดูต่อที", "ส่งให้...", "ให้...จัดการ", "Requesting Boss", etc.
-        2. If a staff name is mentioned as someone who should handle the case, return their name.
+        2. If a staff name is mentioned as someone who should handle the case, return their name matching EXACTLY one of the names in the "Available Staff" list.
         3. Only return a name if there's a clear instruction to assign or consult them.
         
         Output Format (JSON Only):
         {
-            "suggested_agent": "Boss" | "Sales A" | "Jutamat" | null,
+            "suggested_agent": "NameFromList" | null,
             "justification": "Why this agent was suggested."
         }
         `;

@@ -62,15 +62,19 @@ export async function GET(request) {
         // 1. Initialize Business Analyst AI
         const analyst = new BusinessAnalyst(apiKey);
 
-        // 2. Extract Products & Suggest Agent
-        const [extracted, agentResult] = await Promise.all([
-            analyst.extractProductsFromChat(messages),
-            analyst.detectAgentFromChat(messages)
+        // 2. Fetch Data (Catalog & Employees)
+        const { getAllProducts, getAllEmployees } = await import('@/lib/db');
+        const [allCatalogItems, allEmployees] = await Promise.all([
+            getAllProducts(),
+            getAllEmployees()
         ]);
 
-        // 3. Match against Catalog (Using Database-First logic)
-        const { getAllProducts } = await import('@/lib/db');
-        const allCatalogItems = await getAllProducts();
+        // 3. Extract Products & Suggest Agent (Dynamic List)
+        const staffNames = allEmployees.map(e => e.nickName || e.firstName);
+        const [extracted, agentResult] = await Promise.all([
+            analyst.extractProductsFromChat(messages),
+            analyst.detectAgentFromChat(messages, staffNames)
+        ]);
 
         const enriched = extracted.map(item => {
             const match = allCatalogItems.find(p =>

@@ -1,8 +1,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import BusinessAnalyst from '../utils/BusinessAnalyst.js';
+import { getAllEmployees } from './db.js';
 
-const DATA_DIR = path.join(process.cwd(), '../customer');
+const DATA_DIR = path.join(process.cwd(), 'cache', 'customer');
 const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 
 /**
@@ -143,8 +145,93 @@ export async function syncChat(conversationId) {
         console.error('FB Fetch Error:', error);
     }
 
+    // [New] Full Integration: Auto-detect Agent Mentions
+    if (messages.length > 0) {
+        try {
+            const apiKey = process.env.GEMINI_API_KEY;
+            if (apiKey) {
+                const analyst = new BusinessAnalyst(apiKey);
+                const allEmployees = await getAllEmployees();
+                const staffNames = allEmployees.map(e => e.nickName || e.firstName);
+
+                // Last 10 messages for context
+                const contextMessages = messages.slice(0, 10).map(m => ({
+                    sender: m.from?.name || 'Customer',
+                    text: m.message
+                }));
+
+                const result = await analyst.detectAgentFromChat(contextMessages, staffNames);
+                if (result.suggested_agent) {
+                    console.log(`[AI] Auto-detected Assignment: ${result.suggested_agent} | Reason: ${result.justification}`);
+
+                    // Logic to update assignment (Self-calling a local assignment function)
+                    await performAgentAssignment(sanitizedConvId, result.suggested_agent, true);
+                }
+            }
+        } catch (aiErr) {
+            console.error('[AI] Assignment Detection Error:', aiErr);
+        }
+    }
+
     // Fallback to Local Cache
     return getLocalChat(sanitizedConvId);
+}
+
+/**
+ * Helper to perform agent assignment in DB and Cache
+ */
+async function performAgentAssignment(conversationId, agentName, isAuto = false) {
+    try {
+        const { getPrisma } = await import('./db.js');
+        const prisma = await getPrisma();
+        const DATA_DIR = path.join(process.cwd(), 'cache', 'customer');
+
+        // 1. Find Customer Folder
+        let customerFolder = conversationId;
+        if (!fs.existsSync(path.join(DATA_DIR, customerFolder))) {
+            customerFolder = `MSG-${conversationId}`;
+        }
+        const customerDir = path.join(DATA_DIR, customerFolder);
+        if (!fs.existsSync(customerDir)) return;
+
+        // 2. Update DB
+        if (prisma) {
+            await prisma.conversation.update({
+                where: { conversationId },
+                data: { assignedAgent: agentName }
+            });
+        }
+
+        // 3. Update Profile JSON
+        const profilePath = path.join(customerDir, `profile_${customerFolder}.json`);
+        if (fs.existsSync(profilePath)) {
+            const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+            if (profile.profile) profile.profile.agent = agentName;
+            else profile.agent = agentName;
+
+            if (!profile.timeline) profile.timeline = [];
+            profile.timeline.push({
+                id: `AUTO-ASSIGN-${Date.now()}`,
+                date: new Date().toISOString(),
+                type: 'SYSTEM',
+                summary: isAuto ? 'Agent Assigned Automatically (AI)' : 'Agent Assigned Manually',
+                details: { content: `Agent "${agentName}" was assigned based on chat content analysis.` }
+            });
+            fs.writeFileSync(profilePath, JSON.stringify(profile, null, 4));
+        }
+
+        // 4. Update Chat History JSON
+        const historyDir = path.join(customerDir, 'chathistory');
+        const convFile = path.join(historyDir, `conv_${conversationId}.json`);
+        if (fs.existsSync(convFile)) {
+            const convData = JSON.parse(fs.readFileSync(convFile, 'utf8'));
+            convData.agent = agentName;
+            fs.writeFileSync(convFile, JSON.stringify(convData, null, 4));
+        }
+
+    } catch (e) {
+        console.error('Failed to perform agent assignment:', e);
+    }
 }
 
 // 2. Save to Cache

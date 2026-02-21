@@ -10,7 +10,8 @@ All notable changes to the CRM project will be documented in this file.
 - **Hourly Marketing Synchronization (ADR 013)**: Implemented automated hourly fetching and persistence of Facebook Ad metrics to the database.
 - **ASCII Architecture Visualization**: Added dedicated Data Flow and Pipeline Workflow diagrams to `docs/overview.md` for immediate visual orientation.
 - **Agent Workflow Automation**: Created `.agents/workflows/` for structured slash commands like `/checkpoint` and `/system_architecture`.
-- **AI-Driven Chat Automation (ADR 014)**: Implemented intelligent agent detection from conversation history using Gemini Pro, integrated into the product discovery flow.
+- **AI-Driven Chat Automation (Phase 2)**: Integrated background auto-assignment into `chatService.js`. AI now proactively identifies and assigns the correct staff members based on live conversation syncs.
+- **Dynamic Staff Awareness**: Linked AI detection to the `Employee` table, ensuring the system stays current with actual personnel data.
 - **Smart Inbox Scroll**: Refactored chat scrolling to prevent redundant auto-snapping during message polling, improving UX for reading history.
 - **Path Standardization**: Fully removed all legacy root-level folders (`../customer`, `../products`, `../employee`). All systems now use internal `crm-app/cache/` or Prisma DB for a self-contained, container-ready architecture.
 - **Incident Deep Dives**: Added structured incident reporting in `docs/incidents/` to document complex logic anomalies (e.g., attribution logic errors).
