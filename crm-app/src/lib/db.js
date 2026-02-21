@@ -24,7 +24,7 @@ import { readCacheList, readCacheEntry } from './cacheSync.js';
 const { Pool } = pg;
 
 const DB_ADAPTER = process.env.DB_ADAPTER || 'json';
-const DATA_DIR = path.join(process.cwd(), '..');
+const DATA_DIR = path.join(process.cwd(), 'cache');
 
 // ─── Lazy Prisma Loader ────────────────────────────────────
 let _prisma = null;
@@ -443,20 +443,18 @@ function saveCustomerToJSON(data) {
 }
 
 function getAllEmployeesFromJSON() {
-    const empDir = path.join(DATA_DIR, 'employee');
+    const empDir = path.join(process.cwd(), 'cache', 'employee');
     if (!fs.existsSync(empDir)) return [];
 
-    const folders = fs.readdirSync(empDir).filter(f =>
-        fs.statSync(path.join(empDir, f)).isDirectory() && !f.startsWith('.')
-    );
+    const files = fs.readdirSync(empDir).filter(f => f.endsWith('.json'));
 
-    return folders.map(folder => {
-        const files = fs.readdirSync(path.join(empDir, folder))
-            .filter(f => f.startsWith('profile_') && f.endsWith('.json'));
-        if (files.length === 0) return null;
+    return files.map(file => {
         try {
-            return JSON.parse(fs.readFileSync(path.join(empDir, folder, files[0]), 'utf8'));
-        } catch (e) { return null; }
+            return JSON.parse(fs.readFileSync(path.join(empDir, file), 'utf8'));
+        } catch (e) {
+            console.error(`[DB/JSON] Error reading employee file ${file}:`, e.message);
+            return null;
+        }
     }).filter(Boolean);
 }
 

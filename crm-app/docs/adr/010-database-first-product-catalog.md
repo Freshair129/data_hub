@@ -15,6 +15,7 @@ Transition to a **Pure Database-First** approach for the product catalog.
 4.  **Prisma Adapter**: Uses `@prisma/adapter-pg` for robust connectivity.
 
 ## Consequences
+- **Internal Cache Consolidation**: The application now maintains an internal `crm-app/cache/` directory for high-speed local data access and fallback logic, ensuring the project is 100% portable and self-contained. All legacy `../customer` and `../products` references are removed.
 - **Deployment Readiness**: The application no longer depends on local filesystem structures outside of its own root, making it container-ready and cloud-native.
 - **Performance**: Direct database queries via Prisma eliminate file parsing overhead.
 - **Data Integrity**: Enforces strict typing and relational constraints through Prisma schema.

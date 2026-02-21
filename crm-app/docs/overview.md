@@ -36,9 +36,9 @@ npm run dev
 +-----------------------------+   +-------------------------------+
 |     Single Source of Truth  |   |    Local File System (JSON)   |
 |                             |   |                               |
-|        [PostgreSQL]         |   |    +-- [cache/ ] (Fast Read)  |
-|         (Supabase)          |   |    +-- [logs/ ]  (Incidents)  |
-|                             |   |    +-- [customer/ ](Legacy)   |
+|        [PostgreSQL]         |   |    +-- [cache/ ] (Internal) |
+|         (Supabase)          |   |    +-- [logs/ ]  (Incidents) |
+|                             |   |                               |
 +-----------------------------+   +-------------------------------+
 ```
 
@@ -84,11 +84,11 @@ npm run dev
 ---
 
 ## 📂 Directories at a Glance
-- `crm-app/`: Core Web App & API (Single Source of Truth)
-- `scripts/`: Standalone automation scripts
-- `knowledge/`: AI Chatbot knowledge base
-- `archive/`: Legacy files & system archives
-- `logs/`: System incident reports and fallback logs
+- `crm-app/`: Core Web App & API.
+- `crm-app/cache/`: Internal local data mirror & fallback.
+- `docs/`: Technical documentation (ADRs, arc42).
+- `scripts/`: Maintenance & data sync utilities.
+- `logs/`: System activity & checkpoint reports.
 
 ---
 

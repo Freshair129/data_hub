@@ -1,11 +1,6 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-/**
- * BusinessAnalyst - Helper class to prepare data and prompts for Gemini AI
- */
-
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-class BusinessAnalyst {
+export default class BusinessAnalyst {
     constructor(apiKey) {
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -163,6 +158,45 @@ class BusinessAnalyst {
             return [];
         }
     }
+
+    /**
+     * Detects if an agent should be assigned based on chat content
+     */
+    async detectAgentFromChat(messages) {
+        const chatContext = messages.map(m => `${m.from?.name || m.sender}: ${m.message || m.text}`).join('\n');
+
+        const prompt = `
+        Role: Staff Assignment AI for "The V School".
+        Task: Analyze the chat history and determine if a specific staff member/agent should be assigned to this conversation.
+        
+        Context:
+        Common Staff Names: Boss (Developer/Admin), Sales A, Sales B, Jutamat, Pornpon.
+        
+        Chat History:
+        ${chatContext}
+        
+        Logic:
+        1. Look for phrases like "ฝากคุณ...ดูต่อที", "ส่งให้...", "ให้...จัดการ", "Requesting Boss", etc.
+        2. If a staff name is mentioned as someone who should handle the case, return their name.
+        3. Only return a name if there's a clear instruction to assign or consult them.
+        
+        Output Format (JSON Only):
+        {
+            "suggested_agent": "Boss" | "Sales A" | "Jutamat" | null,
+            "justification": "Why this agent was suggested."
+        }
+        `;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(jsonStr);
+        } catch (error) {
+            console.error("Agent Detection Failed:", error);
+            return { suggested_agent: null };
+        }
+    }
 }
 
-module.exports = BusinessAnalyst;

@@ -30,7 +30,7 @@ export async function GET(request) {
             return NextResponse.json({ success: false, error: 'customerId is required' }, { status: 400 });
         }
 
-        const DATA_DIR = path.join(process.cwd(), '../customer');
+        const DATA_DIR = path.join(process.cwd(), 'cache', 'customer');
         let convFile = path.join(DATA_DIR, customerId, `conv_${customerId}.json`);
 
         // If not found directly (maybe customerId is a Conversation ID), search for it
@@ -53,47 +53,24 @@ export async function GET(request) {
         }
 
         const convoData = readJsonFile(convFile);
-        const messages = (convoData?.messages || []).slice(-20); // Last 20 messages for context
+        const messages = (convoData?.messages?.data || convoData?.messages || []).slice(-20); // Support both formats, Last 20 messages
 
         if (messages.length === 0) {
-            return NextResponse.json({ success: true, data: [] });
+            return NextResponse.json({ success: true, data: [], suggested_agent: null });
         }
 
         // 1. Initialize Business Analyst AI
         const analyst = new BusinessAnalyst(apiKey);
 
-        // 2. Extract Products from Chat
-        const extracted = await analyst.extractProductsFromChat(messages);
+        // 2. Extract Products & Suggest Agent
+        const [extracted, agentResult] = await Promise.all([
+            analyst.extractProductsFromChat(messages),
+            analyst.detectAgentFromChat(messages)
+        ]);
 
-        // 3. Match against Catalog
-        // 3. Match against Catalog (Read from products directory)
-        const productsDir = path.join(process.cwd(), '../products');
-        let allCatalogItems = [];
-
-        if (fs.existsSync(productsDir)) {
-            const packagesDir = path.join(productsDir, 'packages');
-            if (fs.existsSync(packagesDir)) {
-                fs.readdirSync(packagesDir)
-                    .filter(f => f.endsWith('.json'))
-                    .forEach(f => {
-                        try {
-                            const data = JSON.parse(fs.readFileSync(path.join(packagesDir, f), 'utf8'));
-                            allCatalogItems.push(data);
-                        } catch (e) { }
-                    });
-            }
-            const coursesDir = path.join(productsDir, 'courses');
-            if (fs.existsSync(coursesDir)) {
-                fs.readdirSync(coursesDir)
-                    .filter(f => f.endsWith('.json'))
-                    .forEach(f => {
-                        try {
-                            const data = JSON.parse(fs.readFileSync(path.join(coursesDir, f), 'utf8'));
-                            allCatalogItems.push(data);
-                        } catch (e) { }
-                    });
-            }
-        }
+        // 3. Match against Catalog (Using Database-First logic)
+        const { getAllProducts } = await import('@/lib/db');
+        const allCatalogItems = await getAllProducts();
 
         const enriched = extracted.map(item => {
             const match = allCatalogItems.find(p =>
@@ -112,6 +89,8 @@ export async function GET(request) {
         return NextResponse.json({
             success: true,
             data: enriched,
+            suggested_agent: agentResult?.suggested_agent || null,
+            justification: agentResult?.justification || null,
             customerId
         });
 
@@ -133,7 +112,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: 'Missing product details' }, { status: 400 });
         }
 
-        const productsDir = path.join(process.cwd(), '../products');
+        const productsDir = path.join(process.cwd(), 'cache', 'products');
 
         // Determine file path based on type (assuming product for now as per original code)
         // Original code pushed to catalog.products. We will write to products/courses/ID.json

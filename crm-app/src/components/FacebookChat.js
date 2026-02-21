@@ -96,14 +96,19 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
         return () => clearInterval(interval);
     }, [isTokenExpired]);
 
-    // Scroll Logic
+    // Scroll Logic: Only scroll if new messages arrived AND user is already near bottom
+    const prevMsgCount = useRef(0);
     useEffect(() => {
         const container = messagesContainerRef.current;
         if (!container) return;
+
+        const isNewMessage = messages.length > prevMsgCount.current;
         const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
-        if (isNearBottom || messages.length <= 20) {
+
+        if (isNewMessage && (isNearBottom || prevMsgCount.current === 0)) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
+        prevMsgCount.current = messages.length;
     }, [messages]);
 
     const fetchConversations = async () => {
@@ -212,6 +217,13 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
             const data = await res.json();
             if (data.success) {
                 setDiscoveredProducts(data.data || []);
+
+                // AI Agent Assignment Suggestion
+                if (data.suggested_agent && data.suggested_agent !== selectedConv.agent) {
+                    if (window.confirm(`AI detects a possible assignment. Assign to "${data.suggested_agent}"?\n\nJustification: ${data.justification}`)) {
+                        handleAssignAgent(data.suggested_agent);
+                    }
+                }
             } else {
                 alert('Discovery failed: ' + data.error);
             }

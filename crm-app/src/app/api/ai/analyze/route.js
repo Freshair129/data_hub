@@ -54,7 +54,7 @@ export async function GET() {
             campaigns = await prisma.campaign.findMany();
         } else {
             // Fallback for customers if prisma unavailable
-            const customerDir = path.join(process.cwd(), '../customer');
+            const customerDir = path.join(process.cwd(), 'cache', 'customer');
             customers = fs.existsSync(customerDir) ? readDirectoryFiles(customerDir) : [];
         }
 
