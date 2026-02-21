@@ -7,15 +7,14 @@ Proposed / Accepted (2026-02-20)
 The system initially relied on a monolithic `catalog.json` file for product and package data. This approach lacked scalability for complex relational data (e.g., packages containing products) and made multi-channel updates difficult. A shift to individual JSON files in `data_hub/products` improved organization, but direct database access was desired for better performance and relational integrity.
 
 ## Decision
-Transition to a **Database-First** approach for the product catalog.
+Transition to a **Pure Database-First** approach for the product catalog.
 
-1.  **Source of Truth**: The PostgreSQL database (Supabase) is now the primary source of truth for the product catalog.
-2.  **Seeding/Sync Mechanism**: Individual JSON files in `data_hub/products` (organized into `courses/` and `packages/`) serve as the source for seeding the database via `scripts/sync_products.ts`.
-3.  **Prisma Adapter**: Use `@prisma/adapter-pg` to ensure robust database connectivity across different environments (local vs. server).
-4.  **Legacy Support**: `catalog.json` is archived (`catalog.json.bak`) and no longer used by the application.
+1.  **Source of Truth**: The PostgreSQL database (Supabase) is the absolute single source of truth for all product and package definitions.
+2.  **Legacy Directory Removal**: The legacy `data_hub/products` directory has been removed. All data previously stored in JSON files (`courses/`, `packages/`) has been committed to the database.
+3.  **Media Consolidation**: All product images (`packages_picture`) have been migrated to the web application's static assets: `crm-app/public/images/products`.
+4.  **Prisma Adapter**: Uses `@prisma/adapter-pg` for robust connectivity.
 
 ## Consequences
-- **Performance**: API routes (`/api/catalog`) now perform direct database queries through Prisma, reducing I/O overhead compared to parsing large JSON files.
-- **Maintenance**: Updates to product data should be made in the `products/` JSON files and then synced to the database using `npm run sync-products` (or equivalent).
-- **Complexity**: Added dependency on `@prisma/adapter-pg` and `pg`.
-- **Integrity**: Enables use of relational features and ACID transactions for orders involving specific products.
+- **Deployment Readiness**: The application no longer depends on local filesystem structures outside of its own root, making it container-ready and cloud-native.
+- **Performance**: Direct database queries via Prisma eliminate file parsing overhead.
+- **Data Integrity**: Enforces strict typing and relational constraints through Prisma schema.

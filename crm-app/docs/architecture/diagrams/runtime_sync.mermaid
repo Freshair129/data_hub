@@ -2,16 +2,27 @@ sequenceDiagram
     participant FB as Facebook Marketing API
     participant PS as marketing_sync.py (Python)
     participant DB as PostgreSQL (Supabase)
-    participant NX as Next.js API sync
+    participant NX as Next.js API/Cron
     participant RD as Redis (BullMQ)
     participant WK as cacheSyncWorker.js
     participant LC as Local JSON Cache
 
-    FB->>PS: Bulk Fetch Data
-    PS->>DB: SQL Upsert Data
-    PS->>NX: Trigger Sync
+    rect rgb(240, 240, 240)
+        Note over PS, FB: Daily Bulk Sync (Legacy/Deep)
+        FB->>PS: Bulk Fetch Data
+        PS->>DB: SQL Upsert Data
+        PS->>NX: Trigger Sync
+    end
+
+    rect rgb(230, 240, 255)
+        Note over NX, FB: Hourly Breakdown Sync (New)
+        NX->>FB: Fetch Hourly Breakdown
+        FB-->>NX: Success
+        NX->>DB: Prisma Upsert AdHourlyMetric
+    end
+
     NX->>RD: Enqueue Job
     RD->>WK: Process Job
-    WK->>DB: Read Latest Records
+    WK->>DB: Read Latest Metrics
     WK->>LC: Write JSON Cache
     Note over LC: Optimized for High Performance UI

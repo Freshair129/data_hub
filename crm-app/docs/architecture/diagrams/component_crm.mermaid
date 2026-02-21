@@ -1,16 +1,25 @@
+// [MermaidChart: 92c29f92-8bae-4099-8012-8734a31f5155]
+// [MermaidChart: e0a42f31-fbb1-49a2-b675-007850abd9a3]
 graph TD
     subgraph Nextjs_App [Next.js Web Application]
         API_Routes[API Routes / App Router]
         UI_Components[React UI Components]
-        Lib_Core[Lib Core: chatService, taskManager, etc.]
+        Lib_Core[Lib Core: chatService, taskManager, marketingService]
         Prisma_Client[Prisma Client / DB Adapter]
         Cache_Sync[Cache Sync Utility]
+        Cron_Scheduler[Cron Scheduler / Instrumentation]
+    end
+
+    subgraph External_APIs [External APIs]
+        FB_API[Facebook Marketing API]
     end
 
     UI_Components -->|Queries| API_Routes
     API_Routes -->|Uses| Lib_Core
     Lib_Core -->|Database Ops| Prisma_Client
     Lib_Core -->|Caching Ops| Cache_Sync
+    Lib_Core -->|Fetch Insights| FB_API
     
+    Cron_Scheduler -->|Triggers Sync| Lib_Core
     Cache_Sync -->|Read/Write| JSON_Cache[(Local JSON Cache)]
     Prisma_Client -->|Read/Write| Postgres[(PostgreSQL)]

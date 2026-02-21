@@ -4,6 +4,26 @@ All notable changes to the CRM project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-21
+
+### Added
+- **Hourly Marketing Synchronization (ADR 013)**: Implemented automated hourly fetching and persistence of Facebook Ad metrics to the database.
+- **ASCII Architecture Visualization**: Added dedicated Data Flow and Pipeline Workflow diagrams to `docs/overview.md` for immediate visual orientation.
+- **Agent Workflow Automation**: Created `.agents/workflows/` for structured slash commands like `/checkpoint` and `/system_architecture`.
+- **Incident Deep Dives**: Added structured incident reporting in `docs/incidents/` to document complex logic anomalies (e.g., attribution logic errors).
+
+### Changed
+- **Pure Database-First Architecture**: Finalized the removal of all legacy product (`data_hub/products`) and marketing (`crm-app/marketing`) file-based storage. All core business data is now queried via Prisma from PostgreSQL.
+- **Media Asset Consolidation**: Migrated all product catalog images from external storage to `crm-app/public/images/products` for static serving.
+- **AI API Refactoring**: Updated `/api/ai/analyze` and `/api/ai/chat` to source product and marketing context exclusively from the database, improving speed and accuracy.
+
+### Fixed
+- **Mermaid Syntax**: Corrected comment syntax in `arc42-main.md` to ensure proper rendering of Level 3 component diagrams.
+- **Prisma Connection Resilience**: Implemented the `PrismaPg` driver adapter to handle long-lived connections for background sync services.
+
+### Removed
+- **Legacy Directories**: Deleted redundant `data_hub/products`, `data_hub/marketing`, and associated file mapping artifacts.
+
 ### Added
 - **Event-Driven Messenger Sync**: Implemented real-time Facebook Messenger webhooks connected to the Python worker for immediate state updates.
 - **Custom ID Formatting & Sessioning (ADR 011)**: Replaced sequential customer IDs with descriptive `TVS_{CH}_{ORIGIN}` identifiers. Implemented 30-minute inactivity timeouts and intent-driven (Ad ID) chat sessions to enable AI-driven episodic summaries.

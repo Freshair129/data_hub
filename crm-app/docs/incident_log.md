@@ -36,6 +36,40 @@ This document records significant logic errors, system failures, and their resol
 
 ---
 
+## 📅 2026-02-18: Simulated Database Connection Failure
+**Ref ID**: `ERR-202602181324-JZJD`
+**Severity**: `CRITICAL`
+**Status**: `RESOLVED` (Test Case)
+
+### 🔴 The Problem (อาการ)
+*   **Message**: `Simulated Database Connection Failure`
+*   **Trace**: Occurred during a test run (`test_error_logger.js`) to verify the system's fallback mechanism.
+
+### 🔍 Root Cause (สาเหตุ)
+*   Manual trigger via test script to ensure the `db.js` fallback logic successfully writes to local `.jsonl` files when Prisma is unreachable.
+
+### ✅ The Solution (วิธีแก้)
+*   Verified that the incident was correctly trapped by the `Auditor` and written to `errors_2026-02-18.jsonl`. No actual system downtime occurred.
+
+---
+
+## 📅 2026-02-18: Attribution Anomaly (TEST-ANOMALY-001)
+**Ref ID**: `ANOM-20260218--001`
+**Severity**: `WARN`
+**Status**: `MONITORING`
+
+### 🔴 The Problem (อาการ)
+*   **Message**: `Customer TEST-ANOMALY-001 entered via 'dinner campaign 2026' but bought NON-Shabu products.`
+*   **Context**: Value: 34,000 THB.
+
+### 🔍 Root Cause (สาเหตุ)
+*   Another instance of the **Loose Attribution Logic** where a customer attracted by a specific campaign (Shabu) converted on a different product (Ramen Course).
+
+### ✅ The Solution (วิธีแก้)
+*   This incident further validates the need for the **strict product-based attribution** logic implemented in ADR-011 and FIX-ATTR-001.
+
+---
+
 ## 📅 2026-02-18: Assistant Tool Failure (Directory "18")
 **Ref ID**: `SYS-ERR-20260218-02`
 **Status**: `INVESTIGATING`

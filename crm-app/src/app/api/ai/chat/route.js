@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import BusinessAnalyst from '@/utils/BusinessAnalyst';
+import { getPrisma, getAllProducts } from '@/lib/db';
 
 // Reuse helper to read JSON files safely
 const readJsonFile = (filePath) => {
@@ -41,17 +42,25 @@ export async function POST(req) {
             return NextResponse.json({ success: false, error: 'Gemini API Key missing' }, { status: 500 });
         }
 
-        // 1. Gather Context
-        const customerDir = path.join(process.cwd(), '../customer');
-        const customers = fs.existsSync(customerDir) ? readDirectoryFiles(customerDir) : [];
+        // 1. Gather Context from DB
+        const prisma = await getPrisma();
 
-        const marketingDir = path.join(process.cwd(), '../marketing/logs/daily');
-        const campaigns = readDirectoryFiles(marketingDir);
+        let customers = [];
+        let campaigns = [];
 
-        const productsDir = path.join(process.cwd(), '../products');
-        const courses = readDirectoryFiles(path.join(productsDir, 'courses'));
-        const packages = readDirectoryFiles(path.join(productsDir, 'packages'));
-        const allProducts = [...courses, ...packages];
+        if (prisma) {
+            customers = await prisma.customer.findMany({
+                include: { inventory: true, intelligence: true }
+            });
+            campaigns = await prisma.campaign.findMany();
+        } else {
+            // Fallback for customers if prisma unavailable
+            const customerDir = path.join(process.cwd(), '../customer');
+            customers = fs.existsSync(customerDir) ? readDirectoryFiles(customerDir) : [];
+        }
+
+        // 2. Fetch Products from DB
+        const allProducts = await getAllProducts();
 
         // 2. Init AI
         const analyst = new BusinessAnalyst(apiKey);

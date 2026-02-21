@@ -1,5 +1,5 @@
 ---
-description: "Update project documentation (ADR, Changelog, Overview), run QA checks, and push to GitHub."
+description: "Update docs, run QA (lint/build), push to GitHub, and log results to /data_hub/logs."
 ---
 
 # Checkpoint Workflow (Professional Edition) 🛡️🚀
@@ -21,7 +21,7 @@ This workflow ensures that the project documentation is up-to-date and that only
 2. Categorize: **Added**, **Changed**, **Fixed**, **Removed**.
 
 ## 4. Update System Overview
-1. Update `doc/overview.md`.
+1. Update `docs/overview.md`.
 2. Check Mermaid diagrams (Architecture, Data Flow) for consistency.
 3. Update **File Structure** and **Key Integrations** tables.
 
@@ -37,6 +37,10 @@ This workflow ensures that the project documentation is up-to-date and that only
 2. Run `git commit -m "checkpoint: docs update and QA verified"`
 3. Run `git push origin main` (or the active branch) to sync with GitHub.
 
-## 7. Completion
+## 7. Recording Results 📝
+// turbo
+1. Append the checkpoint execution result (Date, Git Hash, QA Status) to `/Users/ideab/Desktop/data_hub/logs/checkpoint.log`.
+
+## 8. Completion
 1. Confirm all documents and code are in sync.
 2. Notify the user with a summary of the checkpoint.

@@ -286,6 +286,8 @@ model Ad {
   adSet        AdSet       @relation(fields: [adSetId], references: [id])
   creative     AdCreative? @relation(fields: [creativeId], references: [id])
   experiment   Experiment? @relation(fields: [experimentId], references: [id])
+  dailyMetrics AdDailyMetric[]
+  hourlyMetrics AdHourlyMetric[]
 
   @@index([experimentId])
   @@map("ads")
@@ -336,8 +338,30 @@ model AdDailyMetric {
   revenue     Float    @default(0)
   roas        Float    @default(0)
 
+  ad Ad @relation(fields: [adId], references: [adId])
+
   @@unique([adId, date])
   @@map("ad_daily_metrics")
+}
+
+model AdHourlyMetric {
+  id          String   @id @default(cuid())
+  adId        String   @map("ad_id")
+  date        DateTime @db.Date
+  hour        Int
+  spend       Float
+  impressions Int
+  clicks      Int
+  leads       Int
+  purchases   Int
+  revenue     Float    @default(0)
+  roas        Float    @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  ad Ad @relation(fields: [adId], references: [adId])
+
+  @@unique([adId, date, hour])
+  @@map("ad_hourly_metrics")
 }
 
 model Task {

@@ -22,6 +22,69 @@ export async function GET(request) {
             return NextResponse.json({ error: 'Missing Facebook API credentials' }, { status: 500 });
         }
 
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
+        // 1. Try DB first
+        console.log(`[Hourly API] Checking DB for ${date}...`);
+        const dbHourly = await prisma.adHourlyMetric.findMany({
+            where: {
+                date: new Date(date)
+            },
+            include: {
+                ad: true
+            }
+        });
+
+        if (dbHourly.length > 0) {
+            console.log(`[Hourly API] Found ${dbHourly.length} records in DB. Aggregating...`);
+
+            // Aggregate by hour
+            const hourlyMap = {};
+            for (const item of dbHourly) {
+                const h = item.hour;
+                if (!hourlyMap[h]) {
+                    hourlyMap[h] = {
+                        hour: h,
+                        timeLabel: `${h.toString().padStart(2, '0')}:00`,
+                        spend: 0,
+                        impressions: 0,
+                        clicks: 0,
+                        actions: [],
+                        action_values: []
+                    };
+                }
+                hourlyMap[h].spend += item.spend;
+                hourlyMap[h].impressions += item.impressions;
+                hourlyMap[h].clicks += item.clicks;
+                // Note: We don't reconstruct full actions list from DB yet for simplicity, 
+                // but we could store them as JSON if needed.
+            }
+
+            const fullDay = [];
+            for (let i = 0; i < 24; i++) {
+                fullDay.push(hourlyMap[i] || {
+                    hour: i,
+                    timeLabel: `${i.toString().padStart(2, '0')}:00`,
+                    spend: 0,
+                    impressions: 0,
+                    clicks: 0,
+                    actions: [],
+                    action_values: []
+                });
+            }
+
+            return NextResponse.json({
+                success: true,
+                date,
+                source: 'database',
+                data: fullDay
+            });
+        }
+
+        // 2. Fallback to Live API
+        console.log(`[Hourly API] No DB data. Fetching live from FB for ${date}...`);
+
         // Prepare Time Range for single day
         const timeRange = JSON.stringify({
             since: date,
@@ -29,8 +92,6 @@ export async function GET(request) {
         });
 
         const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/insights?level=account&fields=spend,impressions,clicks,actions,action_values&breakdowns=hourly_stats_aggregated_by_audience_time_zone&time_range=${timeRange}&access_token=${ACCESS_TOKEN}`;
-
-        console.log(`[Hourly API] Fetching for ${date}...`);
 
         const response = await fetch(url);
         const data = await response.json();
@@ -41,10 +102,8 @@ export async function GET(request) {
         }
 
         // Process Data
-        // FB returns hourly stats. The breakdown value is in `hourly_stats_aggregated_by_audience_time_zone` field (e.g., "00:00:00 - 00:59:59")
-
         const hourlyData = data.data.map(item => {
-            const timeRange = item.hourly_stats_aggregated_by_audience_time_zone || ''; // "00:00:00 - 00:59:59"
+            const timeRange = item.hourly_stats_aggregated_by_audience_time_zone || '';
             const hour = parseInt(timeRange.split(':')[0] || '0');
 
             return {
@@ -53,7 +112,6 @@ export async function GET(request) {
                 spend: parseFloat(item.spend || 0),
                 impressions: parseInt(item.impressions || 0),
                 clicks: parseInt(item.clicks || 0),
-                // Parse actions if needed
                 actions: item.actions || [],
                 action_values: item.action_values || []
             };
@@ -81,6 +139,7 @@ export async function GET(request) {
         return NextResponse.json({
             success: true,
             date,
+            source: 'api',
             data: fullDay
         });
 

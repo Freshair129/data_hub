@@ -28,7 +28,20 @@ Describes the system's environment and external interfaces.
 The CRM interacts with students (Customers), Academy staff (Employees), and external platforms like Meta (Facebook/Messenger).
 
 ### 3.2 Technical Context
-![System Context Diagram](./diagrams/context.mermaid)
+```mermaid
+graph TD
+    User([Customer / Employee])
+    System[V School CRM System]
+    Meta[Meta Graph API / Facebook]
+    Supabase[(Supabase / PostgreSQL)]
+    Gemini[Google Gemini AI]
+
+    User -->|Uses| System
+    System -->|Fetches Marketing/Chat Data| Meta
+    System -->|Stores & Retrieves Data| Supabase
+    System -->|Processes Intelligence| Gemini
+    Meta -->|Sends Webhooks| System
+```
 
 ---
 
@@ -43,10 +56,61 @@ The CRM interacts with students (Customers), Academy staff (Employees), and exte
 Detailed decomposition of the system using C4 containers and components.
 
 ### 5.1 Level 2: Containers
-![Container Diagram](./diagrams/container.mermaid)
+```mermaid
+graph TD
+    User([Customer / Employee])
+    
+    subgraph V_School_CRM_System [V School CRM System]
+        Web_App[Next.js App]
+        Python_Worker[Python AI Worker]
+        Redis_Queue[Redis Queue]
+        JSON_Cache[Local JSON Cache]
+    end
+
+    Supabase[(PostgreSQL / Supabase)]
+    Meta[Meta Graph API]
+    Gemini[Google Gemini AI]
+
+    User -->|Interacts with| Web_App
+    Web_App -->|Reads/Writes| Supabase
+    Web_App -->|Fast Reads| JSON_Cache
+    Web_App -->|Enqueues Jobs| Redis_Queue
+    
+    Redis_Queue -->|Processed by| Python_Worker
+    Python_Worker -->|Syncs/Responds| Meta
+    Python_Worker -->|RAG / AI Analysis| Gemini
+    Python_Worker -->|Updates| Supabase
+    
+    Meta -->|Webhooks| Web_App
+```
 
 ### 5.2 Level 3: Components (CRM Web App)
-![Component Diagram](./diagrams/component_crm.mermaid)
+```mermaid
+%% [MermaidChart: e0a42f31-fbb1-49a2-b675-007850abd9a3]
+graph TD
+    subgraph Nextjs_App [Next.js Web Application]
+        API_Routes[API Routes / App Router]
+        UI_Components[React UI Components]
+        Lib_Core[Lib Core: chatService, taskManager, marketingService]
+        Prisma_Client[Prisma Client / DB Adapter]
+        Cache_Sync[Cache Sync Utility]
+        Cron_Scheduler[Cron Scheduler / Instrumentation]
+    end
+
+    subgraph External_APIs [External APIs]
+        FB_API[Facebook Marketing API]
+    end
+
+    UI_Components -->|Queries| API_Routes
+    API_Routes -->|Uses| Lib_Core
+    Lib_Core -->|Database Ops| Prisma_Client
+    Lib_Core -->|Caching Ops| Cache_Sync
+    Lib_Core -->|Fetch Insights| FB_API
+    
+    Cron_Scheduler -->|Triggers Sync| Lib_Core
+    Cache_Sync -->|Read/Write| JSON_Cache[(Local JSON Cache)]
+    Prisma_Client -->|Read/Write| Postgres[(PostgreSQL)]
+```
 
 ---
 
@@ -54,7 +118,36 @@ Detailed decomposition of the system using C4 containers and components.
 Behavior of the system during specific scenarios.
 
 ### 6.1 Marketing Data Synchronization
-![Runtime Sync Diagram](./diagrams/runtime_sync.mermaid)
+```mermaid
+sequenceDiagram
+    participant FB as Facebook Marketing API
+    participant PS as marketing_sync.py (Python)
+    participant DB as PostgreSQL (Supabase)
+    participant NX as Next.js API/Cron
+    participant RD as Redis (BullMQ)
+    participant WK as cacheSyncWorker.js
+    participant LC as Local JSON Cache
+
+    rect rgb(240, 240, 240)
+        Note over PS, FB: Daily Bulk Sync (Legacy/Deep)
+        FB->>PS: Bulk Fetch Data
+        PS->>DB: SQL Upsert Data
+        PS->>NX: Trigger Sync
+    end
+
+    rect rgb(230, 240, 255)
+        Note over NX, FB: Hourly Breakdown Sync (New)
+        NX->>FB: Fetch Hourly Breakdown
+        FB-->>NX: Success
+        NX->>DB: Prisma Upsert AdHourlyMetric
+    end
+
+    NX->>RD: Enqueue Job
+    RD->>WK: Process Job
+    WK->>DB: Read Latest Metrics
+    WK->>LC: Write JSON Cache
+    Note over LC: Optimized for High Performance UI
+```
 
 ---
 

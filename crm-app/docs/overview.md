@@ -16,12 +16,79 @@ npm run dev
 
 ---
 
+## 📊 System Architecture Overview
+
+### 1. Data Flow Diagram
+```text
+[External Users/Customers]                 [Facebook Ecosystem]
+         |                                          |
+         | (Web Requests / Triggers)                | (Webhooks / API Sync)
+         v                                          v
++-----------------------------------------------------------------+
+|                        CRM Web Application                      |
+|                                                                 |
+|   [API Routes] <--- (Read/Write) ---> [Prisma ORM (db.js)]      |
+|                                                                 |
++-----------------------------------------------------------------+
+                           |         |
+      (Primary Data Flow)  |         |  (Fallback / Cache / Legacy Flow)
+                           v         v
++-----------------------------+   +-------------------------------+
+|     Single Source of Truth  |   |    Local File System (JSON)   |
+|                             |   |                               |
+|        [PostgreSQL]         |   |    +-- [cache/ ] (Fast Read)  |
+|         (Supabase)          |   |    +-- [logs/ ]  (Incidents)  |
+|                             |   |    +-- [customer/ ](Legacy)   |
++-----------------------------+   +-------------------------------+
+```
+
+### 2. Pipeline Work Flow (Sync & Analysis)
+```text
+[Phase 1: Ingestion & Sync]
+      Facebook API / Webhooks
+              |
+              v
+      +-----------------+
+      | Sync Services   | (e.g., syncMarketingData, syncProducts)
+      +-----------------+
+              |
+              v (Upsert Data)
+      +-----------------+
+      |  PostgreSQL DB  | <--- [Source of Truth for Products & Marketing]
+      +-----------------+
+
+              |
+[Phase 2: Data Extraction & Processing]
+              |
+              v (Query via Prisma: getAllProducts, findMany)
+      +-----------------+
+      | Context Builder | (Prepares Data for AI)
+      +-----------------+
+              |
+              v (Structured Context: JSON/Text)
+      +-----------------+
+      | Gemini AI Model | (BusinessAnalyst.js)
+      +-----------------+
+
+              |
+[Phase 3: Output Generation]
+              |
+              v
+   +-----------------------+
+   | Executive Summary     |
+   | Intelligence Insights |  <--- (Sent as Response to CRM Frontend)
+   | Recommendations       |
+   +-----------------------+
+```
+
+---
+
 ## 📂 Directories at a Glance
-- `crm-app/`: Core Web App & API
+- `crm-app/`: Core Web App & API (Single Source of Truth)
 - `scripts/`: Standalone automation scripts
-- `products/`: Product catalog source files
 - `knowledge/`: AI Chatbot knowledge base
-- `archive/`: Legacy files
+- `archive/`: Legacy files & system archives
+- `logs/`: System incident reports and fallback logs
 
 ---
 

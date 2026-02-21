@@ -1,21 +1,35 @@
 export async function register() {
     if (process.env.NEXT_RUNTIME === 'nodejs') {
-        const { syncMarketingData } = await import('./services/marketingService');
+        const { syncMarketingData, syncHourlyMarketingData } = await import('./services/marketingService');
 
-        console.log('Starting Marketing Data Sync Scheduler...');
+        const cron = await import('node-cron');
 
-        // Initial sync on startup (optional, maybe skip to avoid slow startup)
-        // await syncMarketingData(1); 
+        console.log('Starting Marketing Data Sync Scheduler (Cron Mode)...');
 
-        // Schedule hourly sync (3600000 ms)
-        setInterval(async () => {
-            console.log(`[${new Date().toISOString()}] Running background marketing sync...`);
+        // Schedule daily sync at the top of every hour (0 minutes past the hour)
+        cron.schedule('0 * * * *', async () => {
+            console.log(`[${new Date().toISOString()}] Running background daily marketing sync (Cron)...`);
             try {
                 const result = await syncMarketingData(1); // Sync last 1 month primarily for updates
-                console.log(`[${new Date().toISOString()}] Background sync complete:`, result.message);
+                console.log(`[${new Date().toISOString()}] Daily sync complete:`, result.message);
             } catch (err) {
-                console.error(`[${new Date().toISOString()}] Background sync failed:`, err);
+                console.error(`[${new Date().toISOString()}] Daily sync failed:`, err);
             }
-        }, 3600000);
+        });
+
+        // Schedule hourly breakdown sync at 5 minutes past every hour
+        cron.schedule('5 * * * *', async () => {
+            console.log(`[${new Date().toISOString()}] Running background hourly breakdown sync (Cron)...`);
+            try {
+                const result = await syncHourlyMarketingData();
+                if (result.success) {
+                    console.log(`[${new Date().toISOString()}] Hourly sync complete: Upserted ${result.count} records.`);
+                } else {
+                    console.error(`[${new Date().toISOString()}] Hourly sync failed:`, result.error);
+                }
+            } catch (err) {
+                console.error(`[${new Date().toISOString()}] Hourly sync error:`, err);
+            }
+        });
     }
 }
