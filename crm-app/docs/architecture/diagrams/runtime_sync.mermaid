@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant FB as Facebook Marketing API
+    participant PS as marketing_sync.py (Python)
+    participant DB as PostgreSQL (Supabase)
+    participant NX as Next.js API sync
+    participant RD as Redis (BullMQ)
+    participant WK as cacheSyncWorker.js
+    participant LC as Local JSON Cache
+
+    FB->>PS: Bulk Fetch Data
+    PS->>DB: SQL Upsert Data
+    PS->>NX: Trigger Sync
+    NX->>RD: Enqueue Job
+    RD->>WK: Process Job
+    WK->>DB: Read Latest Records
+    WK->>LC: Write JSON Cache
+    Note over LC: Optimized for High Performance UI

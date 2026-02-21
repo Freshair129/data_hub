@@ -1,0 +1,25 @@
+graph TD
+    User([Customer / Employee])
+    
+    subgraph V_School_CRM_System [V School CRM System]
+        Web_App[Next.js App]
+        Python_Worker[Python AI Worker]
+        Redis_Queue[Redis Queue]
+        JSON_Cache[Local JSON Cache]
+    end
+
+    Supabase[(PostgreSQL / Supabase)]
+    Meta[Meta Graph API]
+    Gemini[Google Gemini AI]
+
+    User -->|Interacts with| Web_App
+    Web_App -->|Reads/Writes| Supabase
+    Web_App -->|Fast Reads| JSON_Cache
+    Web_App -->|Enqueues Jobs| Redis_Queue
+    
+    Redis_Queue -->|Processed by| Python_Worker
+    Python_Worker -->|Syncs/Responds| Meta
+    Python_Worker -->|RAG / AI Analysis| Gemini
+    Python_Worker -->|Updates| Supabase
+    
+    Meta -->|Webhooks| Web_App

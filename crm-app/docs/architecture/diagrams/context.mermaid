@@ -1,0 +1,12 @@
+graph TD
+    User([Customer / Employee])
+    System[V School CRM System]
+    Meta[Meta Graph API / Facebook]
+    Supabase[(Supabase / PostgreSQL)]
+    Gemini[Google Gemini AI]
+
+    User -->|Uses| System
+    System -->|Fetches Marketing/Chat Data| Meta
+    System -->|Stores & Retrieves Data| Supabase
+    System -->|Processes Intelligence| Gemini
+    Meta -->|Sends Webhooks| System

@@ -13,7 +13,11 @@ All notable changes to the CRM project will be documented in this file.
 - **Full Offline Cache**: Implemented `clone_db_to_local.ts` to mirror the entire remote database and media assets to a local JSON cache.
 - **Adaptive Database Connector**: Enhanced `src/lib/db.js` with automatic offline fallback, ensuring zero UI disruption during connection loss.
 - **Career Courses**: Added "Sushi Career Creation" (4900 THB) and "Ramen Career Creation" (4900 THB) to catalog.
-- **Documentation**: Added ADR 009 (Hybrid Cache & Marketing Sync Strategy) and ADR 011 (Custom ID Formatting and Smarter Sessioning).
+- **arc42 Documentation Framework (ADR 012)**: Adopted the arc42 framework for structured technical documentation. Centralized all architecture details in `crm-app/docs/architecture/arc42-main.md`.
+- **C4 Model Diagrams**: Extracted all system diagrams into standalone Mermaid files using the C4 Model (Standard V2) for better maintainability and multi-level visualization.
+- **Project Structure Reorganization**: Consolidated root-level directories. Moved legacy data and scripts into structured `archive/`, `scripts/`, and `docs/` folders. Established `data_hub/` as the single Git repository root.
+- **Employee Data Migration**: Migrated legacy employee profiles from root-level JSON files into the PostgreSQL database.
+- **Cleanup**: Permanently removed obsolete root-level `customer/` and `employee/` directories, following data migration and cache verification.
 - **Quality Assurance**: Added `verify_offline_cache.ts` for automated fallback validation.
 
 ### Changed
