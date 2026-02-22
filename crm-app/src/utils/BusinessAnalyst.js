@@ -163,6 +163,38 @@ export default class BusinessAnalyst {
      * Detects if an agent should be assigned based on chat content
      */
     async detectAgentFromChat(messages, staffList = []) {
+        // 1. Signature-based Detection (Priority)
+        // Patterns:
+        // - [Admin Name] กำหนดการสนทนานี้ให้กับ [Target Name]
+        // - ระบบมอบหมายแชทนี้ให้กับ [Admin Name] ผ่านระบบอัตโนมัติ
+        const assignmentRegex = [
+            /(.+) กำหนดการสนทนานี้ให้กับ (.+)/,
+            /ระบบมอบหมายแชทนี้ให้กับ (.+) ผ่านระบบอัตโนมัติ/
+        ];
+
+        for (const msg of messages) {
+            const text = msg.message || msg.text || '';
+            for (const regex of assignmentRegex) {
+                const match = text.match(regex);
+                if (match) {
+                    // If pattern 1: index 2 is the target. If pattern 2: index 1 is the target.
+                    const rawTarget = regex.source.includes('ระบบมอบหมาย') ? match[1] : match[2];
+                    const targetName = rawTarget.trim();
+
+                    // Match against staffList if provided
+                    if (staffList.length > 0) {
+                        const matched = staffList.find(s =>
+                            targetName.toLowerCase().includes(s.toLowerCase()) ||
+                            s.toLowerCase().includes(targetName.toLowerCase())
+                        );
+                        if (matched) return { suggested_agent: matched, justification: `Meta Assignment Signature: ${text}` };
+                    }
+                    return { suggested_agent: targetName, justification: `Meta Assignment Signature: ${text}` };
+                }
+            }
+        }
+
+        // 2. AI-based Detection (Fallback)
         const chatContext = messages.map(m => `${m.from?.name || m.sender}: ${m.message || m.text}`).join('\n');
 
         const staffNames = staffList.length > 0

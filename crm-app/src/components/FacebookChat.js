@@ -489,7 +489,33 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
             {selectedConv && (
                 <div className="w-80 border-l border-white/5 bg-[#0A1A2F] flex flex-col p-6 space-y-8 overflow-y-auto custom-scrollbar">
                     <div className="border-b border-white/5 pb-6">
-                        <button onClick={() => onViewCustomer && onViewCustomer(selectedConv.customer)} className="w-full py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all">
+                        <button
+                            onClick={() => {
+                                if (onViewCustomer) {
+                                    if (selectedConv.customer) {
+                                        onViewCustomer(selectedConv.customer);
+                                    } else {
+                                        // Pass a fallback profile using Facebook Data
+                                        const fbData = selectedConv.participants?.data?.[0] || {};
+                                        onViewCustomer({
+                                            customer_id: 'NEW_LEAD_' + (fbData.id || Date.now()),
+                                            profile: {
+                                                first_name: fbData.name || 'Unknown',
+                                                last_name: '',
+                                                status: 'Lead',
+                                                membership_tier: 'GUEST',
+                                                lifecycle_stage: 'Lead',
+                                            },
+                                            contact_info: {
+                                                facebook_id: fbData.id
+                                            },
+                                            isTemporary: true
+                                        });
+                                    }
+                                }
+                            }}
+                            className="w-full py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all"
+                        >
                             <i className="fas fa-id-card"></i> View Full Profile
                         </button>
                     </div>
