@@ -1,69 +1,161 @@
 import { NextResponse } from 'next/server';
+import { getPrisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * API Route to fetch all ads for the connected Facebook Ad Account
+ * API Route to fetch all ads from the PostgreSQL Database
+ * Replaces live Facebook API fetching with fast local DB queries.
  */
 export async function GET(request) {
     try {
-        const ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
-        const AD_ACCOUNT_ID = process.env.FB_AD_ACCOUNT_ID;
-
-        if (!ACCESS_TOKEN || !AD_ACCOUNT_ID) {
-            return NextResponse.json({ error: 'Facebook credentials not configured' }, { status: 400 });
-        }
-
-        // Fetch ads with basic info and thumbnails
         const { searchParams } = new URL(request.url);
-        const range = searchParams.get('range') || 'maximum';
-        const preset = range === 'last_30d' ? 'last_30d' : 'maximum';
+        const range = searchParams.get('range') || 'last_30d';
+        const status = searchParams.get('status') || '';
+        const since = searchParams.get('since');
+        const until = searchParams.get('until');
 
-        // Optimized query: Use date_preset for dynamic range data and include action_values for ROAS
-        const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/ads?fields=name,status,campaign_id,adset_id,created_time,created_by,creative{thumbnail_url,image_url},insights.date_preset(${preset}){spend,impressions,cpm,ctr,cpc,clicks,actions,action_values,cost_per_action_type}&limit=200&access_token=${ACCESS_TOKEN}`;
+        const prisma = await getPrisma();
 
-        const response = await fetch(url);
-        const data = await response.json();
+        // ── Check for Single Ad Lookup ──
+        const adId = searchParams.get('id');
+        if (adId) {
+            const ad = await prisma.ad.findUnique({
+                where: { adId: adId },
+                include: {
+                    adSet: {
+                        include: {
+                            campaign: true
+                        }
+                    },
+                    creative: true
+                }
+            });
 
-        if (!response.ok) {
-            console.error('Facebook Ads API Error:', data);
+            if (!ad) {
+                return NextResponse.json({ success: false, error: 'Ad not found' }, { status: 404 });
+            }
+
             return NextResponse.json({
-                success: false,
-                error: data.error?.message || 'Failed to fetch ads',
-                errorCode: data.error?.code
-            }, { status: 500 });
+                success: true,
+                data: {
+                    id: ad.adId,
+                    name: ad.name,
+                    status: ad.status,
+                    campaign_name: ad.adSet?.campaign?.name,
+                    adset_name: ad.adSet?.name,
+                    thumbnail: ad.creative?.imageUrl,
+                    image: ad.creative?.imageUrl
+                }
+            });
         }
 
-        // Simplify and flatten ad data
-        const ads = (data.data || []).map(ad => ({
-            id: ad.id,
-            name: ad.name,
-            status: ad.status,
-            campaign_id: ad.campaign_id,
-            adset_id: ad.adset_id,
-            created_time: ad.created_time,
-            updated_time: ad.updated_time,
-            created_by: ad.created_by ? (ad.created_by.name || 'Unknown') : null,
-            updated_by: ad.updated_by ? (ad.updated_by.name || 'Unknown') : null,
+        // ── Handle Date Bounds for Daily Metrics ──
+        let startDate, endDate;
+        if (since && until) {
+            startDate = new Date(since);
+            endDate = new Date(until);
+            // Include entire end date
+            endDate.setHours(23, 59, 59, 999);
+        } else {
+            const now = new Date();
+            endDate = new Date(now);
+            startDate = new Date(now);
+            if (range === 'today') {
+                startDate.setHours(0, 0, 0, 0);
+            } else if (range === 'yesterday') {
+                startDate.setDate(now.getDate() - 1);
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setDate(now.getDate() - 1);
+                endDate.setHours(23, 59, 59, 999);
+            } else if (range === 'this_month') {
+                startDate.setDate(1);
+                startDate.setHours(0, 0, 0, 0);
+            } else if (range === 'last_month') {
+                startDate.setMonth(now.getMonth() - 1);
+                startDate.setDate(1);
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setDate(0); // last day of previous month
+                endDate.setHours(23, 59, 59, 999);
+            } else if (range === 'last_30d') {
+                startDate.setDate(now.getDate() - 30);
+            } else if (range === 'last_90d') {
+                startDate.setDate(now.getDate() - 90);
+            } else {
+                startDate = new Date('2000-01-01'); // maximum
+            }
+        }
 
-            thumbnail: ad.creative?.thumbnail_url || ad.creative?.image_url,
-            image: ad.creative?.image_url || ad.creative?.thumbnail_url,
-            creative_name: ad.creative?.name,
-            // Latest insights from the core fields
-            spend: parseFloat(ad.insights?.data?.[0]?.spend || 0),
-            impressions: parseInt(ad.insights?.data?.[0]?.impressions || 0),
-            cpm: parseFloat(ad.insights?.data?.[0]?.cpm || 0),
-            ctr: parseFloat(ad.insights?.data?.[0]?.ctr || 0),
-            cpc: parseFloat(ad.insights?.data?.[0]?.cpc || 0),
-            clicks: parseInt(ad.insights?.data?.[0]?.clicks || 0),
-            actions: ad.insights?.data?.[0]?.actions || [],
-            action_values: ad.insights?.data?.[0]?.action_values || [],
-            cost_per_action_type: ad.insights?.data?.[0]?.cost_per_action_type || []
-        }));
+        const buildStatusFilter = () => {
+            if (!status) return undefined;
+            const statuses = status.split(',').map(s => s.trim());
+            return { in: statuses };
+        };
+
+        const ads = await prisma.ad.findMany({
+            where: {
+                status: buildStatusFilter(),
+            },
+            include: {
+                adSet: {
+                    include: {
+                        campaign: true
+                    }
+                },
+                creative: true,
+                dailyMetrics: {
+                    where: {
+                        date: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                spend: 'desc'
+            }
+        });
+
+        const formattedAds = ads.map(ad => {
+            // Aggregate metrics for the requested period
+            const periodSpend = ad.dailyMetrics.reduce((sum, m) => sum + m.spend, 0);
+            const periodImpressions = ad.dailyMetrics.reduce((sum, m) => sum + m.impressions, 0);
+            const periodClicks = ad.dailyMetrics.reduce((sum, m) => sum + m.clicks, 0);
+            const periodLeads = ad.dailyMetrics.reduce((sum, m) => sum + m.leads, 0);
+            const periodPurchases = ad.dailyMetrics.reduce((sum, m) => sum + m.purchases, 0);
+
+            return {
+                id: ad.adId,
+                name: ad.name,
+                status: ad.status,
+                campaign_id: ad.adSet?.campaign?.campaignId,
+                adset_id: ad.adSet?.adSetId,
+                created_time: ad.createdAt,
+                updated_time: ad.updatedAt,
+
+                thumbnail: ad.creative?.imageUrl,
+                image: ad.creative?.imageUrl,
+                creative_name: ad.creative?.name,
+
+                start_time: ad.adSet?.campaign?.startDate || ad.createdAt,
+                stop_time: ad.adSet?.campaign?.endDate || null,
+
+                // Returns aggregated insights instead of lifetime insights
+                spend: periodSpend,
+                impressions: periodImpressions,
+                clicks: periodClicks,
+                leads: periodLeads,
+                purchases: periodPurchases,
+            };
+        });
+
+        // Optional: Filter out ads that had 0 spend in this period if a specific period was requested?
+        // Let's keep all matching status for now, the frontend will filter based on `.spend > 0`.
 
         return NextResponse.json({
             success: true,
-            data: ads
+            data: formattedAds
         });
 
     } catch (error) {

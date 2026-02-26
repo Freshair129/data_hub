@@ -107,7 +107,7 @@ export function readCacheList(entity) {
                         if (!fs.existsSync(profilePath)) return null;
                         const data = JSON.parse(fs.readFileSync(profilePath, 'utf-8'));
 
-                        // Merge wallet, inventory, and cart if they exist for legacy compatibility in UI
+                        // Merge wallet, inventory, and cart if they exist
                         const walletPath = path.join(dir, folder, 'wallet.json');
                         const invPath = path.join(dir, folder, 'inventory.json');
                         const cartPath = path.join(dir, folder, 'cart.json');
@@ -124,6 +124,7 @@ export function readCacheList(entity) {
                             const cartData = JSON.parse(fs.readFileSync(cartPath, 'utf-8'));
                             data.cart = cartData;
                         }
+
 
                         return data;
                     } catch { return null; }
@@ -168,13 +169,15 @@ export function writeCustomerCache(id, data) {
             lastName: data.lastName || data.profile?.last_name,
             nickName: data.nickName || data.profile?.nick_name,
             status: data.status,
-            membershipTier: data.membershipTier,
-            lifecycleStage: data.lifecycleStage,
+            membershipTier: data.membershipTier || data.profile?.membership_tier,
+            lifecycleStage: data.lifecycleStage || data.profile?.lifecycle_stage,
+            agent: data.profile?.agent || data.assignedAgent || data.intelligence?.agent || 'Unassigned',
             email: data.email,
             phonePrimary: data.phonePrimary,
             facebookId: data.facebookId,
+            profilePicture: data.profilePicture || data.profile?.profile_picture,
+            joinDate: data.joinDate || data.profile?.join_date,
             intelligence: data.intelligence,
-            // ... add other essential profile fields
         };
         fs.writeFileSync(path.join(dir, 'profile.json'), JSON.stringify(profile, null, 2));
 

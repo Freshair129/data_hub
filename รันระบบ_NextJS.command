@@ -31,7 +31,15 @@ fi
 echo "✨ Starting Development Server..."
 cd crm-app
 
-# 4. Run Next.js and open browser automatically
+# 4. Ensure Infrastructure (Redis/Postgres) is running
+if command -v docker &> /dev/null && [ -f "docker-compose.yml" ]; then
+    echo "🐳 Starting Infrastructure (Redis & Postgres)..."
+    docker compose up -d
+else
+    echo "⚠️ Warning: Docker or docker-compose.yml not found. Redis-dependent features may fail."
+fi
+
+# 5. Run Next.js and open browser automatically
 # Note: Next.js usually runs on 3000.
 (sleep 5 && open "http://localhost:3000") &
 

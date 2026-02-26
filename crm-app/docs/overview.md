@@ -20,42 +20,50 @@ npm run dev
 
 ### 1. Data Flow Diagram
 ```text
-[External Users/Customers]                 [Facebook Ecosystem]
-         |                                          |
-         | (Web Requests / Triggers)                | (Webhooks / API Sync)
-         v                                          v
-+-----------------------------------------------------------------+
-|                        CRM Web Application                      |
-|                                                                 |
-|   [API Routes] <--- (Read/Write) ---> [Prisma ORM (db.js)]      |
-|                                                                 |
-+-----------------------------------------------------------------+
-                           |         |
-      (Primary Data Flow)  |         |  (Fallback / Cache / Legacy Flow)
-                           v         v
-+-----------------------------+   +-------------------------------+
-|     Single Source of Truth  |   |    Local File System (JSON)   |
-|                             |   |                               |
-|        [PostgreSQL]         |   |    +-- [cache/ ] (Internal) |
-|         (Supabase)          |   |    +-- [logs/ ]  (Incidents) |
-|                             |   |                               |
-+-----------------------------+   +-------------------------------+
+[External Users/Customers]                 [Facebook Ecosystem]   [LINE Platform]
+         |                                          |                    |
+         | (Web Requests)                           | (Webhooks)         | (Webhooks / Push API)
+         v                                          v                    v
++-----------------------------------------------------------------+-----------+
+|                        CRM Web Application                                  |
+|                                                                             |
+|   [API Routes] <--- (Read/Write) ---> [Prisma ORM (db.js)]                 |
+|        ^                                       |                            |
+|        | (Event Processing)                    v                            |
+|   [BullMQ / Redis] <------------------ [Webhook Listeners]                  |
+|                                        (FB + LINE)                          |
++-----------------------------------------------------------------------------+
+                           |         |                    |
+      (Primary Data Flow)  |         |                    | (Outbound Alerts)
+                           v         v                    v
++-----------------------------+   +------------------+  +-------------------+
+|     Single Source of Truth  |   | Local File Cache |  | LINE Messaging    |
+|        [PostgreSQL]         |   |   [cache/]       |  | (Flex Messages,   |
+|         (Supabase)          |   |   [logs/]        |  |  Push Alerts)     |
++-----------------------------+   +------------------+  +-------------------+
 ```
 
-### 2. Pipeline Work Flow (Sync & Analysis)
+### 2. Pipeline Work Flow (Event-Driven Sync)
 ```text
-[Phase 1: Ingestion & Sync]
-      Facebook API / Webhooks
-              |
-              v
-      +-----------------+
-      | Sync Services   | (e.g., syncMarketingData, syncProducts)
-      +-----------------+
-              |
-              v (Upsert Data)
-      +-----------------+
-      |  PostgreSQL DB  | <--- [Source of Truth for Products & Marketing]
-      +-----------------+
+[Phase 1: Ingestion]
+    FB Webhooks (Real-time)  OR  Cron Job (Hourly Reconciliation)
+              |                          |
+              +-----------+--------------+
+                          |
+                          v
+                  +-----------------+
+                  |  Event Queue    | (BullMQ / Redis)
+                  +-----------------+
+                          |
+                          v
+                  +-----------------+
+                  | Sync Services   | (chatService, marketingService)
+                  +-----------------+
+                          |
+                          v (Upsert Data)
+                  +-----------------+
+                  |  PostgreSQL DB  |
+                  +-----------------+
 
               |
 [Phase 2: Data Extraction & Processing]

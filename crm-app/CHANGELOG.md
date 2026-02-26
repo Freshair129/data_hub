@@ -4,6 +4,12 @@ All notable changes to the CRM project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-23
+
+### Fixed
+- **Agent Filter Logic**: Resolved issue where the agent filter in the customer dashboard was empty. Implemented relational linking between conversations and customers in Prisma and robust agent enrichment fallback in the API.
+
+
 ## [0.3.0] - 2026-02-21
 
 ### Added

@@ -31,7 +31,7 @@ let _prisma = null;
 export async function getPrisma() {
     if (!_prisma) {
         try {
-            const { PrismaClient } = await import('@prisma/client');
+            const { PrismaClient } = await import('../generated/prisma-client/index.js');
 
             const connectionString = process.env.DATABASE_URL;
             if (!connectionString) throw new Error('DATABASE_URL is not set');
@@ -50,13 +50,41 @@ export async function getPrisma() {
     return _prisma;
 }
 
+/**
+ * Resolves an agent name from conversation content if assignedAgent is null.
+ */
+function resolveAgentFromContent(messages) {
+    if (!messages || !Array.isArray(messages)) return null;
+    const assignmentPatterns = [
+        /กำหนดการสนทนานี้ให้กับ (.*)$/,
+        /ระบบมอบหมายแชทนี้ให้กับ (.*) ผ่านระบบอัตโนมัติ/,
+        /assigned this conversation to (.*)$/,
+        /assigned this chat to (.*)$/
+    ];
+    for (let i = messages.length - 1; i >= 0; i--) {
+        const content = messages[i]?.content || "";
+        for (const pattern of assignmentPatterns) {
+            const match = content.match(pattern);
+            if (match && match[1]) return match[1].trim();
+        }
+    }
+    return null;
+}
+
 export async function getAllCustomers() {
     if (DB_ADAPTER === 'prisma') {
         const prisma = await getPrisma();
         if (prisma) {
             try {
-                return await prisma.customer.findMany({
-                    include: { orders: true, inventory: true, timeline: true, cart: { include: { product: true } } }
+                const customers = await prisma.customer.findMany({
+                    include: { orders: true, inventory: true, timeline: true, cart: { include: { product: true } }, conversations: { take: 1, orderBy: { updatedAt: 'desc' }, select: { assignedAgent: true, messages: { take: 10, orderBy: { createdAt: 'desc' } } } } }
+                });
+                // Merge conversation agent into top-level for easy access
+                return customers.map(c => {
+                    const conv = c.conversations?.[0];
+                    const convAgent = conv?.assignedAgent || resolveAgentFromContent(conv?.messages);
+                    const intelAgent = (typeof c.intelligence === 'object' && c.intelligence !== null) ? c.intelligence.agent : undefined;
+                    return { ...c, agent: intelAgent || convAgent || 'Unassigned' };
                 });
             } catch (e) {
                 console.warn('[DB] Prisma query failed, falling back to Cache:', e.message);
@@ -66,7 +94,14 @@ export async function getAllCustomers() {
 
     // Cache/JSON Fallback using cacheSync
     const cached = readCacheList('customer');
-    if (cached.length > 0) return cached;
+    if (cached.length > 0) {
+        return cached.map(c => {
+            const conv = c.conversations?.[0];
+            const convAgent = conv?.assignedAgent || resolveAgentFromContent(conv?.messages);
+            const intelAgent = (typeof c.intelligence === 'object' && c.intelligence !== null) ? c.intelligence.agent : undefined;
+            return { ...c, agent: intelAgent || convAgent || 'Unassigned' };
+        });
+    }
 
     // Legacy JSON Fallback (data_hub/)
     return getAllCustomersFromJSON();
@@ -116,6 +151,45 @@ export async function getConversationById(conversationId) {
         }
     }
     return null;
+}
+
+export async function createTask(taskData) {
+    if (DB_ADAPTER === 'prisma') {
+        const prisma = await getPrisma();
+        if (prisma) {
+            try {
+                // Find internal customer ID from customerId string
+                const customer = await prisma.customer.findUnique({
+                    where: { customerId: taskData.customerId }
+                });
+
+                return await prisma.task.create({
+                    data: {
+                        taskId: taskData.taskId || `TSK-${Date.now()}`,
+                        title: taskData.title,
+                        description: taskData.description,
+                        type: taskData.type || 'FOLLOW_UP',
+                        priority: taskData.priority || 'MEDIUM',
+                        status: 'PENDING',
+                        aiGenerated: taskData.aiGenerated || false,
+                        aiContext: taskData.aiContext || {},
+                        customer: customer ? { connect: { id: customer.id } } : undefined
+                    }
+                });
+            } catch (e) {
+                console.error('[DB] Prisma createTask failed:', e.message);
+            }
+        }
+    }
+
+    // JSON Fallback
+    const taskDir = path.join(DATA_DIR, 'tasks');
+    if (!fs.existsSync(taskDir)) fs.mkdirSync(taskDir, { recursive: true });
+    const taskId = taskData.taskId || `TSK-${Date.now()}`;
+    const filePath = path.join(taskDir, `${taskId}.json`);
+    const finalTask = { ...taskData, taskId, status: 'PENDING', createdAt: new Date().toISOString() };
+    fs.writeFileSync(filePath, JSON.stringify(finalTask, null, 4));
+    return finalTask;
 }
 
 export async function getCustomerById(customerId) {
@@ -477,6 +551,12 @@ function mapCustomerToPrisma(json) {
     const s = json.social_profiles?.facebook || {};
     const w = json.wallet || {};
 
+    // Merge agent into intelligence so it survives the DB round-trip
+    const intel = { ...(json.intelligence || {}) };
+    if (p.agent && p.agent !== 'Unassigned') {
+        intel.agent = p.agent;
+    }
+
     return {
         customerId: json.customer_id,
         memberId: p.member_id || null,
@@ -491,12 +571,12 @@ function mapCustomerToPrisma(json) {
         joinDate: p.join_date ? new Date(p.join_date) : null,
         email: c.email || null,
         phonePrimary: c.phone_primary || null,
-        facebookId: s.id || null,
-        facebookName: s.name || null,
+        facebookId: s.id || c.facebook_id || null,
+        facebookName: s.name || c.facebook || null,
         walletBalance: w.balance || 0,
         walletPoints: w.points || 0,
         walletCurrency: w.currency || 'THB',
-        intelligence: json.intelligence || {},
+        intelligence: intel,
         conversationId: json.conversation_id || null
     };
 }

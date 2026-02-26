@@ -25,6 +25,14 @@ export default function FacebookAds({ customers }) {
     const [ads, setAds] = useState([]);
     const [chartMetric, setChartMetric] = useState('spend');
     const [auditResults, setAuditResults] = useState({ verified: 0, anomalies: [], healthScore: 100 });
+    const [expandedNodes, setExpandedNodes] = useState(new Set());
+
+    const toggleNode = (id) => {
+        const newSet = new Set(expandedNodes);
+        if (newSet.has(id)) newSet.delete(id);
+        else newSet.add(id);
+        setExpandedNodes(newSet);
+    };
 
     useEffect(() => {
         if (purchaseModalOpen) {
@@ -999,50 +1007,179 @@ export default function FacebookAds({ customers }) {
                         </div>
 
                         <div className="flex-1 overflow-hidden p-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-                                {/* Left: Ad Source */}
-                                <div className="flex flex-col h-full bg-blue-900/10 rounded-2xl border border-blue-500/10 overflow-hidden">
-                                    <div className="p-4 border-b border-blue-500/10 bg-blue-900/20">
-                                        <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
-                                            <i className="fab fa-facebook"></i> Ad Source {dashboardMode === 'daily' ? '(Daily)' : '(30D)'}
-                                        </h3>
-                                    </div>
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                                        {(() => {
-                                            // Determine which campaigns source to use
-                                            const sourceCampaigns = (dashboardMode === 'daily' && latestDay?.campaigns)
-                                                ? latestDay.campaigns
-                                                : campaigns;
+                            {/* Reconciliation Scorecard */}
+                            {(() => {
+                                const sourceCampaigns = (dashboardMode === 'daily' && latestDay?.campaigns) ? latestDay.campaigns : campaigns;
+                                const fbTotalPurchases = sourceCampaigns.reduce((sum, c) => {
+                                    const p = c.actions?.find(a => ['purchase', 'onsite_conversion.purchase'].includes(a.action_type))?.value || 0;
+                                    return sum + parseInt(p);
+                                }, 0);
 
-                                            const activeItems = sourceCampaigns.filter(c => {
-                                                const purch = c.actions?.find(a => ['purchase', 'onsite_conversion.purchase'].includes(a.action_type));
-                                                return purch && parseInt(purch.value) > 0;
+                                // CRM Orders (Re-calculate for summary)
+                                let crmTotalOrders = 0;
+                                let targetDateStr = (dashboardMode === 'daily' && latestDay) ? latestDay.date : null;
+                                let periodMs = 2592000000;
+
+                                (customers || []).forEach(c => {
+                                    const timeline = c.timeline || [];
+                                    const orders = c.orders || [];
+                                    timeline.forEach(evt => {
+                                        const isOrder = evt.type === 'ORDER' || evt.type === 'PURCHASE' || (evt.details?.total > 0) || (evt.details?.amount > 0);
+                                        if (isOrder) {
+                                            const evtDate = new Date(evt.date);
+                                            const ds = `${evtDate.getFullYear()}-${String(evtDate.getMonth() + 1).padStart(2, '0')}-${String(evtDate.getDate()).padStart(2, '0')}`;
+                                            if (targetDateStr ? (ds === targetDateStr) : (new Date() - evtDate <= periodMs)) crmTotalOrders++;
+                                        }
+                                    });
+                                });
+
+                                const variance = fbTotalPurchases - crmTotalOrders;
+                                const matchRate = fbTotalPurchases > 0 ? Math.min(100, (crmTotalOrders / fbTotalPurchases) * 100) : 100;
+
+                                return (
+                                    <div className="grid grid-cols-4 gap-4 mb-6">
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">FB Purchases</p>
+                                            <p className="text-2xl font-black text-white">{fbTotalPurchases}</p>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">CRM Orders</p>
+                                            <p className="text-2xl font-black text-emerald-400">{crmTotalOrders}</p>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Variance</p>
+                                            <p className={`text-2xl font-black ${variance === 0 ? 'text-white/40' : 'text-orange-400'}`}>
+                                                {variance > 0 ? `+${variance}` : variance}
+                                            </p>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Match Rate</p>
+                                            <div className="flex items-end gap-2">
+                                                <p className="text-2xl font-black text-blue-400">{matchRate.toFixed(1)}%</p>
+                                                <div className="flex-1 h-1 bg-white/10 rounded-full mb-2 overflow-hidden">
+                                                    <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${matchRate}%` }}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100%-120px)]">
+                                {/* Left: Ad Source (Tree View) */}
+                                <div className="flex flex-col h-full bg-blue-900/10 rounded-2xl border border-blue-500/10 overflow-hidden">
+                                    <div className="p-4 border-b border-blue-500/10 bg-blue-900/20 flex justify-between items-center">
+                                        <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                                            <i className="fab fa-facebook"></i> Hierarchical Breakdown
+                                        </h3>
+                                        <span className="text-[9px] font-bold text-blue-400/60 bg-blue-400/10 px-2 py-0.5 rounded-full">
+                                            Campaign &gt; Ad Set &gt; Ad
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                                        {(() => {
+                                            const sourceCampaigns = (dashboardMode === 'daily' && latestDay?.campaigns) ? latestDay.campaigns : campaigns;
+                                            const activeCampaigns = sourceCampaigns.filter(c => {
+                                                const p = c.actions?.find(a => ['purchase', 'onsite_conversion.purchase'].includes(a.action_type));
+                                                return p && parseInt(p.value) > 0;
                                             });
 
-                                            if (activeItems.length === 0) {
-                                                return (
-                                                    <div className="h-full flex flex-col items-center justify-center text-center p-8 text-white/20">
-                                                        <i className="fas fa-ghost text-4xl mb-2"></i>
-                                                        <p className="text-xs">No Ad Attribution Found for this period</p>
-                                                    </div>
-                                                );
-                                            }
+                                            if (activeCampaigns.length === 0) return (
+                                                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-white/20">
+                                                    <i className="fas fa-ghost text-4xl mb-2"></i>
+                                                    <p className="text-xs">No Ad Attribution Found</p>
+                                                </div>
+                                            );
 
-                                            return activeItems.map((c, i) => {
-                                                const purchVal = c.action_values?.find(a => ['purchase', 'onsite_conversion.purchase'].includes(a.action_type))?.value || 0;
-                                                const purchCount = c.actions?.find(a => ['purchase', 'onsite_conversion.purchase'].includes(a.action_type))?.value || 0;
+                                            return activeCampaigns.map((camp) => {
+                                                const campPurch = camp.actions?.find(a => ['purchase', 'onsite_conversion.purchase'].includes(a.action_type))?.value || 0;
+                                                const campRev = camp.action_values?.find(a => ['purchase', 'onsite_conversion.purchase'].includes(a.action_type))?.value || 0;
+                                                const isExpanded = expandedNodes.has(camp.id);
+
                                                 return (
-                                                    <div key={i} className="bg-blue-600/10 border border-blue-500/20 rounded-xl p-3 flex justify-between items-center group hover:bg-blue-600/20 transition-all">
-                                                        <div>
-                                                            <p className="font-bold text-white text-sm mb-1 line-clamp-1">{c.name.replace(/\|/g, ' ').replace(/\s+/g, ' ')}</p>
-                                                            <p className="text-[10px] text-blue-300 font-medium bg-blue-500/20 px-2 py-0.5 rounded-full inline-block">
-                                                                Campaign
-                                                            </p>
+                                                    <div key={camp.id} className="space-y-1">
+                                                        {/* Campaign Level */}
+                                                        <div
+                                                            onClick={() => toggleNode(camp.id)}
+                                                            className={`bg-blue-600/10 border border-blue-500/20 rounded-xl p-3 flex justify-between items-center cursor-pointer hover:bg-blue-600/20 transition-all ${isExpanded ? 'border-blue-500/50 bg-blue-600/20' : ''}`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <i className={`fas fa-chevron-right text-[10px] text-blue-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}></i>
+                                                                <div>
+                                                                    <p className="font-bold text-white text-sm line-clamp-1">{camp.name}</p>
+                                                                    <p className="text-[10px] text-blue-300 font-black uppercase tracking-tighter">Campaign</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-sm font-black text-white">{campPurch} sales</p>
+                                                                <p className="text-[10px] text-emerald-400 font-bold">฿{fmt(campRev)}</p>
+                                                            </div>
                                                         </div>
-                                                        <div className="text-right shrink-0 ml-4">
-                                                            <p className="text-lg font-black text-white">{purchCount} <span className="text-xs text-white/40 font-normal">sales</span></p>
-                                                            <p className="text-xs text-emerald-400 font-bold">฿{fmt(purchVal)}</p>
-                                                        </div>
+
+                                                        {/* Ad Sets Level */}
+                                                        {isExpanded && (
+                                                            <div className="ml-6 border-l-2 border-blue-500/20 pl-4 space-y-1 py-1">
+                                                                {adsets.filter(as => as.campaign_id === camp.id).map(adset => {
+                                                                    const isAdsetExpanded = expandedNodes.has(adset.id);
+                                                                    // Aggregating adset stats from ads if possible, or using adset data
+                                                                    // For now, let's just list the adsets and their ads
+                                                                    const childAds = ads.filter(a => a.adset_id === adset.id);
+                                                                    const adsetPurch = childAds.reduce((sum, a) => sum + (a.actions?.find(act => ['purchase', 'onsite_conversion.purchase'].includes(act.action_type))?.value || 0), 0);
+                                                                    const adsetRev = childAds.reduce((sum, a) => sum + parseFloat(a.action_values?.find(act => ['purchase', 'onsite_conversion.purchase'].includes(act.action_type))?.value || 0), 0);
+
+                                                                    if (adsetPurch === 0 && childAds.length === 0) return null;
+
+                                                                    return (
+                                                                        <div key={adset.id} className="space-y-1">
+                                                                            <div
+                                                                                onClick={(e) => { e.stopPropagation(); toggleNode(adset.id); }}
+                                                                                className={`bg-white/5 border border-white/10 rounded-lg p-2 flex justify-between items-center cursor-pointer hover:bg-white/10 transition-all ${isAdsetExpanded ? 'bg-white/10 border-white/20' : ''}`}
+                                                                            >
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <i className={`fas fa-caret-right text-[10px] text-white/30 transition-transform ${isAdsetExpanded ? 'rotate-90' : ''}`}></i>
+                                                                                    <div>
+                                                                                        <p className="font-bold text-white/80 text-xs line-clamp-1">{adset.name}</p>
+                                                                                        <p className="text-[9px] text-white/40 font-bold uppercase tracking-tighter">Ad Set</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="text-right">
+                                                                                    <p className="text-xs font-bold text-white/60">{adsetPurch} sales</p>
+                                                                                    {adsetRev > 0 && <p className="text-[9px] text-emerald-400/60 font-bold">฿{fmt(adsetRev)}</p>}
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Ads Level */}
+                                                                            {isAdsetExpanded && (
+                                                                                <div className="ml-4 border-l border-white/10 pl-3 space-y-1 py-1">
+                                                                                    {childAds.map(ad => {
+                                                                                        const adPurch = ad.actions?.find(act => ['purchase', 'onsite_conversion.purchase'].includes(act.action_type))?.value || 0;
+                                                                                        const adRev = ad.action_values?.find(act => ['purchase', 'onsite_conversion.purchase'].includes(act.action_type))?.value || 0;
+
+                                                                                        return (
+                                                                                            <div key={ad.id} className="bg-white/5 p-2 rounded-md flex justify-between items-center group">
+                                                                                                <div className="flex items-center gap-2">
+                                                                                                    <div className="w-6 h-6 rounded bg-white/10 overflow-hidden shrink-0">
+                                                                                                        {ad.thumbnail ? <img src={ad.thumbnail} className="w-full h-full object-cover" /> : <i className="fas fa-ad text-[10px] m-auto"></i>}
+                                                                                                    </div>
+                                                                                                    <div className="min-w-0">
+                                                                                                        <p className="text-[11px] font-medium text-white/60 truncate w-32 md:w-48 group-hover:text-white transition-colors">{ad.name}</p>
+                                                                                                        <p className="text-[8px] text-white/30 font-bold uppercase tracking-widest">Ad</p>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div className="text-right shrink-0">
+                                                                                                    <p className="text-[11px] font-black text-white/40 group-hover:text-white">{adPurch} sales</p>
+                                                                                                    {adRev > 0 && <p className="text-[9px] text-emerald-500/40 font-bold group-hover:text-emerald-400 transition-colors">฿{fmt(adRev)}</p>}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 );
                                             });

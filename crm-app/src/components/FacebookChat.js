@@ -17,9 +17,47 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
     const [employees, setEmployees] = useState([]);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [discoveredProducts, setDiscoveredProducts] = useState([]);
+    const [activeAd, setActiveAd] = useState(null);
+    const [loadingAd, setLoadingAd] = useState(false);
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
     const initialSelectionRef = useRef(false);
+
+    // Real-time SSE Connection
+    useEffect(() => {
+        console.log('[Chat] Establishing Real-time connection...');
+        const eventSource = new EventSource('/api/events/stream');
+
+        eventSource.onmessage = (event) => {
+            try {
+                const payload = JSON.parse(event.data);
+                console.log('[Chat] Real-time event received:', payload);
+
+                if (payload.channel === 'chat-updates') {
+                    // Refresh conversation list for everyone
+                    fetchConversations();
+
+                    // If we are currently viewing this specific conversation, refresh its messages
+                    if (selectedConv && (selectedConv.id === payload.data.conversationId || selectedConv.id === `t_${payload.data.conversationId}`)) {
+                        console.log('[Chat] Refreshing active messages...');
+                        fetchMessages(selectedConv.id);
+                    }
+                }
+            } catch (e) {
+                // Heartbeats or malformed data
+            }
+        };
+
+        eventSource.onerror = (err) => {
+            console.error('[Chat] SSE Error:', err);
+            eventSource.close();
+        };
+
+        return () => {
+            console.log('[Chat] Closing Real-time connection');
+            eventSource.close();
+        };
+    }, [selectedConv]);
 
     // Initial load: catalog & employees
     useEffect(() => {
@@ -44,19 +82,19 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
         loadEmployees();
     }, []);
 
-    // Polling setup: Fetch conversations every 15s
+    // Polling setup: Fetch conversations every 60s (was 15s)
     useEffect(() => {
         fetchConversations();
-        const interval = setInterval(fetchConversations, 15000);
+        const interval = setInterval(fetchConversations, 60000);
         return () => clearInterval(interval);
     }, []);
 
-    // Polling active chat: Fetch messages every 5s if active
+    // Polling active chat: Fetch messages every 30s (was 5s) if active
     useEffect(() => {
         let interval;
         if (selectedConv) {
             fetchMessages(selectedConv.id);
-            interval = setInterval(() => fetchMessages(selectedConv.id), 5000);
+            interval = setInterval(() => fetchMessages(selectedConv.id), 30000);
         }
         return () => clearInterval(interval);
     }, [selectedConv]);
@@ -77,6 +115,49 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
             }
         }
     }, [initialCustomerId, conversations]);
+
+    // Fetch Ad details when conversation changes
+    useEffect(() => {
+        const fetchAdDetails = async () => {
+            if (!selectedConv) {
+                setActiveAd(null);
+                return;
+            }
+
+            // 1. Try to find ad_id from labels
+            const labels = selectedConv.labels?.data?.map(l => l.name) || [];
+            const adLabel = labels.find(l => l.includes('ad_id.'));
+            let adId = adLabel ? adLabel.split('ad_id.')[1] : null;
+
+            // 2. Fallback to customer intelligence
+            if (!adId && selectedConv.customer?.intelligence?.source_ad_id) {
+                adId = selectedConv.customer.intelligence.source_ad_id;
+            }
+
+            if (!adId) {
+                setActiveAd(null);
+                return;
+            }
+
+            setLoadingAd(true);
+            try {
+                const res = await fetch(`/api/marketing/ads?id=${adId}`);
+                const result = await res.json();
+                if (result.success) {
+                    setActiveAd(result.data);
+                } else {
+                    setActiveAd(null);
+                }
+            } catch (err) {
+                console.error('Failed to fetch ad details:', err);
+                setActiveAd(null);
+            } finally {
+                setLoadingAd(false);
+            }
+        };
+
+        fetchAdDetails();
+    }, [selectedConv]);
 
     // Auto-Sync Background: Trigger full Facebook lead import every 5 minutes
     useEffect(() => {
@@ -520,8 +601,50 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
                         </button>
                     </div>
 
+                    {/* Ad Context Section */}
+                    {(loadingAd || activeAd) && (
+                        <div className="animate-fade-in">
+                            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                <i className="fas fa-ad text-indigo-500"></i> Ad Attribution
+                            </h3>
+                            {loadingAd ? (
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center">
+                                    <i className="fas fa-circle-notch animate-spin text-indigo-500/50"></i>
+                                </div>
+                            ) : (
+                                <div className="bg-[#162A47]/40 backdrop-blur-md rounded-2xl border border-indigo-500/20 overflow-hidden group hover:bg-[#162A47]/60 transition-all shadow-lg shadow-indigo-500/5">
+                                    <div className="aspect-[1.91/1] w-full bg-black/40 relative overflow-hidden">
+                                        {activeAd.thumbnail ? (
+                                            <img src={activeAd.thumbnail} alt={activeAd.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                        ) : (
+                                            <div className="w-full h-full flex flex-col items-center justify-center text-white/10 italic">
+                                                <i className="fas fa-image text-2xl mb-2"></i>
+                                                <span className="text-[8px] uppercase font-black">Ad Visual Hidden</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-md border border-white/10">
+                                            <span className={`text-[7px] font-black uppercase tracking-widest ${activeAd.status === 'ACTIVE' ? 'text-emerald-400' : 'text-white/40'}`}>
+                                                {activeAd.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 space-y-2">
+                                        <div>
+                                            <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-0.5">Campaign Context</p>
+                                            <h4 className="text-xs font-black text-white leading-tight line-clamp-2">{activeAd.campaign_name || 'Direct Message'}</h4>
+                                        </div>
+                                        <div className="pt-2 border-t border-white/5">
+                                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Ad Name</p>
+                                            <p className="text-[10px] font-bold text-slate-300 truncate">{activeAd.name}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div>
-                        <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
                             <i className="fas fa-tags text-blue-500"></i> Labels & Segmentation
                         </h3>
                         <div className="flex flex-wrap gap-2">

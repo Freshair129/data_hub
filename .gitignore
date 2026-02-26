@@ -72,3 +72,6 @@ crm-app/automation/user_data/
 # Knowledge Vector DB
 knowledge/vector_index.json
 
+__pycache__/
+*.pyc
+put_response.json

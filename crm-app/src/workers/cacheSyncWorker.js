@@ -24,6 +24,7 @@ const QUEUE_NAME = 'cache-sync';
 const connection = new IORedis(REDIS_URL, {
     maxRetriesPerRequest: null
 });
+connection.on('error', () => { /* Silence connection errors */ });
 
 // ─── Worker ────────────────────────────────────────────────────
 

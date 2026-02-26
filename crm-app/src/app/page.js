@@ -16,6 +16,8 @@ import RegistrationModal from '@/components/RegistrationModal';
 import LoginPage from '@/components/LoginPage';
 import SlipVerificationPanel from '@/components/SlipVerificationPanel';
 import CampaignTracking from '@/components/CampaignTracking';
+import EmployeeManagement from '@/components/EmployeeManagement';
+import TeamKPI from '@/components/TeamKPI';
 
 export default function Home() {
     const [activeView, setActiveView] = useState('customers');
@@ -28,6 +30,30 @@ export default function Home() {
     const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
     const [customerViewMode, setCustomerViewMode] = useState('list'); // 'list' or 'detail'
     const [initialChatCustomerId, setInitialChatCustomerId] = useState(null);
+    const [pendingTaskCount, setPendingTaskCount] = useState(0);
+
+    // Real-time SSE Connection for Tasks
+    useEffect(() => {
+        const eventSource = new EventSource('/api/events/stream');
+        eventSource.onmessage = (event) => {
+            try {
+                const payload = JSON.parse(event.data);
+                if (payload.channel === 'task-updates') {
+                    setPendingTaskCount(prev => prev + 1);
+                } else if (payload.channel === 'chat-updates') {
+                    console.log('[SSE] Chat update received:', payload.data?.conversationId);
+                    // Trigger re-fetch of conversations if chat view is active
+                    window.dispatchEvent(new CustomEvent('chat-update', { detail: payload.data }));
+                } else if (payload.channel === 'slip-updates') {
+                    console.log('[SSE] Slip verification received:', payload.data?.senderId);
+                    window.dispatchEvent(new CustomEvent('slip-update', { detail: payload.data }));
+                }
+            } catch (e) {
+                console.error('[SSE] Parse error:', e.message);
+            }
+        };
+        return () => eventSource.close();
+    }, []);
 
     // Auth State
     const [currentUser, setCurrentUser] = useState(null);
@@ -452,9 +478,11 @@ export default function Home() {
                 activeView={activeView}
                 onViewChange={(view) => {
                     if (view === 'customers') setCustomerViewMode('list');
+                    if (view === 'dashboard') setPendingTaskCount(0); // Reset count when viewing tasks
                     setActiveView(view);
                 }}
                 cartCount={cartItemCount}
+                pendingTaskCount={pendingTaskCount}
                 currentUser={currentUser}
                 onLogout={handleLogout}
             />
@@ -588,6 +616,17 @@ export default function Home() {
                     />
                 )}
 
+                {activeView === 'team-kpi' && (
+                    <TeamKPI customers={customers} />
+                )}
+                {activeView === 'employees' && (
+                    <EmployeeManagement
+                        employees={employees}
+                        customers={customers}
+                        onRefresh={loadEmployees}
+                        currentUser={currentUser}
+                    />
+                )}
                 {activeView === 'settings' && (
                     <Settings />
                 )}

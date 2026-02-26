@@ -11,7 +11,21 @@ export default function Analytics({ customers, products }) {
     const [isLoadingMapping, setIsLoadingMapping] = useState(false);
     const [campaigns, setCampaigns] = useState([]);
     const [insights, setInsights] = useState({});
+    const [teamAnalytics, setTeamAnalytics] = useState(null);
     const [loadingMarketing, setLoadingMarketing] = useState(true);
+
+    useEffect(() => {
+        const fetchTeamAnalytics = async () => {
+            try {
+                const res = await fetch(`/api/analytics/team?timeframe=${rankingPeriod === 'month' ? 'lifetime' : rankingPeriod === 'week' ? 'week' : 'today'}`);
+                const data = await res.json();
+                if (data.success) setTeamAnalytics(data);
+            } catch (err) {
+                console.error('Failed to fetch team analytics:', err);
+            }
+        };
+        fetchTeamAnalytics();
+    }, [rankingPeriod]);
 
     useEffect(() => {
         const fetchMarketing = async () => {
@@ -605,10 +619,57 @@ export default function Analytics({ customers, products }) {
         ? channelROI.reduce((prev, current) => (parseFloat(current.roas) > parseFloat(prev.roas) ? current : prev))
         : { channel: 'N/A', roas: '0' };
 
-    // --- Financial P&L Logic (Real) ---
+    // --- Financial P&L Logic (Real with dynamic COGS) ---
+    const calculateDynamicCOGS = () => {
+        let totalCOGS = 0;
+        let matchedItems = 0;
+        let unknownItems = 0;
+
+        customers.forEach(cust => {
+            // Check orders
+            (cust.orders || []).forEach(order => {
+                if (order.status === 'PAID' || order.status === 'Completed') {
+                    (order.items || []).forEach(item => {
+                        const product = products.find(p => p.id === item.product_id || p.name === item.name);
+                        if (product && product.base_price > 0) {
+                            totalCOGS += product.base_price;
+                            matchedItems++;
+                        } else {
+                            // Fallback to 45% of price if cost unknown
+                            totalCOGS += (item.price || product?.price || 0) * 0.45;
+                            unknownItems++;
+                        }
+                    });
+                }
+            });
+
+            // Check inventory (for sales not captured in orders)
+            (cust.inventory?.learning_courses || []).forEach(course => {
+                const product = products.find(p => p.id === course.id || p.name === course.name);
+                // To avoid double counting, only count inventory if no orders exist for this customer
+                const hasOrders = (cust.orders || []).length > 0;
+                if (!hasOrders) {
+                    if (product && product.base_price > 0) {
+                        totalCOGS += product.base_price;
+                        matchedItems++;
+                    } else {
+                        totalCOGS += (product?.price || 0) * 0.45;
+                        unknownItems++;
+                    }
+                }
+            });
+        });
+
+        // If no items found, use the global revenue fallback to avoid 0 COGS
+        if (totalCOGS === 0 && totalRevenue > 0) {
+            return totalRevenue * 0.45;
+        }
+
+        return totalCOGS;
+    };
+
     const financialConfig = marketingData?.financial_config || { cogs_rate: 0.45, opex: {} };
-    const COGS_RATE = financialConfig.cogs_rate;
-    const cogs = totalRevenue * COGS_RATE;
+    const cogs = calculateDynamicCOGS();
     const grossProfit = totalRevenue - cogs;
 
     const opex = {
@@ -624,29 +685,35 @@ export default function Analytics({ customers, products }) {
     const upcomingEvents = marketingData?.events?.upcoming || [];
     const pastEvents = marketingData?.events?.past || [];
 
-    // --- Campaign Tracker Logic (Dynamic) ---
+    // --- Campaign Tracker Logic (Dynamic & CRM-Verified) ---
     const processedCampaigns = (campaigns || []).map(c => {
-        const spend = c.spend || 0;
-        const revenue = c.action_values?.filter(a => ['purchase', 'onsite_conversion.purchase', 'offsite_conversion.fb_pixel_purchase'].includes(a.action_type))
+        const fbRevenue = c.action_values?.filter(a => ['purchase', 'onsite_conversion.purchase', 'offsite_conversion.fb_pixel_purchase'].includes(a.action_type))
             .reduce((sum, a) => sum + parseFloat(a.value || 0), 0) || 0;
+
+        // CRM-Verified Revenue Calculation (The Golden Standard)
+        const crmRevenue = customers.reduce((sum, cust) => {
+            const attribution = cust.intelligence?.attribution;
+            if (attribution?.campaign_id === c.id || attribution?.smart_detected_ad?.campaign_name === c.name) {
+                return sum + (cust.intelligence?.metrics?.total_spend || 0);
+            }
+            return sum;
+        }, 0);
+
+        const spend = c.spend || 0;
         const budget = c.daily_budget || c.lifetime_budget || 0;
 
         return {
             ...c,
             spend,
-            revenue,
+            fbRevenue,
+            crmRevenue,
             budget,
             utilization: budget > 0 ? ((spend / budget) * 100).toFixed(1) : '0',
-            roas: spend > 0 ? (revenue / spend).toFixed(2) : '1.00',
+            roas: spend > 0 ? (fbRevenue / spend).toFixed(2) : '0.00',
+            realRoas: spend > 0 ? (crmRevenue / spend).toFixed(2) : '0.00',
             color: (c.status === 'Active' || c.status === 'ACTIVE') ? 'bg-indigo-500' : 'bg-slate-400'
         };
-    }).sort((a, b) => {
-        // Prioritize Active campaigns
-        if ((a.status === 'Active' || a.status === 'ACTIVE') && !(b.status === 'Active' || b.status === 'ACTIVE')) return -1;
-        if (!(a.status === 'Active' || a.status === 'ACTIVE') && (b.status === 'Active' || b.status === 'ACTIVE')) return 1;
-        // Secondary sort: Spend (Desc)
-        return b.spend - a.spend;
-    });
+    }).sort((a, b) => b.spend - a.spend);
 
 
     // --- V-Insight AI Aggregation ---
@@ -701,7 +768,6 @@ export default function Analytics({ customers, products }) {
                         { id: 'roi', label: 'Channel ROI', icon: 'fa-sack-dollar' },
                         { id: 'vinsight', label: 'V-Insight AI', icon: 'fa-brain' },
                         { id: 'event', label: 'Event Calendar', icon: 'fa-calendar-check' },
-                        { id: 'campaign', label: 'Campaign Tracker', icon: 'fa-bullhorn' },
                         { id: 'team', label: 'Sales Team', icon: 'fa-user-tie' },
                         { id: 'mapping', label: 'Mapping Matrix', icon: 'fa-sitemap' }
                     ].map(tab => (
@@ -1070,7 +1136,7 @@ export default function Analytics({ customers, products }) {
                     <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
                         {[
                             { label: 'Total Revenue', val: totalRevenue, sub: '100%', color: 'text-white' },
-                            { label: 'COGS (Est. 40%)', val: cogs, sub: '40%', color: 'text-rose-400' },
+                            { label: 'COGS (Real Cost)', val: cogs, sub: `${((cogs / totalRevenue) * 100).toFixed(1)}%`, color: 'text-rose-400' },
                             { label: 'Operating Expenses', val: totalOpex, sub: `${((totalOpex / totalRevenue) * 100).toFixed(1)}%`, color: 'text-orange-400' },
                             { label: 'Net Profit', val: netProfit, sub: `${profitMargin.toFixed(1)}%`, color: 'text-emerald-400', highlight: true }
                         ].map((stat, i) => (
@@ -1096,10 +1162,10 @@ export default function Analytics({ customers, products }) {
                             {/* COGS Deduction */}
                             <div className="relative pl-12 opacity-80">
                                 <div className="flex justify-between text-xs font-bold text-rose-300 mb-2">
-                                    <span>- Cost of Goods (40%)</span>
+                                    <span>- Cost of Goods (Dynamic)</span>
                                     <span>(฿{formatCurrency(cogs)})</span>
                                 </div>
-                                <div className="h-6 w-[40%] bg-rose-500/30 border border-rose-500 rounded-r-xl relative border-dashed"></div>
+                                <div style={{ width: `${(cogs / totalRevenue) * 100}%` }} className="h-6 bg-rose-500/30 border border-rose-500 rounded-r-xl relative border-dashed"></div>
                             </div>
 
                             {/* Expenses Deduction */}
@@ -1486,89 +1552,86 @@ export default function Analytics({ customers, products }) {
             )}
 
             {/* TAB 8: Campaign Tracker (New) */}
-            {activeTab === 'campaign' && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
-                    {/* ... (Campaign Tracker content stays the same) ... */}
-                    {/* KPI Cards */}
-                    <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
-                            <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-bullhorn text-indigo-500"></i> Active Campaigns</h4>
-                            <p className="text-4xl font-black text-slate-800">{campaignStats.active}</p>
-                            <span className="text-[10px] text-slate-400 font-bold">Initiatives Running</span>
-                        </div>
-                        <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
-                            <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-wallet text-slate-600"></i> Total Budget</h4>
-                            <p className="text-4xl font-black text-slate-800">฿{formatCurrency(campaignStats.totalBudget)}</p>
-                            <span className="text-[10px] text-slate-400 font-bold">Planned Spend</span>
-                        </div>
-                        <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100 relative overflow-hidden">
-                            <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-fire text-orange-500"></i> Burn Rate</h4>
-                            <p className="text-4xl font-black text-slate-800">{((campaignStats.totalSpend / campaignStats.totalBudget) * 100).toFixed(1)}%</p>
-                            <div className="w-full bg-slate-100 h-1 mt-2 rounded-full overflow-hidden">
-                                <div style={{ width: `${((campaignStats.totalSpend / campaignStats.totalBudget) * 100)}%` }} className="h-full bg-orange-500 rounded-full"></div>
-                            </div>
-                        </div>
-                        <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
-                            <h4 className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-2"><i className="fas fa-sack-dollar text-[#C9A34E]"></i> Revenue Generated</h4>
-                            <p className="text-4xl font-black text-slate-800">฿{formatCurrency(campaignStats.totalRevenue)}</p>
-                            <span className="text-[10px] text-green-500 font-bold bg-green-50 px-2 py-0.5 rounded">{(campaignStats.totalRevenue / campaignStats.totalSpend).toFixed(2)}x ROAS</span>
-                        </div>
-                    </div>
 
-                    {/* Detailed Campaign Table */}
-                    <div className="lg:col-span-12 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
-                        <h3 className="font-black text-slate-800 text-xl tracking-tight mb-6">Campaign Performance</h3>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="bg-slate-50">
-                                    <tr className="text-xs font-black text-slate-500 uppercase tracking-wider">
-                                        <th className="p-4 rounded-l-xl pl-6">Campaign</th>
-                                        <th className="p-4">Status</th>
-                                        <th className="p-4">Timeline</th>
-                                        <th className="p-4 text-right">Spend</th>
-                                        <th className="p-4 text-right">Revenue</th>
-                                        <th className="p-4 text-right rounded-r-xl pr-6">ROAS</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-sm font-bold text-slate-700 divide-y divide-slate-100">
-                                    {processedCampaigns.map((c, i) => (
-                                        <tr key={i} className="hover:bg-slate-50 transition-colors">
-                                            <td className="p-4 pl-6">
-                                                <p className="font-bold text-slate-800">{c.name}</p>
-                                                <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${c.color || 'bg-slate-500'}`}></span>
-                                                    {c.platform || 'Facebook'}
-                                                </p>
-                                            </td>
-                                            <td className="p-4">
-                                                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${c.status === 'Active' || c.status === 'ACTIVE' ? 'bg-green-100 text-green-600' :
-                                                    c.status === 'Paused' || c.status === 'PAUSED' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'
-                                                    }`}>
-                                                    {c.status}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 text-xs text-slate-500">
-                                                {c.start || 'N/A'} - {c.end || 'N/A'}
-                                            </td>
-                                            <td className="p-4 text-right">฿{formatCurrency(c.spend)}</td>
-                                            <td className="p-4 text-right">฿{formatCurrency(c.revenue)}</td>
-                                            <td className="p-4 text-right pr-6">
-                                                <span className={`text-[#C9A34E] font-black hover:underline decoration-dashed decoration-slate-300 underline-offset-4 cursor-help`} title="Return on Ad Spend">
-                                                    {c.roas}x
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* TAB 9: Sales Team Performance (New) */}
             {activeTab === 'team' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
+                    {/* NEW: Live Delivery Dashboard */}
+                    <div className="lg:col-span-12 space-y-8">
+                        <div className="bg-gradient-to-br from-indigo-900/40 via-[#0A1A2F]/80 to-[#0A1A2F]/50 border border-indigo-500/30 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-10 opacity-10">
+                                <i className="fas fa-broadcast-tower text-8xl text-indigo-400 animate-pulse"></i>
+                            </div>
+
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-10">
+                                    <div>
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]"></span>
+                                            <p className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em]">Live Delivery Insights</p>
+                                        </div>
+                                        <h3 className="font-black text-white text-3xl tracking-tight">What&apos;s Running Now?</h3>
+                                        <p className="text-white/40 text-sm mt-1">Real-time ad delivery detected in the last 48 hours.</p>
+                                    </div>
+                                    <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-center">
+                                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Delivering Ads</p>
+                                        <p className="text-3xl font-black text-white">{teamAnalytics?.summary?.liveDelivery?.activeAdsCount || 0}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    <div className="md:col-span-1 space-y-6">
+                                        <div>
+                                            <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-4">Active Products</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {(teamAnalytics?.summary?.liveDelivery?.productsRunning || []).map((prod, i) => (
+                                                    <span key={i} className="px-3 py-1.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                                        {prod}
+                                                    </span>
+                                                ))}
+                                                {(!teamAnalytics?.summary?.liveDelivery?.productsRunning || teamAnalytics.summary.liveDelivery.productsRunning.length === 0) && (
+                                                    <span className="text-white/20 text-[10px] font-bold italic">No active products detected</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {(teamAnalytics?.summary?.liveDelivery?.ads || []).map((ad, i) => (
+                                            <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 group hover:bg-white/10 transition-all">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-12 h-12 rounded-lg bg-black/40 overflow-hidden flex-shrink-0 border border-white/10">
+                                                        {ad.thumbnail ? (
+                                                            <img src={ad.thumbnail} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-white/10">
+                                                                <i className="fas fa-image text-xs"></i>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-0.5 truncate">{ad.product}</p>
+                                                        <p className="text-[11px] font-bold text-white truncate mb-2">{ad.name}</p>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[10px] font-black text-emerald-400">฿{formatCurrency(ad.spend)}</span>
+                                                            <span className="text-[8px] text-white/30 font-bold">{ad.leads || 0} Leads</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {(!teamAnalytics?.summary?.liveDelivery?.ads || teamAnalytics.summary.liveDelivery.ads.length === 0) && (
+                                            <div className="col-span-full py-8 text-center border border-dashed border-white/10 rounded-2xl">
+                                                <p className="text-white/20 text-xs font-bold uppercase tracking-widest">No delivering ads found in recent window</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="lg:col-span-12 bg-[#0A1A2F]/50 border border-white/10 rounded-[2.5rem] p-8">
                         <div className="flex justify-between items-center mb-8">
                             <div>

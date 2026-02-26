@@ -234,5 +234,119 @@ export default class BusinessAnalyst {
             return { suggested_agent: null };
         }
     }
+
+    /**
+     * Proactively suggests tasks based on chat context
+     */
+    async suggestProactiveTasks(messages, customerInfo = {}) {
+        const chatContext = messages.map(m => `${m.from?.name || m.sender || 'User'}: ${m.message || m.text}`).join('\n');
+
+        const prompt = `
+        Role: Sales Operations AI for "The V School".
+        Task: Analyze the chat history and suggest ONE high-priority task if the customer shows strong intent.
+        
+        Customer: ${customerInfo.name || 'Unknown'} (Stage: ${customerInfo.lifecycle_stage || 'Lead'})
+        
+        Chat History:
+        ${chatContext}
+        
+        Logic for Task Creation:
+        1. High Intent: Customer asks for "เลขบัญชี" (Bank Account), "ราคา" (Price), or "ตารางเรียน" (Schedule).
+        2. Follow-up: Customer asks a specific question but hasn't received a full answer.
+        3. Document Request: Customer asks for a "ใบเสนอราคา" (Quotation) or "ใบกำกับภาษี" (Tax Invoice).
+        
+        If NO clear action is needed, return null.
+        
+        Output Format (JSON Only):
+        {
+            "title": "Short Task Title (Thai)",
+            "description": "Detailed explanation (Thai)",
+            "type": "FOLLOW_UP" | "QUOTATION" | "PAYMENT_CHECK" | "CONSULTATION",
+            "priority": "HIGH" | "MEDIUM" | "LOW",
+            "justification": "Why this task was created (English)"
+        }
+        `;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            if (jsonStr === 'null' || jsonStr === '{}') return null;
+            return JSON.parse(jsonStr);
+        } catch (error) {
+            console.error("Proactive Task Suggestion Failed:", error);
+            return null;
+        }
+    }
+
+    /**
+     * Suggests labels (tags) for Facebook lead segmentation
+     */
+    async suggestLabels(messages) {
+        const chatContext = messages.map(m => `${m.from?.name || m.sender || 'User'}: ${m.message || m.text}`).join('\n');
+
+        const prompt = `
+        Role: Lead Scoring AI for "The V School".
+        Task: Analyze the chat history and suggest 2-3 short, impactful labels (tags) for this customer.
+        
+        Chat History:
+        ${chatContext}
+        
+        Requirements for Labels:
+        1. Format: Short, Alphanumeric, Hyphenated (e.g., "Potential-Ramen", "Pending-Payment").
+        2. Focus: Product Interest, Urgency, or Lead Quality.
+        3. Use English for technical tags but Thai is okay if it helps staff (keep it short).
+        
+        Output Format (JSON Only):
+        ["Label1", "Label2", "Label3"]
+        `;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            const labels = JSON.parse(jsonStr);
+            return Array.isArray(labels) ? labels.slice(0, 3) : [];
+        } catch (error) {
+            console.error("Label Suggestion Failed:", error);
+            return [];
+        }
+    }
+
+    /**
+     * Generates a draft reply as if it were from the owner
+     */
+    async generateSmartReply(messages, ownerName, customerInfo = {}) {
+        const chatContext = messages.map(m => `${m.from?.name || m.sender || 'User'}: ${m.message || m.text}`).join('\n');
+
+        const prompt = `
+        Role: Professional Personal Assistant for "${ownerName}", the owner of "The V School".
+        Task: Draft a short, warm, and helpful reply in Thai as if you were ${ownerName}.
+        
+        Customer: ${customerInfo.name || 'Unknown'}
+        
+        Style Guidelines:
+        1. Friendly, professional, and authentic (Culinary school context).
+        2. Use polite Thai particles (ครับ/ค่ะ).
+        3. If the customer asked a question, provide a helpful but concise answer.
+        4. Do NOT sound like a robot. Sound like ${ownerName}.
+        
+        Chat History:
+        ${chatContext}
+        
+        Output: Plain text Thai response only. No JSON.
+        `;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            return response.text().trim();
+        } catch (error) {
+            console.error("Smart Reply Generation Failed:", error);
+            return null;
+        }
+    }
 }
 

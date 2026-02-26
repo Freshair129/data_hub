@@ -31,7 +31,7 @@ def connect_redis():
 from auto_reply import generate_auto_reply
 
 from notification_service import send_staff_notification
-from db_adapter import update_customer_intelligence, save_chat_messages, create_task
+from db_adapter import update_customer_intelligence, save_chat_messages, create_task, create_order, add_timeline_event
 from behavioral_analyzer import analyze_customer_behavior
 
 def process_event(event):
@@ -98,8 +98,17 @@ def process_event(event):
         image_url = attachments[0].get('payload', {}).get('url')
         print(f"[Python Worker] Image detected: {image_url}")
         slip_data = verify_slip_real(sender_id, image_url)
-        if slip_data:
+        if slip_data and slip_data.get('status') == 'VERIFIED':
             intelligence_results['slip'] = slip_data
+            
+            # PHASE 19: Order Persistence
+            amount = slip_data.get('amount', 0)
+            txn_id = slip_data.get('ref_id') or f"SLIP-{int(time.time())}"
+            
+            print(f"[Python Worker] 💰 Creating Actual Order for {sender_id}: ฿{amount}")
+            create_order(sender_id, txn_id, amount, status="PAID", metadata={"source": "Facebook Slip Detection"})
+            add_timeline_event(sender_id, "PURCHASE", f"โอนเงินสำเร็จ ฿{amount}", details=slip_data)
+
             # Update intel_data for auto-reply logic
             if intel_data: 
                 intel_data.update({"intent": "Purchase", "score": 100})

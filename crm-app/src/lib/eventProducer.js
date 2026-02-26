@@ -11,6 +11,9 @@ let eventQueue;
 const connection = new IORedis(REDIS_URL, {
     maxRetriesPerRequest: null, // Required by BullMQ
 });
+connection.on('error', (err) => {
+    console.warn(`[Redis] Connection error: ${err.message}. Redis features will be unavailable.`);
+});
 
 function getQueue() {
     if (!eventQueue) {

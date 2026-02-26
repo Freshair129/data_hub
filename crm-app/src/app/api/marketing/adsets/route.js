@@ -16,9 +16,12 @@ export async function GET(request) {
 
         const { searchParams } = new URL(request.url);
         const range = searchParams.get('range') || 'maximum';
-        const preset = range === 'last_30d' ? 'last_30d' : 'maximum';
+        const status = searchParams.get('status') || '';
+        const validPresets = ['today', 'yesterday', 'this_month', 'last_month', 'last_30d', 'last_90d', 'maximum'];
+        const preset = validPresets.includes(range) ? range : 'maximum';
+        const statusFilter = status ? `&filtering=[{"field":"effective_status","operator":"IN","value":["${status}"]}]` : '';
 
-        const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/adsets?fields=name,status,campaign_id,targeting,daily_budget,lifetime_budget,optimization_goal,insights.date_preset(${preset}){spend,impressions,clicks,reach,cpc,cpm,ctr,actions,action_values,cost_per_action_type}&limit=100&access_token=${ACCESS_TOKEN}`;
+        const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/adsets?fields=name,status,campaign_id,targeting,daily_budget,lifetime_budget,optimization_goal,insights.date_preset(${preset}){spend,impressions,clicks,reach,cpc,cpm,ctr,actions,action_values,cost_per_action_type}&limit=100${statusFilter}&access_token=${ACCESS_TOKEN}`;
 
         const response = await fetch(url);
         const data = await response.json();

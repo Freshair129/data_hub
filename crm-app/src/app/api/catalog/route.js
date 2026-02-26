@@ -36,6 +36,7 @@ export async function GET() {
                 name: item.name,
                 description: item.description,
                 price: item.price,
+                base_price: item.basePrice || item.base_price || 0, // Include cost data
                 original_price: item.originalPrice,
                 category: item.category,
                 tags: item.tags || [],

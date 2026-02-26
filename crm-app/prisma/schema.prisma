@@ -1,6 +1,7 @@
 generator client {
   provider   = "prisma-client-js"
   engineType = "library"
+  output     = "../src/generated/prisma-client"
 }
 
 datasource db {
@@ -110,20 +111,20 @@ model TimelineEvent {
 }
 
 model Conversation {
-  id              String    @id @default(cuid())
-  conversationId  String    @unique @map("conversation_id")
-  customerId      String?   @map("customer_id")
-  channel         String    @default("facebook")
-  participantName String?   @map("participant_name")
-  participantId   String?   @map("participant_id")
-  assignedAgent   String?   @map("assigned_agent")
-  lastMessageAt   DateTime? @map("last_message_at")
-  unreadCount     Int       @default(0) @map("unread_count")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  customer        Customer? @relation(fields: [customerId], references: [id])
-  messages        Message[]
+  id              String        @id @default(cuid())
+  conversationId  String        @unique @map("conversation_id")
+  customerId      String?       @map("customer_id")
+  channel         String        @default("facebook")
+  participantName String?       @map("participant_name")
+  participantId   String?       @map("participant_id")
+  assignedAgent   String?       @map("assigned_agent")
+  lastMessageAt   DateTime?     @map("last_message_at")
+  unreadCount     Int           @default(0) @map("unread_count")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
   episodes        ChatEpisode[]
+  customer        Customer?     @relation(fields: [customerId], references: [id])
+  messages        Message[]
 
   @@map("conversations")
 }
@@ -132,10 +133,6 @@ model Message {
   id             String       @id @default(cuid())
   messageId      String       @unique @map("message_id")
   conversationId String       @map("conversation_id")
-  attachmentId   String?      @map("attachment_id")
-  sessionId      String?      @map("session_id")
-  episodeId      String?      @map("episode_id")
-  metadata       Json?        @default("{}")
   fromName       String?      @map("from_name")
   fromId         String?      @map("from_id")
   content        String?
@@ -143,6 +140,10 @@ model Message {
   attachmentType String?      @map("attachment_type")
   attachmentUrl  String?      @map("attachment_url")
   createdAt      DateTime     @default(now()) @map("created_at")
+  attachmentId   String?      @map("attachment_id")
+  metadata       Json?        @default("{}")
+  episodeId      String?      @map("episode_id")
+  sessionId      String?      @map("session_id")
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@map("messages")
@@ -187,6 +188,9 @@ model Employee {
   performance    Json?     @default("{}")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
+  metadata       Json?     @default("{}")
+  facebookName   String?   @map("facebook_name")
+  lineName       String?   @map("line_name")
   tasks          Task[]
 
   @@map("employees")
@@ -218,6 +222,7 @@ model Campaign {
   name            String
   objective       String?
   status          String     @default("ACTIVE")
+  isVisible       Boolean    @default(true) @map("is_visible")
   spend           Float      @default(0)
   impressions     Int        @default(0)
   clicks          Int        @default(0)
@@ -267,30 +272,43 @@ model AdSet {
 }
 
 model Ad {
-  id           String      @id @default(cuid())
-  adId         String      @unique @map("ad_id")
-  name         String
-  status       String
-  adSetId      String      @map("ad_set_id")
-  creativeId   String?     @map("creative_id")
-  experimentId String?     @map("experiment_id")
-  variantName  String?     @map("variant_name")
-  spend        Float       @default(0)
-  impressions  Int         @default(0)
-  clicks       Int         @default(0)
-  cfr          Float       @default(0)
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
-  revenue      Float       @default(0)
-  roas         Float       @default(0)
-  adSet        AdSet       @relation(fields: [adSetId], references: [id])
-  creative     AdCreative? @relation(fields: [creativeId], references: [id])
-  experiment   Experiment? @relation(fields: [experimentId], references: [id])
-  dailyMetrics AdDailyMetric[]
-  hourlyMetrics AdHourlyMetric[]
+  id             String           @id @default(cuid())
+  adId           String           @unique @map("ad_id")
+  name           String
+  status         String
+  deliveryStatus String?          @map("delivery_status")
+  adSetId        String           @map("ad_set_id")
+  creativeId     String?          @map("creative_id")
+  experimentId   String?          @map("experiment_id")
+  variantName    String?          @map("variant_name")
+  spend          Float            @default(0)
+  impressions    Int              @default(0)
+  clicks         Int              @default(0)
+  cfr            Float            @default(0)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  revenue        Float            @default(0)
+  roas           Float            @default(0)
+  dailyMetrics   AdDailyMetric[]
+  hourlyMetrics  AdHourlyMetric[]
+  liveStatus     AdLiveStatus?
+  adSet          AdSet            @relation(fields: [adSetId], references: [id])
+  creative       AdCreative?      @relation(fields: [creativeId], references: [id])
+  experiment     Experiment?      @relation(fields: [experimentId], references: [id])
 
   @@index([experimentId])
   @@map("ads")
+}
+
+model AdLiveStatus {
+  id                 String   @id @default(cuid())
+  adId               String   @unique @map("ad_id")
+  lastImpressionTime DateTime @map("last_impression_time")
+  isRunningNow       Boolean  @default(false) @map("is_running_now")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  ad                 Ad       @relation(fields: [adId], references: [id])
+
+  @@map("ad_live_status")
 }
 
 model AdCreative {
@@ -337,8 +355,7 @@ model AdDailyMetric {
   createdAt   DateTime @default(now()) @map("created_at")
   revenue     Float    @default(0)
   roas        Float    @default(0)
-
-  ad Ad @relation(fields: [adId], references: [adId])
+  ad          Ad       @relation(fields: [adId], references: [adId])
 
   @@unique([adId, date])
   @@map("ad_daily_metrics")
@@ -357,8 +374,7 @@ model AdHourlyMetric {
   revenue     Float    @default(0)
   roas        Float    @default(0)
   createdAt   DateTime @default(now()) @map("created_at")
-
-  ad Ad @relation(fields: [adId], references: [adId])
+  ad          Ad       @relation(fields: [adId], references: [adId])
 
   @@unique([adId, date, hour])
   @@map("ad_hourly_metrics")

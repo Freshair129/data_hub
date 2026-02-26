@@ -22,8 +22,12 @@ export async function GET(request) {
             return NextResponse.json({ error: 'Missing Facebook API credentials' }, { status: 500 });
         }
 
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
+        const { getPrisma } = await import('@/lib/db');
+        const prisma = await getPrisma();
+
+        if (!prisma) {
+            return NextResponse.json({ error: 'Database connection not available' }, { status: 500 });
+        }
 
         // 1. Try DB first
         console.log(`[Hourly API] Checking DB for ${date}...`);

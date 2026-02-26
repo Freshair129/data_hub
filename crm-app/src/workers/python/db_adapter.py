@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DB_ADAPTER = os.getenv('DB_ADAPTER', 'json')
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'customer'))
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'cache', 'customer'))
 
 # ─── PostgreSQL / Supabase Connection ──────────────────────
 _conn = None
@@ -333,3 +333,172 @@ def get_customer_assets(customer_id, asset_type='images'):
     if not os.path.exists(assets_path): return []
     
     return [os.path.join(assets_path, f) for f in os.listdir(assets_path) if not f.startswith('.')]
+
+# ═══════════════════════════════════════════════════════════
+#  ORDERS & TIMELINE
+# ═══════════════════════════════════════════════════════════
+
+def create_order(customer_id, order_id, amount, status="PAID", items=None, metadata=None):
+    """
+    Creates a new order record in the DB or JSON cache.
+    """
+    if DB_ADAPTER == 'prisma':
+        conn = get_db_conn()
+        if conn:
+            try:
+                import uuid
+                import secrets
+                def cuid(): return "c" + secrets.token_hex(12)
+                
+                cur = conn.cursor()
+                # Find internal customer ID
+                cur.execute("SELECT id FROM customers WHERE customer_id = %s OR facebook_id = %s", (customer_id, customer_id))
+                res = cur.fetchone()
+                if not res: return False
+                internal_id = res[0]
+
+                # Insert Order
+                cur.execute("""
+                    INSERT INTO orders (id, order_id, customer_id, date, status, total_amount, paid_amount, items, created_at, updated_at)
+                    VALUES (%s, %s, %s, NOW(), %s, %s, %s, %s, NOW(), NOW())
+                """, (cuid(), order_id, internal_id, status, amount, amount if status == 'PAID' else 0, json.dumps(items or [])))
+                
+                # Insert Transaction
+                cur.execute("""
+                    INSERT INTO transactions (id, transaction_id, order_id, date, amount, type, method, status, created_at)
+                    VALUES (%s, %s, %s, NOW(), %s, 'PAYMENT', 'Transfer', %s, NOW())
+                """, (cuid(), f"TXN-{order_id}", cuid(), amount, status))
+
+                return True
+            except Exception as e:
+                print(f"[DB/Python] SQL Order Error: {e}")
+    
+    # JSON Fallback: Add to profile's orders array
+    return add_order_to_json(customer_id, {
+        "order_id": order_id,
+        "amount": amount,
+        "status": status,
+        "date": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+        "items": items or [],
+        "metadata": metadata or {}
+    })
+
+def add_timeline_event(customer_id, event_type, summary, details=None):
+    """
+    Adds a new event to the customer timeline.
+    """
+    if DB_ADAPTER == 'prisma':
+        conn = get_db_conn()
+        if conn:
+            try:
+                import secrets
+                def cuid(): return "c" + secrets.token_hex(12)
+                cur = conn.cursor()
+                cur.execute("SELECT id FROM customers WHERE customer_id = %s OR facebook_id = %s", (customer_id, customer_id))
+                res = cur.fetchone()
+                if not res: return False
+                internal_id = res[0]
+
+                cur.execute("""
+                    INSERT INTO timeline_events (id, event_id, customer_id, date, type, summary, details, created_at)
+                    VALUES (%s, %s, %s, NOW(), %s, %s, %s, NOW())
+                """, (cuid(), f"EVT-{int(time.time())}", internal_id, event_type, summary, json.dumps(details or {})))
+                return True
+            except Exception as e:
+                print(f"[DB/Python] SQL Timeline Error: {e}")
+
+    # JSON Fallback
+    return add_timeline_event_to_json(customer_id, {
+        "type": event_type,
+        "summary": summary,
+        "details": details or {},
+        "date": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    })
+
+def add_order_to_json(customer_id, order_data):
+    # Re-use the scan-and-match logic from intelligence update
+    target_profile = _find_profile_path(customer_id)
+    if not target_profile: return False
+    
+    try:
+        with open(target_profile, 'r', encoding='utf-8') as f:
+            profile = json.load(f)
+        
+        if 'orders' not in profile: profile['orders'] = []
+        profile['orders'].append(order_data)
+        
+        with open(target_profile, 'w', encoding='utf-8') as f:
+            json.dump(profile, f, indent=4, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"[DB/JSON] Order Append Error: {e}")
+        return False
+
+def add_timeline_event_to_json(customer_id, event_data):
+    target_profile = _find_profile_path(customer_id)
+    if not target_profile: return False
+    
+    try:
+        with open(target_profile, 'r', encoding='utf-8') as f:
+            profile = json.load(f)
+        
+        if 'timeline' not in profile: profile['timeline'] = []
+        profile['timeline'].insert(0, event_data) # Newest first
+        
+        with open(target_profile, 'w', encoding='utf-8') as f:
+            json.dump(profile, f, indent=4, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"[DB/JSON] Timeline Append Error: {e}")
+        return False
+
+def _find_profile_path(customer_id):
+    if not os.path.exists(DATA_DIR): return None
+    direct_folder = os.path.join(DATA_DIR, str(customer_id))
+    if os.path.exists(direct_folder):
+        profile_path = os.path.join(direct_folder, f"profile_{customer_id}.json")
+        if os.path.exists(profile_path): return profile_path
+        # Try finding any profile in that folder
+        for f in os.listdir(direct_folder):
+            if f.startswith('profile_') and f.endswith('.json'):
+                return os.path.join(direct_folder, f)
+
+    # Scan all
+    for folder in os.listdir(DATA_DIR):
+        folder_path = os.path.join(DATA_DIR, folder)
+        if not os.path.isdir(folder_path): continue
+        for f in os.listdir(folder_path):
+            if f.startswith('profile_') and f.endswith('.json'):
+                path = os.path.join(folder_path, f)
+                try:
+                    with open(path, 'r', encoding='utf-8') as pf:
+                        p = json.load(pf)
+                    fb_id = p.get('contact_info', {}).get('facebook_id') or p.get('facebook_id')
+                    if str(customer_id) == str(fb_id) or str(customer_id).replace('MSG-', '') == str(fb_id):
+                        return path
+                except: continue
+    return None
+
+def create_task(customer_id, title, description, priority="NORMAL"):
+    """
+    Creates a new task for the staff.
+    """
+    if DB_ADAPTER == 'prisma':
+        conn = get_db_conn()
+        if conn:
+            try:
+                import secrets
+                def cuid(): return "c" + secrets.token_hex(12)
+                cur = conn.cursor()
+                cur.execute("SELECT id FROM customers WHERE customer_id = %s OR facebook_id = %s", (customer_id, customer_id))
+                res = cur.fetchone()
+                if not res: return False
+                internal_id = res[0]
+
+                cur.execute("""
+                    INSERT INTO tasks (id, task_id, customer_id, title, description, priority, status, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, 'PENDING', NOW(), NOW())
+                """, (cuid(), f"TASK-{int(time.time())}", internal_id, title, description, priority))
+                return True
+            except Exception: pass
+    return False # JSON task support not yet implemented

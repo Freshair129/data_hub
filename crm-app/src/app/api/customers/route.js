@@ -25,10 +25,64 @@ export async function GET(request) {
         if (cached.length > 0) {
             console.log(`[Customers] 🗃 Serving ${cached.length} customers from local cache`);
 
-            // Background refresh: sync from DB & Facebook without blocking UI
-            setImmediate(() => _syncCustomersFromSources().catch(console.error));
+            // Background refresh REMOVED - Now handled by Webhooks & Hourly Cron
+            // setImmediate(() => _syncCustomersFromSources().catch(console.error));
 
-            return NextResponse.json(cached.map(c => ({ ...c, _source: 'cache' })));
+            // Enrich with agent data from conversations (fast DB lookup)
+            let agentMap = {};
+            try {
+                const { getPrisma } = await import('@/lib/db');
+                const prisma = await getPrisma();
+                if (prisma) {
+                    const convs = await prisma.conversation.findMany({
+                        where: { assignedAgent: { not: null } },
+                        select: {
+                            conversationId: true,
+                            assignedAgent: true,
+                            customer: { select: { customerId: true } }
+                        },
+                        orderBy: { updatedAt: 'desc' }
+                    });
+
+                    // ─── 1. Build Agent Map (ID -> Name) ─────────────────
+                    convs.forEach(cv => {
+                        // Priority 1: Use linked customer ID string
+                        if (cv.customer?.customerId && !agentMap[cv.customer.customerId]) {
+                            agentMap[cv.customer.customerId] = cv.assignedAgent;
+                        }
+                        // Priority 2: Use conversation ID directly (often matches for Facebook leads)
+                        if (cv.conversationId && !agentMap[cv.conversationId]) {
+                            agentMap[cv.conversationId] = cv.assignedAgent;
+                        }
+                    });
+
+                    // ─── 2. Build Normalization Map (Alias -> Preferred) ──
+                    let normalizationMap = {};
+                    try {
+                        const employees = await prisma.employee.findMany();
+                        employees.forEach(emp => {
+                            const preferredName = emp.nickName || emp.firstName;
+                            normalizationMap[`${emp.firstName} ${emp.lastName}`] = preferredName;
+                            normalizationMap[emp.firstName] = preferredName;
+                            if (emp.nickName) normalizationMap[emp.nickName] = preferredName;
+
+                            const aliases = emp.metadata?.aliases || [];
+                            aliases.forEach(alias => {
+                                normalizationMap[alias] = preferredName;
+                            });
+                        });
+                    } catch (e) { console.warn('[Customers] Normalization map failed:', e.message); }
+
+                    const normalize = (name) => normalizationMap[name] || name;
+
+                    return NextResponse.json(cached.map(c => {
+                        const cid = c.customerId || c.customer_id;
+                        const convId = c.conversation_id || c.conversationId;
+                        const rawAgent = c.agent || c.intelligence?.agent || agentMap[cid] || agentMap[convId] || 'Unassigned';
+                        return { ...c, agent: normalize(rawAgent), _source: 'cache' };
+                    }));
+                }
+            } catch (e) { console.error('[Customers] Agent enrichment failed:', e.message); }
         }
 
         // ── 2. Cache Miss: Fetch fresh from sources, cache result ──
@@ -51,7 +105,7 @@ async function _syncCustomersFromSources() {
 
     try {
         // Step A: Fetch conversations with participant details and labels
-        const convUrl = `https://graph.facebook.com/v19.0/${PAGE_ID}/conversations?fields=participants,updated_time,labels,messages.limit(3){from,message,created_time}&limit=100&access_token=${PAGE_ACCESS_TOKEN}`;
+        const convUrl = `https://graph.facebook.com/v19.0/${PAGE_ID}/conversations?fields=participants,updated_time,labels,messages.limit(20){from,message,created_time}&limit=100&access_token=${PAGE_ACCESS_TOKEN}`;
         const convRes = await fetch(convUrl);
         const convData = await convRes.json();
 
@@ -73,6 +127,10 @@ async function _syncCustomersFromSources() {
 
                 const nameEn = customer.name.replace(/[^\x00-\x7F]/g, '').replace(/\s+/g, '') || 'User';
                 const origin = (fbLabels.length > 0) ? 'AD' : 'OG';
+
+                // Extract source_ad_id from labels if present
+                const adLabel = fbLabels.find(l => l.includes('ad_id.'));
+                const sourceAdId = adLabel ? adLabel.split('ad_id.')[1] : null;
 
                 let customerId = targetCustomer?.customer_id || targetCustomer?.customerId;
 
@@ -99,6 +157,7 @@ async function _syncCustomersFromSources() {
                         lead_channel: 'Facebook'
                     },
                     intelligence: {
+                        source_ad_id: sourceAdId || targetCustomer?.intelligence?.source_ad_id || null,
                         metrics: targetCustomer?.intelligence?.metrics || { total_spend: 0, total_order: 0 },
                         tags: Array.from(new Set([...(targetCustomer?.intelligence?.tags || []), 'Facebook Chat', ...fbLabels]))
                     }

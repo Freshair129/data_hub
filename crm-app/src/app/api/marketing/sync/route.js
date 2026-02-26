@@ -9,12 +9,17 @@ import { getAllCustomers } from '@/lib/db';
  * POST /api/marketing/sync
  * Triggers the Python bulk sync script and then regenerates local cache.
  */
-export async function POST(request) {
+/**
+ * Shared Sync Handler
+ */
+async function handleSync(request) {
     try {
-        console.log('[MarketingSync] 🚀 Triggering manual hybrid sync...');
+        const { searchParams } = new URL(request.url);
+        const months = searchParams.get('months') || '3';
+        console.log(`[MarketingSync] 🚀 Triggering manual hybrid sync (${months} months)...`);
 
         // 1. Run Python Bulk Sync (Marketing API -> DB)
-        const pythonResult = await runPython('marketing_sync.py', {});
+        const pythonResult = await runPython('marketing_sync.py', { months });
 
         if (!pythonResult.success) {
             console.error('[MarketingSync] ❌ Python sync failed:', pythonResult.error);
@@ -28,10 +33,8 @@ export async function POST(request) {
         console.log('[MarketingSync] ✅ Python sync complete. Triggering cache rebuild...');
 
         // 2. Trigger cache rebuilds in background
-        // rebuild-marketing: reads from ad_daily_metrics and writes to cache
         await emitRebuildMarketing();
 
-        // rebuild-summary: refreshes dashboard KPIs
         const customers = await getAllCustomers();
         await emitRebuildSummary(customers);
 
@@ -45,4 +48,12 @@ export async function POST(request) {
         console.error('[MarketingSync] ❌ API Route Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
+}
+
+export async function POST(request) {
+    return handleSync(request);
+}
+
+export async function GET(request) {
+    return handleSync(request);
 }

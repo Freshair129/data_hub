@@ -64,21 +64,21 @@ def sync_marketing_data():
 
         # -- Fetch Campaigns (ACTIVE only) --
         fields = [Campaign.Field.id, Campaign.Field.name, Campaign.Field.status, Campaign.Field.objective, Campaign.Field.start_time]
-        campaigns = call_with_retry(account.get_campaigns, fields=fields, params={'effective_status': ['ACTIVE']})
+        campaigns = call_with_retry(account.get_campaigns, fields=fields)
         data["campaigns"] = [c.export_all_data() for c in campaigns]
         print(f"✅ Found {len(data['campaigns'])} Active Campaigns")
         time.sleep(2)
 
         # -- Fetch AdSets (ACTIVE only) --
         fields = [AdSet.Field.id, AdSet.Field.name, AdSet.Field.status, AdSet.Field.daily_budget, AdSet.Field.campaign_id, AdSet.Field.targeting]
-        adsets = call_with_retry(account.get_ad_sets, fields=fields, params={'effective_status': ['ACTIVE']})
+        adsets = call_with_retry(account.get_ad_sets, fields=fields)
         data["adsets"] = [a.export_all_data() for a in adsets]
         print(f"✅ Found {len(data['adsets'])} Active AdSets")
         time.sleep(2)
 
         # -- Fetch Ads (ACTIVE only) --
         fields = [Ad.Field.id, Ad.Field.name, Ad.Field.status, Ad.Field.adset_id, Ad.Field.creative]
-        ads = call_with_retry(account.get_ads, fields=fields, params={'effective_status': ['ACTIVE']})
+        ads = call_with_retry(account.get_ads, fields=fields)
         data["ads"] = [a.export_all_data() for a in ads]
         print(f"✅ Found {len(data['ads'])} Active Ads")
         time.sleep(2)
@@ -149,9 +149,6 @@ def sync_marketing_data():
     except Exception as e:
         print(f"[MarketingSync] ❌ Error during sync: {e}")
         print(json.dumps({"success": False, "error": str(e)}))
-
-if __name__ == "__main__":
-    sync_marketing_data()
 
 if __name__ == "__main__":
     sync_marketing_data()

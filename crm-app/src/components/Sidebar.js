@@ -11,6 +11,7 @@ const menuGroups = [
         label: 'OPERATIONS',
         items: [
             { id: 'customers', icon: 'fa-users', label: 'Customers' },
+            { id: 'employees', icon: 'fa-user-tie', label: 'Employees' },
             { id: 'store', icon: 'fa-store', label: 'Store' },
             { id: 'orders', icon: 'fa-receipt', label: 'Orders' },
             { id: 'verification', icon: 'fa-robot', label: 'Verification' }
@@ -20,6 +21,7 @@ const menuGroups = [
         label: 'GROWTH',
         items: [
             { id: 'analytics', icon: 'fa-chart-line', label: 'Analytics' },
+            { id: 'team-kpi', icon: 'fa-chart-network', label: 'Team KPI' },
             { id: 'facebook-ads', icon: 'fa-bullhorn', label: 'Facebook Ads' },
             { id: 'facebook-chat', icon: 'fa-comments', label: 'Inbox' },
             { id: 'campaign-tracking', icon: 'fa-crosshairs', label: 'Campaign Tracking' }
@@ -33,9 +35,9 @@ const menuGroups = [
     }
 ];
 
-export default function Sidebar({ activeView, onViewChange, cartCount, currentUser, onLogout }) {
-    const userName = currentUser?.profile?.first_name || 'User';
-    const userRole = currentUser?.profile?.role || 'Guest';
+export default function Sidebar({ activeView, onViewChange, cartCount, pendingTaskCount, currentUser, onLogout }) {
+    const userName = currentUser?.firstName || currentUser?.profile?.first_name || 'User';
+    const userRole = currentUser?.role || currentUser?.profile?.role || 'Guest';
 
     return (
         <aside className="w-64 bg-[#0A1A2F] border-r border-white/5 flex flex-col h-screen shrink-0 sticky top-0 z-[100]">
@@ -88,6 +90,13 @@ export default function Sidebar({ activeView, onViewChange, cartCount, currentUs
 
                                                 <i className={`fas ${item.icon} w-6 text-center text-lg ${isActive ? 'text-white' : 'group-hover:text-red-500 transition-colors'}`}></i>
                                                 <span className="tracking-tight">{item.label}</span>
+
+                                                {/* Task Notification Badge */}
+                                                {item.id === 'dashboard' && pendingTaskCount > 0 && (
+                                                    <span className="ml-auto w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black animate-pulse shadow-lg shadow-red-500/40">
+                                                        {pendingTaskCount}
+                                                    </span>
+                                                )}
 
                                                 {/* Cart badge - Japan Red Accent */}
                                                 {item.id === 'store' && cartCount > 0 && (

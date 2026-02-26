@@ -234,6 +234,113 @@ async function performAgentAssignment(conversationId, agentName, isAuto = false)
     }
 }
 
+/**
+ * Sends a Facebook message with optional Persona ID
+ */
+export async function sendFacebookMessage(recipientId, text, personaId = null) {
+    if (!PAGE_ACCESS_TOKEN) return { success: false, error: 'Missing FB Config' };
+
+    try {
+        const payload = {
+            recipient: { id: recipientId },
+            message: { text: text }
+        };
+
+        if (personaId) {
+            payload.persona_id = personaId;
+            console.log(`[FB/Send] Sending message as Persona: ${personaId}`);
+        }
+
+        const res = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        return { success: !!data.message_id, data };
+    } catch (e) {
+        console.error('[FB/Send] Error sending message:', e.message);
+        return { success: false, error: e.message };
+    }
+}
+
+/**
+ * Applies a label (tag) to a Facebook conversation
+ */
+export async function applyFacebookLabel(conversationId, labelName) {
+    if (!PAGE_ACCESS_TOKEN || !process.env.FB_PAGE_ID) return { success: false, error: 'Missing FB Config' };
+    const sanitizedConvId = conversationId.replace('t_', '');
+
+    try {
+        // 1. Get or Create Label ID
+        const listUrl = `https://graph.facebook.com/v19.0/${process.env.FB_PAGE_ID}/labels?fields=id,name&access_token=${PAGE_ACCESS_TOKEN}`;
+        const listRes = await fetch(listUrl);
+        const listData = await listRes.json();
+
+        let labelId = listData.data?.find(l => l.name === labelName)?.id;
+
+        if (!labelId) {
+            console.log(`[FB/Label] Creating new label: ${labelName}`);
+            const createRes = await fetch(`https://graph.facebook.com/v19.0/${process.env.FB_PAGE_ID}/labels?access_token=${PAGE_ACCESS_TOKEN}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: labelName })
+            });
+            const createData = await createRes.json();
+            labelId = createData.id;
+        }
+
+        if (labelId) {
+            // 2. Associate Label with Conversation
+            console.log(`[FB/Label] Applying label ${labelName} (${labelId}) to ${sanitizedConvId}`);
+            const applyRes = await fetch(`https://graph.facebook.com/v19.0/${labelId}/users?access_token=${PAGE_ACCESS_TOKEN}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/event-stream' },
+                body: JSON.stringify({ user: sanitizedConvId })
+            });
+            const applyData = await applyRes.json();
+
+            // 3. Log to Customer Timeline in CRM
+            if (applyData.success) {
+                await logAiActionToTimeline(sanitizedConvId, `Labeled as "${labelName}" on Facebook`);
+            }
+
+            return { success: applyData.success || false };
+        }
+    } catch (e) {
+        console.error('[FB/Label] Error applying label:', e.message);
+    }
+    return { success: false };
+}
+
+/**
+ * Helper to log AI actions to the customer's timeline
+ */
+export async function logAiActionToTimeline(conversationId, message) {
+    try {
+        const { getPrisma, getCustomerById } = await import('./db.js');
+        const prisma = await getPrisma();
+        if (prisma) {
+            const customer = await prisma.customer.findFirst({
+                where: { OR: [{ conversationId }, { facebookId: conversationId }] }
+            });
+            if (customer) {
+                await prisma.timelineEvent.create({
+                    data: {
+                        eventId: `AI-LOG-${Date.now()}`,
+                        customer: { connect: { id: customer.id } },
+                        type: 'SYSTEM',
+                        date: new Date(),
+                        summary: `[AI] ${message}`,
+                        details: { actor: 'V-Insight (AI)', platform: 'Facebook' }
+                    }
+                });
+            }
+        }
+    } catch (e) { console.error('Timeline log error:', e); }
+}
+
 // 2. Save to Cache
 async function saveChatToCache(conversationId, messages) {
     if (!fs.existsSync(DATA_DIR)) return;

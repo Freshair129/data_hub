@@ -62,8 +62,9 @@ export default function Dashboard({ customers, products, onRefresh }) {
         const joinDateStr = c.profile?.join_date || (c.timeline && c.timeline.length > 0 ? c.timeline[c.timeline.length - 1].date : null);
         if (joinDateStr) {
             const joinDate = new Date(joinDateStr);
-            const months = (now.getFullYear() - joinDate.getFullYear()) * 12 + (now.getMonth() - joinDate.getMonth());
-            totalLifespanMonths += Math.max(1, months); // Minimum 1 month
+            const diffTime = Math.abs(now - joinDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            totalLifespanMonths += (diffDays / 30); // Convert days to months for better precision
             customerWithHistory++;
         }
     });
@@ -71,7 +72,7 @@ export default function Dashboard({ customers, products, onRefresh }) {
     const avgLifespanMonths = customerWithHistory > 0 ? totalLifespanMonths / customerWithHistory : 1;
     const avgLifespanText = avgLifespanMonths >= 12
         ? `${(avgLifespanMonths / 12).toFixed(1)} Years`
-        : `${Math.round(avgLifespanMonths)} Months`;
+        : `${avgLifespanMonths.toFixed(1)} Months`;
 
     const avgLTV = totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
 
@@ -159,8 +160,12 @@ export default function Dashboard({ customers, products, onRefresh }) {
                             <button className="text-[10px] font-black text-[#C9A34E] uppercase tracking-widest hover:underline">View All Notifications</button>
                         </div>
                         <div className="space-y-4">
-                            {customers.slice(0, 5).map((customer, i) => (
-                                <div key={i} className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer group/item">
+                            {[...customers]
+                                .filter(c => c.timeline && c.timeline.length > 0)
+                                .sort((a, b) => new Date(b.timeline[0].date) - new Date(a.timeline[0].date))
+                                .slice(0, 5)
+                                .map((customer, i) => (
+                                    <div key={i} className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer group/item">
                                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white/40 font-black relative overflow-hidden border border-white/10">
                                         {customer.profile?.profile_picture ? (
                                             <img src={customer.profile.profile_picture} alt="" className="w-full h-full object-cover" />

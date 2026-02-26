@@ -8,6 +8,7 @@ export async function checkRedisConnection() {
         maxRetriesPerRequest: 1,
         connectTimeout: 2000
     });
+    redis.on('error', () => { /* Silence connection errors */ });
 
     try {
         await redis.ping();

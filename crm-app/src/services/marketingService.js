@@ -1,12 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
+import { getPrisma } from '../lib/db.js';
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+console.log('[MarketingService] Using centralized Prisma Client from lib/db');
 
 /**
  * Service to sync Facebook Ad insights to local storage.
@@ -14,6 +8,9 @@ const prisma = new PrismaClient({ adapter });
  * @returns {Promise<{success: boolean, syncedCount: number, message?: string, error?: string}>}
  */
 export async function syncMarketingData(months = 3) {
+    const prisma = await getPrisma();
+    if (!prisma) throw new Error('Could not initialize Prisma');
+
     try {
         const ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
         const AD_ACCOUNT_ID = process.env.FB_AD_ACCOUNT_ID;
@@ -60,15 +57,28 @@ export async function syncMarketingData(months = 3) {
                         const action = (item.actions || []).find(a => a.action_type === type);
                         return action ? parseInt(action.value || 0) : 0;
                     };
-                    const leads = getAction('lead') || getAction('onsite_conversion.lead');
-                    const purchases = getAction('purchase') || getAction('onsite_conversion.purchase');
+                    // Sum common lead types
+                    const leads = getAction('lead') ||
+                        getAction('onsite_conversion.lead') ||
+                        getAction('onsite_web_lead') ||
+                        getAction('onsite_conversion.messaging_conversation_started_7d');
 
                     const getActionValue = (type) => {
                         const action = (item.action_values || []).find(a => a.action_type === type);
                         return action ? parseFloat(action.value || 0) : 0;
                     };
-                    const revenue = getActionValue('purchase') || getActionValue('onsite_conversion.purchase');
+                    // Use omni_purchase as priority, fallback to specific types
+                    const revenue = getActionValue('omni_purchase') ||
+                        getActionValue('purchase') ||
+                        getActionValue('onsite_conversion.purchase') ||
+                        getActionValue('onsite_web_purchase');
+
                     const roas = spend > 0 ? revenue / spend : 0;
+
+                    // Also capture purchase count for conversion rate stats
+                    const purchases = getAction('purchase') ||
+                        getAction('omni_purchase') ||
+                        getAction('onsite_conversion.purchase');
 
                     // 1. Ensure Campaign exists
                     await prisma.campaign.upsert({
@@ -166,6 +176,9 @@ function getOffsetDate(daysOffset) {
  * @param {string} date Date string in YYYY-MM-DD format. Default is today.
  */
 export async function syncHourlyMarketingData(date) {
+    const prisma = await getPrisma();
+    if (!prisma) throw new Error('Could not initialize Prisma');
+
     try {
         const ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
         const AD_ACCOUNT_ID = process.env.FB_AD_ACCOUNT_ID;
@@ -175,11 +188,18 @@ export async function syncHourlyMarketingData(date) {
         }
 
         const targetDate = date || new Date().toISOString().split('T')[0];
-        const timeRange = JSON.stringify({ since: targetDate, until: targetDate });
 
-        const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/insights?level=ad&fields=ad_id,spend,impressions,clicks,actions,action_values&breakdowns=hourly_stats_aggregated_by_audience_time_zone&time_range=${timeRange}&access_token=${ACCESS_TOKEN}`;
+        // We need the last 24 hours. Because time zone differences and the way FB breakdown works,
+        // querying yesterday and today with time_increment=1 ensures we get the full 24-hour spectrum of the current and previous day.
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-        console.log(`[Hourly Sync] Fetching FB breakdown for ${targetDate}...`);
+        const timeRange = JSON.stringify({ since: yesterdayStr, until: targetDate });
+
+        const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/insights?level=ad&fields=ad_id,spend,impressions,clicks,actions,action_values&breakdowns=hourly_stats_aggregated_by_audience_time_zone&time_range=${timeRange}&time_increment=1&limit=500&access_token=${ACCESS_TOKEN}`;
+
+        console.log(`[Hourly Sync] Fetching FB breakdown for ${yesterdayStr} to ${targetDate}...`);
         const response = await fetch(url);
         const data = await response.json();
 
@@ -201,20 +221,30 @@ export async function syncHourlyMarketingData(date) {
             const clicks = parseInt(item.clicks || 0);
 
             // Helpers for actions
-            const getActionValue = (type) => {
+            const getAction = (type) => {
                 const action = (item.actions || []).find(a => a.action_type === type);
                 return action ? parseInt(action.value || 0) : 0;
             };
 
-            const purchases = getActionValue('purchase') || getActionValue('onsite_conversion.purchase');
-            const leads = getActionValue('lead') || getActionValue('onsite_conversion.lead');
+            const leads = getAction('lead') ||
+                getAction('onsite_conversion.lead') ||
+                getAction('onsite_web_lead') ||
+                getAction('onsite_conversion.messaging_conversation_started_7d');
 
             // Extraction for Revenue / ROAS if available
             const getActionRev = (type) => {
                 const action = (item.action_values || []).find(a => a.action_type === type);
                 return action ? parseFloat(action.value || 0) : 0;
             };
-            const revenue = getActionRev('purchase') || getActionRev('onsite_conversion.purchase');
+            const revenue = getActionRev('omni_purchase') ||
+                getActionRev('purchase') ||
+                getActionRev('onsite_conversion.purchase') ||
+                getActionRev('onsite_web_purchase');
+
+            const purchases = getAction('purchase') ||
+                getAction('omni_purchase') ||
+                getAction('onsite_conversion.purchase');
+
             const roas = spend > 0 ? revenue / spend : 0;
 
             // Check if Ad exists (referential integrity)
@@ -224,12 +254,16 @@ export async function syncHourlyMarketingData(date) {
                 continue;
             }
 
+            // Extract the date from the item since we are querying multiple days
+            // FB Insights returns date_start for the day of the breakdown
+            const itemDate = item.date_start ? new Date(item.date_start) : new Date(targetDate);
+
             // Upsert into DB
             await prisma.adHourlyMetric.upsert({
                 where: {
                     adId_date_hour: {
                         adId: adExists.adId,
-                        date: new Date(targetDate),
+                        date: itemDate,
                         hour: hour
                     }
                 },
@@ -244,7 +278,7 @@ export async function syncHourlyMarketingData(date) {
                 },
                 create: {
                     adId: adExists.adId,
-                    date: new Date(targetDate),
+                    date: itemDate,
                     hour: hour,
                     spend,
                     impressions,
@@ -258,7 +292,7 @@ export async function syncHourlyMarketingData(date) {
             upsertedCount++;
         }
 
-        console.log(`[Hourly Sync] Success. Upserted ${upsertedCount} hourly records for ${targetDate}.`);
+        console.log(`[Hourly Sync] Success. Upserted ${upsertedCount} hourly records for ${yesterdayStr} to ${targetDate}.`);
         return { success: true, count: upsertedCount };
 
     } catch (error) {

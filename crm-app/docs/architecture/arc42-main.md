@@ -61,9 +61,9 @@ graph TD
     User([Customer / Employee])
     
     subgraph V_School_CRM_System [V School CRM System]
-        Web_App[Next.js App]
+        Web_App[Next.js App / Webhook Listener]
         Python_Worker[Python AI Worker]
-        Redis_Queue[Redis Queue]
+        Redis_Queue[Redis Queue / BullMQ]
         JSON_Cache[Local JSON Cache]
     end
 
@@ -74,14 +74,16 @@ graph TD
     User -->|Interacts with| Web_App
     Web_App -->|Reads/Writes| Supabase
     Web_App -->|Fast Reads| JSON_Cache
-    Web_App -->|Enqueues Jobs| Redis_Queue
+    Web_App -->|Enqueues Events| Redis_Queue
+    Meta -->|Webhooks| Web_App
     
     Redis_Queue -->|Processed by| Python_Worker
+    Redis_Queue -->|Processed by| Node_Worker[Node.js Event Worker]
+    
+    Node_Worker -->|Updates| Supabase
     Python_Worker -->|Syncs/Responds| Meta
     Python_Worker -->|RAG / AI Analysis| Gemini
     Python_Worker -->|Updates| Supabase
-    
-    Meta -->|Webhooks| Web_App
 ```
 
 ### 5.2 Level 3: Components (CRM Web App)
@@ -149,6 +151,26 @@ sequenceDiagram
     Note over LC: Optimized for High Performance UI
 ```
 
+### 6.2 Event-Driven Chat Synchronization (Real-time)
+```mermaid
+sequenceDiagram
+    participant FB as Facebook Messenger
+    participant WH as Webhook API (/api/webhooks)
+    participant RD as Redis (BullMQ)
+    participant WK as eventProcessor.mjs
+    participant DB as PostgreSQL (Supabase)
+    participant LC as Local JSON Cache
+
+    FB->>WH: New Message/Event
+    WH->>RD: Enqueue 'fb-events'
+    WH-->>FB: 200 OK (Immediate)
+    
+    RD->>WK: Pull Event
+    WK->>DB: Upsert Message & Customer
+    WK->>LC: Update Local Cache
+    Note over WK: Automatic Slip Detection & AI Analysis
+```
+
 ---
 
 ## 7. Deployment View
@@ -176,6 +198,11 @@ Detailed history of key architectural choices:
 - [ADR 007: Customer ID Standardization](../adr/007-customer-id-standardization.md)
 - [ADR 009: Hybrid Cache Marketing Sync](../adr/009-hybrid-cache-marketing-sync.md)
 - [ADR 010: Database-First Product Catalog](../adr/010-database-first-product-catalog.md)
+- [ADR 011: Custom ID Formatting](../adr/011-custom-id-formatting-and-smarter-sessioning.md)
+- [ADR 012: arc42 Documentation Framework](../adr/012-arc42-documentation-framework.md)
+- [ADR 013: Hourly Marketing Sync](../adr/013-hourly-marketing-sync.md)
+- [ADR 014: AI-Driven Chat Automation](../adr/014-ai-driven-chat-automation.md)
+- [ADR 015: Scalable Synchronization Architecture](../adr/015-scalable-sync-architecture.md)
 
 ---
 

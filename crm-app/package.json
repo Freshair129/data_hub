@@ -7,7 +7,8 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "worker": "node src/workers/eventProcessor.mjs"
+        "worker": "node src/workers/eventProcessor.mjs",
+        "sync:sales": "npx tsx scripts/sync_sales_from_sheets.ts"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
