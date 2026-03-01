@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import BusinessAnalyst from '@/utils/BusinessAnalyst';
-import { getPrisma, getAllProducts } from '@/lib/db';
+import BusinessAnalyst from '@/utils/BusinessAnalyst.js';
+import { getPrisma, getAllProducts } from '@/lib/db.js';
 
 // Reuse helper to read JSON files safely
 const readJsonFile = (filePath) => {

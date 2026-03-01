@@ -45,18 +45,22 @@ model Customer {
 }
 
 model Order {
-  id           String        @id @default(cuid())
-  orderId      String        @unique @map("order_id")
-  customerId   String        @map("customer_id")
-  date         DateTime
-  status       String        @default("PENDING")
-  totalAmount  Float         @map("total_amount")
-  paidAmount   Float         @default(0) @map("paid_amount")
-  items        Json          @default("[]")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  id             String        @id @default(cuid())
+  orderId        String        @unique @map("order_id")
+  customerId     String        @map("customer_id")
+  date           DateTime
+  status         String        @default("PENDING")
+  totalAmount    Float         @map("total_amount")
+  paidAmount     Float         @default(0) @map("paid_amount")
+  items          Json          @default("[]")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  customer       Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+  closedById     String?       @map("closed_by_id")
+  closedBy       Employee?     @relation("OrderCloser", fields: [closedById], references: [id])
+  conversationId String?       @map("conversation_id")
+  conversation   Conversation? @relation("OrderConversation", fields: [conversationId], references: [id])
 
   @@map("orders")
 }
@@ -111,20 +115,23 @@ model TimelineEvent {
 }
 
 model Conversation {
-  id              String        @id @default(cuid())
-  conversationId  String        @unique @map("conversation_id")
-  customerId      String?       @map("customer_id")
-  channel         String        @default("facebook")
-  participantName String?       @map("participant_name")
-  participantId   String?       @map("participant_id")
-  assignedAgent   String?       @map("assigned_agent")
-  lastMessageAt   DateTime?     @map("last_message_at")
-  unreadCount     Int           @default(0) @map("unread_count")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
-  episodes        ChatEpisode[]
-  customer        Customer?     @relation(fields: [customerId], references: [id])
-  messages        Message[]
+  id                 String        @id @default(cuid())
+  conversationId     String        @unique @map("conversation_id")
+  customerId         String?       @map("customer_id")
+  channel            String        @default("facebook")
+  participantName    String?       @map("participant_name")
+  participantId      String?       @map("participant_id")
+  assignedAgent      String?       @map("assigned_agent")
+  lastMessageAt      DateTime?     @map("last_message_at")
+  unreadCount        Int           @default(0) @map("unread_count")
+  assignedEmployeeId String?       @map("assigned_employee_id")
+  assignedEmployee   Employee?     @relation("ConversationAssignee", fields: [assignedEmployeeId], references: [id])
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+  episodes           ChatEpisode[]
+  customer           Customer?     @relation(fields: [customerId], references: [id])
+  messages           Message[]
+  orders             Order[]       @relation("OrderConversation")
 
   @@map("conversations")
 }
@@ -141,6 +148,8 @@ model Message {
   attachmentUrl  String?      @map("attachment_url")
   createdAt      DateTime     @default(now()) @map("created_at")
   attachmentId   String?      @map("attachment_id")
+  responderId    String?      @map("responder_id")
+  responder      Employee?    @relation("MessageResponder", fields: [responderId], references: [id])
   metadata       Json?        @default("{}")
   episodeId      String?      @map("episode_id")
   sessionId      String?      @map("session_id")
@@ -169,29 +178,32 @@ model ChatEpisode {
 }
 
 model Employee {
-  id             String    @id @default(cuid())
-  employeeId     String    @unique @map("employee_id")
-  agentId        String?   @unique @map("agent_id")
-  firstName      String    @map("first_name")
-  lastName       String    @map("last_name")
-  nickName       String?   @map("nick_name")
-  role           String    @default("sales")
-  department     String?
-  profilePicture String?   @map("profile_picture")
-  status         String    @default("Active")
-  joinDate       DateTime? @map("join_date")
-  email          String    @unique
-  phonePrimary   String?   @map("phone_primary")
-  lineId         String?   @map("line_id")
-  passwordHash   String    @map("password_hash")
-  permissions    Json      @default("{}")
-  performance    Json?     @default("{}")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  metadata       Json?     @default("{}")
-  facebookName   String?   @map("facebook_name")
-  lineName       String?   @map("line_name")
-  tasks          Task[]
+  id                    String         @id @default(cuid())
+  employeeId            String         @unique @map("employee_id")
+  agentId               String?        @unique @map("agent_id")
+  firstName             String         @map("first_name")
+  lastName              String         @map("last_name")
+  nickName              String?        @map("nick_name")
+  role                  String         @default("sales")
+  department            String?
+  profilePicture        String?        @map("profile_picture")
+  status                String         @default("Active")
+  joinDate              DateTime?      @map("join_date")
+  email                 String         @unique
+  phonePrimary          String?        @map("phone_primary")
+  lineId                String?        @map("line_id")
+  passwordHash          String         @map("password_hash")
+  permissions           Json           @default("{}")
+  performance           Json?          @default("{}")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
+  metadata              Json?          @default("{}")
+  facebookName          String?        @map("facebook_name")
+  lineName              String?        @map("line_name")
+  tasks                 Task[]
+  respondedMessages     Message[]      @relation("MessageResponder")
+  assignedConversations Conversation[] @relation("ConversationAssignee")
+  closedOrders          Order[]        @relation("OrderCloser")
 
   @@map("employees")
 }
@@ -222,6 +234,7 @@ model Campaign {
   name            String
   objective       String?
   status          String     @default("ACTIVE")
+  isVisible       Boolean    @default(true) @map("is_visible")
   spend           Float      @default(0)
   impressions     Int        @default(0)
   clicks          Int        @default(0)
@@ -271,30 +284,43 @@ model AdSet {
 }
 
 model Ad {
-  id            String           @id @default(cuid())
-  adId          String           @unique @map("ad_id")
-  name          String
-  status        String
-  adSetId       String           @map("ad_set_id")
-  creativeId    String?          @map("creative_id")
-  experimentId  String?          @map("experiment_id")
-  variantName   String?          @map("variant_name")
-  spend         Float            @default(0)
-  impressions   Int              @default(0)
-  clicks        Int              @default(0)
-  cfr           Float            @default(0)
-  createdAt     DateTime         @default(now()) @map("created_at")
-  updatedAt     DateTime         @updatedAt @map("updated_at")
-  revenue       Float            @default(0)
-  roas          Float            @default(0)
-  dailyMetrics  AdDailyMetric[]
-  hourlyMetrics AdHourlyMetric[]
-  adSet         AdSet            @relation(fields: [adSetId], references: [id])
-  creative      AdCreative?      @relation(fields: [creativeId], references: [id])
-  experiment    Experiment?      @relation(fields: [experimentId], references: [id])
+  id             String           @id @default(cuid())
+  adId           String           @unique @map("ad_id")
+  name           String
+  status         String
+  deliveryStatus String?          @map("delivery_status")
+  adSetId        String           @map("ad_set_id")
+  creativeId     String?          @map("creative_id")
+  experimentId   String?          @map("experiment_id")
+  variantName    String?          @map("variant_name")
+  spend          Float            @default(0)
+  impressions    Int              @default(0)
+  clicks         Int              @default(0)
+  cfr            Float            @default(0)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  revenue        Float            @default(0)
+  roas           Float            @default(0)
+  dailyMetrics   AdDailyMetric[]
+  hourlyMetrics  AdHourlyMetric[]
+  liveStatus     AdLiveStatus?
+  adSet          AdSet            @relation(fields: [adSetId], references: [id])
+  creative       AdCreative?      @relation(fields: [creativeId], references: [id])
+  experiment     Experiment?      @relation(fields: [experimentId], references: [id])
 
   @@index([experimentId])
   @@map("ads")
+}
+
+model AdLiveStatus {
+  id                 String   @id @default(cuid())
+  adId               String   @unique @map("ad_id")
+  lastImpressionTime DateTime @map("last_impression_time")
+  isRunningNow       Boolean  @default(false) @map("is_running_now")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  ad                 Ad       @relation(fields: [adId], references: [id])
+
+  @@map("ad_live_status")
 }
 
 model AdCreative {

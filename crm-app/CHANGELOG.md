@@ -2,7 +2,18 @@
 
 All notable changes to the CRM project will be documented in this file.
 
-## [Unreleased]
+### Added
+- **Deep Sync Mode (ADR 020)**: Implemented full historical sync logic in `sync_agents_v2.js` with February 2026 date cutoff and React Fiber-based ID extraction.
+- **Staff Attribution Logging**: Added persistent thread-level logging in `logs/synced_threads.log` for auditing sync progress.
+- **Aggressive Sidebar Discovery**: Enhanced scraper with keyboard emulation (PageDown/End) and aggressive scroll fallbacks to discover all 300+ current conversations.
+
+### Changed
+- **Unified ID Mapping**: Standardized `conversationId` to the `t_THREAD_ID` format across all automation and API layers for 100% reliable linking.
+- **Default Full Sync**: Increased default sync limit to 9999 to allow unattended full history processing.
+
+### Fixed
+- **Precision Matching**: Resolved discrepancy in field naming (`msgId` vs `responseId`) between scraper and API, enabling 100% precise staff attribution by absolute message ID.
+- **Scroll Cutoff Reliability**: Refined date-based stop logic to ignore dates in the sidebar, ensuring deep scanning always reaches the first message of the chat.
 
 ## [0.3.1] - 2026-02-23
 

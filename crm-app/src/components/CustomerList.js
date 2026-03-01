@@ -64,7 +64,21 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
     const getTierKey = (c) => {
         const totalSpend = c.totalSpend || c.intelligence?.metrics?.total_spend || 0;
         const learningHours = c.learningHours || c.intelligence?.metrics?.total_learning_hours || 0;
-        const internship = c.internship || c.intelligence?.metrics?.internship_completed || false;
+        const internshipFlag = c.internship || c.intelligence?.metrics?.internship_completed || false;
+
+        // T14 Fix: Validate internship recency via inventory if available
+        let internship = internshipFlag;
+        if (internshipFlag) {
+            const courses = c._raw?.inventory?.learning_courses || c.inventory?.learning_courses || [];
+            const internshipCourse = courses.find(course =>
+                (course.name || '').toLowerCase().match(/internship|ฝึกงาน/)
+            );
+            if (internshipCourse?.enrolled_at) {
+                const daysSince = (Date.now() - new Date(internshipCourse.enrolled_at).getTime()) / (1000 * 60 * 60 * 24);
+                internship = daysSince <= 730; // 2 years
+            }
+        }
+
         if (totalSpend >= 250000 && learningHours >= 100 && internship) return 'L5';
         if (totalSpend >= 125000 && learningHours >= 30) return 'L4';
         if (totalSpend >= 50000) return 'L3';

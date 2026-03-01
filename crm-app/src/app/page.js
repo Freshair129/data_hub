@@ -605,6 +605,7 @@ export default function Home() {
                 {activeView === 'facebook-chat' && (
                     <FacebookChat
                         initialCustomerId={initialChatCustomerId}
+                        currentUser={currentUser}
                         onViewCustomer={(customer) => {
                             if (customer) {
                                 const fullCustomer = customers.find(c => c.customer_id === customer.customer_id) || customer;

@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
+export default function FacebookChat({ onViewCustomer, initialCustomerId, currentUser }) {
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
     const [selectedConv, setSelectedConv] = useState(null);
@@ -166,7 +166,7 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
         const autoSync = async () => {
             console.log('[Chat] Background Auto-Sync Triggered');
             try {
-                await fetch('/api/customers');
+                await fetch('/api/customers?sync=true');
                 await fetchConversations();
             } catch (err) {
                 console.error('Auto-sync error:', err);
@@ -252,13 +252,33 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
             const res = await fetch('/api/marketing/chat/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ recipientId: recipient.id, message: text })
+                body: JSON.stringify({
+                    recipientId: recipient.id,
+                    message: text,
+                    ownerName: currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Agent',
+                    usePersona: true // Enable personas for better tracking
+                })
             });
-            const data = await res.json();
-            if (data.success) {
-                fetchMessages(selectedConv.id);
-                setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    // [NEW] Add optimistic message immediately with agent name
+                    const newMsg = {
+                        id: data.data.message_id,
+                        message: text,
+                        from: { name: currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Me', id: pageId },
+                        created_time: new Date().toISOString(),
+                        metadata: { agent_name: currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Agent' },
+                        isOptimistic: true
+                    };
+                    setMessages(prev => [...prev, newMsg]);
+                    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+                } else {
+                    alert('Failed to send: ' + (data.error || 'Unknown error'));
+                    setInputText(text);
+                }
             } else {
+                const data = await res.json();
                 alert('Failed to send: ' + (data.error || 'Unknown error'));
                 setInputText(text);
             }
@@ -355,8 +375,10 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
     };
 
     const getParticipantName = (conv) => {
+        const FB_PAGE_ID = process.env.NEXT_PUBLIC_FB_PAGE_ID || '170707786504';
+        console.log('[Chat] Initialization - FB_PAGE_ID:', FB_PAGE_ID);
         const parts = conv.participants?.data || [];
-        const other = parts.find(p => p.id !== pageId);
+        const other = parts.find(p => p.id !== FB_PAGE_ID);
         return other?.name || 'User';
     };
 
@@ -492,8 +514,8 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
                                     </span>
                                     {(!selectedConv.agent || selectedConv.agent === 'Unassigned') && (
                                         <button
-                                            onClick={() => handleAssignAgent('Me')}
-                                            className="ml-4 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500/40 transition-all flex items-center gap-1.5"
+                                            onClick={() => handleAssignAgent(currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Me')}
+                                            className="ml-4 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500/40 transition-all flex items-center gap-1.1"
                                         >
                                             <i className="fas fa-hand-paper"></i> Claim Chat
                                         </button>
@@ -516,7 +538,21 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
                             </div>
                         ) : (
                             messages.map((msg, i) => {
-                                const isMe = msg.from?.id === pageId;
+                                const isMe = msg.from?.id && String(msg.from.id) === String(pageId);
+                                const metadataAgent = msg.metadata?.agent_name;
+                                const fromName = msg.from?.name;
+
+                                let displayAgentName = isMe ? 'Admin' : (fromName || 'Customer');
+                                if (isMe) {
+                                    if (metadataAgent && !['The V School', 'Agent', 'Me', ''].includes(metadataAgent)) {
+                                        displayAgentName = metadataAgent;
+                                    } else if (fromName && !['The V School', 'Agent', 'Me', ''].includes(fromName)) {
+                                        displayAgentName = fromName;
+                                    } else if (selectedConv?.assignedAgent && !['Unassigned', 'The V School'].includes(selectedConv.assignedAgent)) {
+                                        displayAgentName = selectedConv.assignedAgent;
+                                    }
+                                }
+
                                 return (
                                     <div key={msg.id || i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                         <div className={`max-w-[70%] p-3.5 rounded-2xl text-xs leading-relaxed font-medium shadow-xl backdrop-blur-sm ${isMe
@@ -533,9 +569,15 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId }) {
                                                     )}
                                                 </div>
                                             ))}
-                                            <p className={`text-[8px] mt-1.5 font-bold uppercase tracking-wider ${isMe ? 'text-blue-200' : 'text-slate-400'}`}>
-                                                {new Date(msg.created_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
+                                            <div className={`flex items-center gap-1.5 mt-1.5 font-bold uppercase tracking-wider ${isMe ? 'text-blue-100' : 'text-slate-400'}`}>
+                                                <span className="text-[10px] font-black">
+                                                    {isMe ? displayAgentName : (msg.from?.name || 'Customer')}
+                                                </span>
+                                                <span className="text-[7px] opacity-40">•</span>
+                                                <span className="text-[8px]">
+                                                    {new Date(msg.created_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 );

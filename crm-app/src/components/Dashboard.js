@@ -51,6 +51,8 @@ export default function Dashboard({ customers, products, onRefresh }) {
     // Generate some metrics based on data
     const totalCustomers = customers.length;
     const totalPoints = customers.reduce((sum, c) => sum + (c.wallet?.points || 0), 0);
+    // T7 Note: total_spend = cumulative customer purchase amount (LTV), NOT ad spend
+    // Populated in page.js checkout: existing + cartTotal; starts at 0 in RegistrationModal
     const totalRevenue = customers.reduce((sum, c) => sum + (c.intelligence?.metrics?.total_spend || 0), 0);
 
     // Calculate Average Lifespan
@@ -63,7 +65,8 @@ export default function Dashboard({ customers, products, onRefresh }) {
         if (joinDateStr) {
             const joinDate = new Date(joinDateStr);
             const diffTime = Math.abs(now - joinDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // T12 Fix: Math.round instead of ceil to avoid upward bias
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
             totalLifespanMonths += (diffDays / 30); // Convert days to months for better precision
             customerWithHistory++;
         }
@@ -166,31 +169,31 @@ export default function Dashboard({ customers, products, onRefresh }) {
                                 .slice(0, 5)
                                 .map((customer, i) => (
                                     <div key={i} className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer group/item">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white/40 font-black relative overflow-hidden border border-white/10">
-                                        {customer.profile?.profile_picture ? (
-                                            <img src={customer.profile.profile_picture} alt="" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <span>{customer.profile?.nick_name?.charAt(0) || 'C'}</span>
-                                        )}
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white/40 font-black relative overflow-hidden border border-white/10">
+                                            {customer.profile?.profile_picture ? (
+                                                <img src={customer.profile.profile_picture} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span>{customer.profile?.nick_name?.charAt(0) || 'C'}</span>
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-black text-white group-hover/item:text-[#C9A34E] transition-colors">
+                                                {customer.profile?.nick_name || customer.profile?.first_name} {customer.profile?.last_name}
+                                            </p>
+                                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
+                                                {customer.profile?.lifecycle_stage || 'Active Student'}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xs font-black text-white/80">
+                                                {customer.timeline?.[0]?.summary || 'Recently Joined'}
+                                            </p>
+                                            <p className="text-[10px] text-white/20 font-mono mt-0.5">
+                                                {customer.timeline?.[0]?.date?.split('T')[0] || '2026-02-08'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-black text-white group-hover/item:text-[#C9A34E] transition-colors">
-                                            {customer.profile?.nick_name || customer.profile?.first_name} {customer.profile?.last_name}
-                                        </p>
-                                        <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
-                                            {customer.profile?.lifecycle_stage || 'Active Student'}
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-xs font-black text-white/80">
-                                            {customer.timeline?.[0]?.summary || 'Recently Joined'}
-                                        </p>
-                                        <p className="text-[10px] text-white/20 font-mono mt-0.5">
-                                            {customer.timeline?.[0]?.date?.split('T')[0] || '2026-02-08'}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>

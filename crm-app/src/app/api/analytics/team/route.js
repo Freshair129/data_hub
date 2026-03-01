@@ -235,11 +235,17 @@ export async function GET(request) {
 
         // 6. Attribute and Finalize
         const totalCRMLeads = Object.values(agentStats).reduce((sum, s) => sum + s.leads, 0);
+        // T10 Fix: Use revenue-based attribution instead of lead-based
+        const totalCRMRevenue = Object.values(agentStats).reduce((sum, s) => sum + s.revenue, 0);
         const result = Object.values(agentStats).map(stats => {
+            // T10: Revenue share with leadShare fallback for agents with 0 revenue
+            const revenueShare = totalCRMRevenue > 0 ? stats.revenue / totalCRMRevenue : 0;
             const leadShare = totalCRMLeads > 0 ? stats.leads / totalCRMLeads : 0;
-            const attrRev = totalMarketingRevenue * leadShare;
-            const attrPurchases = Math.round(totalMarketingPurchases * leadShare);
-            const attrLeads = Math.round(totalMarketingLeads * leadShare);
+            const attrShare = revenueShare > 0 ? revenueShare : leadShare;
+
+            const attrRev = totalMarketingRevenue * attrShare;
+            const attrPurchases = Math.round(totalMarketingPurchases * attrShare);
+            const attrLeads = Math.round(totalMarketingLeads * attrShare);
 
             const finalRev = stats.revenue + attrRev;
             const finalLeads = stats.leads + attrLeads;
@@ -250,8 +256,9 @@ export async function GET(request) {
                 revenue: finalRev,
                 leads: finalLeads,
                 customers: finalCust,
-                attributed: { revenue: attrRev, customers: attrPurchases, ads: topAds.map(a => ({ ...a, share: a.revenue * leadShare })) },
-                conversionRate: finalLeads > 0 ? (finalCust / finalLeads) * 100 : 0,
+                attributed: { revenue: attrRev, customers: attrPurchases, ads: topAds.map(a => ({ ...a, share: a.revenue * attrShare })) },
+                // T5 Fix: Conversion rate from CRM actuals only (not diluted by attributed leads)
+                conversionRate: stats.leads > 0 ? (stats.customers / stats.leads) * 100 : 0,
                 avgOrderValue: finalCust > 0 ? finalRev / finalCust : 0
             };
         }).sort((a, b) => b.revenue - a.revenue);

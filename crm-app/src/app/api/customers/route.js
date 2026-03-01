@@ -8,11 +8,11 @@ import { emitCacheSyncJob, emitRebuildIndex, emitRebuildSummary } from '@/worker
  */
 export async function GET(request) {
     try {
-        const { searchParams } = new URL(request.url);
+        const forceSync = searchParams.get('sync') === 'true';
         const useIndex = searchParams.get('index') === 'true';
 
-        // ── 1. Cache-First: Return lightweight index if requested ──
-        if (useIndex) {
+        // ── 1. Cache-First: Return lightweight index if requested (unless forcing sync) ──
+        if (useIndex && !forceSync) {
             const indexData = readCacheEntry('customer', '__index__');
             if (indexData) {
                 console.log(`[Customers] 📋 Serving index (${indexData.total} entries)`);
@@ -20,9 +20,9 @@ export async function GET(request) {
             }
         }
 
-        // ── 2. Normal Cache-First: Return full profiles list ──
+        // ── 2. Normal Cache-First: Return full profiles list (unless forcing sync) ──
         const cached = readCacheList('customer');
-        if (cached.length > 0) {
+        if (cached.length > 0 && !forceSync) {
             console.log(`[Customers] 🗃 Serving ${cached.length} customers from local cache`);
 
             // Background refresh REMOVED - Now handled by Webhooks & Hourly Cron
@@ -77,8 +77,20 @@ export async function GET(request) {
 
                     return NextResponse.json(cached.map(c => {
                         const cid = c.customerId || c.customer_id;
-                        const convId = c.conversation_id || c.conversationId;
-                        const rawAgent = c.agent || c.intelligence?.agent || agentMap[cid] || agentMap[convId] || 'Unassigned';
+                        const convIdFallback = c.conversation_id || c.conversationId || (c.facebookId ? `t_${c.facebookId}` : null);
+
+                        let dbAgent = agentMap[cid] || agentMap[convIdFallback];
+                        if (!dbAgent && c.conversationIds && c.conversationIds.length > 0) {
+                            for (const cId of c.conversationIds) {
+                                if (agentMap[cId]) {
+                                    dbAgent = agentMap[cId];
+                                    break;
+                                }
+                            }
+                        }
+
+                        let rawAgent = dbAgent || c.profile?.agent || c.agent || c.intelligence?.agent || 'Unassigned';
+                        if (rawAgent === 'The V School' && !dbAgent) rawAgent = 'Unassigned';
                         return { ...c, agent: normalize(rawAgent), _source: 'cache' };
                     }));
                 }
@@ -105,19 +117,25 @@ async function _syncCustomersFromSources() {
 
     try {
         // Step A: Fetch conversations with participant details and labels
-        const convUrl = `https://graph.facebook.com/v19.0/${PAGE_ID}/conversations?fields=participants,updated_time,labels,messages.limit(20){from,message,created_time}&limit=100&access_token=${PAGE_ACCESS_TOKEN}`;
+        const convUrl = `https://graph.facebook.com/v19.0/${PAGE_ID}/conversations?fields=participants,updated_time,labels,messages.limit(100){from,message,created_time}&limit=100&access_token=${PAGE_ACCESS_TOKEN}`;
         const convRes = await fetch(convUrl);
         const convData = await convRes.json();
 
         if (convRes.ok && convData.data) {
             const { generateCustomerId, getOrigin } = await import('@/lib/idUtils');
+            const { getAllCustomers, resolveAgentFromContent } = await import('@/lib/db');
             const allExisting = await getAllCustomers();
 
             for (const conv of convData.data) {
                 const customer = conv.participants?.data?.[0] || { name: 'Unknown', id: '0' };
                 const fbLabels = (conv.labels?.data || []).map(l => l.name);
-                const hasStaffReply = (conv.messages?.data || []).some(m => m.from?.id === PAGE_ID);
-                const detectedAgent = (conv.messages?.data || []).find(m => m.from?.id === PAGE_ID)?.from?.name || 'Unassigned';
+                const rawMessages = conv.messages?.data || [];
+                const hasStaffReply = rawMessages.some(m => m.from?.id === PAGE_ID);
+
+                // [NEW] Use robust parsing for assigned agent
+                const assignedFromContent = resolveAgentFromContent(rawMessages.map(m => ({ content: m.message })));
+                const lastStaffName = rawMessages.find(m => m.from?.id === PAGE_ID)?.from?.name;
+                const detectedAgent = assignedFromContent || lastStaffName || 'Unassigned';
 
                 // Standard ID Resolution (TVS-CUS V7)
                 let targetCustomer = allExisting.find(c =>

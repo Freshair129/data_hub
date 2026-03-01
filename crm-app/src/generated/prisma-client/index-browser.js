@@ -158,7 +158,9 @@ exports.Prisma.OrderScalarFieldEnum = {
   paidAmount: 'paidAmount',
   items: 'items',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  closedById: 'closedById',
+  conversationId: 'conversationId'
 };
 
 exports.Prisma.TransactionScalarFieldEnum = {
@@ -211,6 +213,7 @@ exports.Prisma.ConversationScalarFieldEnum = {
   assignedAgent: 'assignedAgent',
   lastMessageAt: 'lastMessageAt',
   unreadCount: 'unreadCount',
+  assignedEmployeeId: 'assignedEmployeeId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -227,6 +230,7 @@ exports.Prisma.MessageScalarFieldEnum = {
   attachmentUrl: 'attachmentUrl',
   createdAt: 'createdAt',
   attachmentId: 'attachmentId',
+  responderId: 'responderId',
   metadata: 'metadata',
   episodeId: 'episodeId',
   sessionId: 'sessionId'
@@ -296,6 +300,7 @@ exports.Prisma.CampaignScalarFieldEnum = {
   name: 'name',
   objective: 'objective',
   status: 'status',
+  isVisible: 'isVisible',
   spend: 'spend',
   impressions: 'impressions',
   clicks: 'clicks',
@@ -338,6 +343,7 @@ exports.Prisma.AdScalarFieldEnum = {
   adId: 'adId',
   name: 'name',
   status: 'status',
+  deliveryStatus: 'deliveryStatus',
   adSetId: 'adSetId',
   creativeId: 'creativeId',
   experimentId: 'experimentId',
@@ -350,6 +356,14 @@ exports.Prisma.AdScalarFieldEnum = {
   updatedAt: 'updatedAt',
   revenue: 'revenue',
   roas: 'roas'
+};
+
+exports.Prisma.AdLiveStatusScalarFieldEnum = {
+  id: 'id',
+  adId: 'adId',
+  lastImpressionTime: 'lastImpressionTime',
+  isRunningNow: 'isRunningNow',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AdCreativeScalarFieldEnum = {
@@ -491,6 +505,7 @@ exports.Prisma.ModelName = {
   AdAccount: 'AdAccount',
   AdSet: 'AdSet',
   Ad: 'Ad',
+  AdLiveStatus: 'AdLiveStatus',
   AdCreative: 'AdCreative',
   Experiment: 'Experiment',
   AdDailyMetric: 'AdDailyMetric',

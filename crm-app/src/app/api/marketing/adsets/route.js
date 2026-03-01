@@ -1,76 +1,122 @@
 import { NextResponse } from 'next/server';
+import { getPrisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * API Route to fetch Facebook Ad Sets with per-adset insights
+ * T11 Fix: Migrated from live Facebook Graph API to Prisma DB
+ * Eliminates dependency on FB_ACCESS_TOKEN for adset data
+ * Pattern follows campaigns/route.js (DB-first with daily metric aggregation)
  */
 export async function GET(request) {
     try {
-        const ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
-        const AD_ACCOUNT_ID = process.env.FB_AD_ACCOUNT_ID;
-
-        if (!ACCESS_TOKEN || !AD_ACCOUNT_ID) {
-            return NextResponse.json({ error: 'Facebook credentials not configured' }, { status: 400 });
+        const prisma = await getPrisma();
+        if (!prisma) {
+            return NextResponse.json({ error: 'Database not available' }, { status: 503 });
         }
 
         const { searchParams } = new URL(request.url);
-        const range = searchParams.get('range') || 'maximum';
+        const range = searchParams.get('range') || 'last_30d';
         const status = searchParams.get('status') || '';
-        const validPresets = ['today', 'yesterday', 'this_month', 'last_month', 'last_30d', 'last_90d', 'maximum'];
-        const preset = validPresets.includes(range) ? range : 'maximum';
-        const statusFilter = status ? `&filtering=[{"field":"effective_status","operator":"IN","value":["${status}"]}]` : '';
 
-        const url = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/adsets?fields=name,status,campaign_id,targeting,daily_budget,lifetime_budget,optimization_goal,insights.date_preset(${preset}){spend,impressions,clicks,reach,cpc,cpm,ctr,actions,action_values,cost_per_action_type}&limit=100${statusFilter}&access_token=${ACCESS_TOKEN}`;
+        // Date range calculation (same pattern as campaigns/route.js)
+        let startDate, endDate;
+        const now = new Date();
+        endDate = new Date(now);
+        startDate = new Date(now);
 
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error('Facebook Adsets API Error:', data);
-
-            // Handle Token Expiration (Error Code 190)
-            if (data.error?.code === 190) {
-                return NextResponse.json({
-                    success: false,
-                    errorType: 'TOKEN_EXPIRED',
-                    error: 'Facebook access token has expired or is invalid.'
-                }, { status: 401 });
-            }
-
-            return NextResponse.json({ error: data.error?.message || 'Failed to fetch adsets' }, { status: 500 });
+        if (range === 'today') {
+            startDate.setHours(0, 0, 0, 0);
+        } else if (range === 'yesterday') {
+            startDate.setDate(now.getDate() - 1);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setDate(now.getDate() - 1);
+            endDate.setHours(23, 59, 59, 999);
+        } else if (range === 'this_month') {
+            startDate.setDate(1);
+            startDate.setHours(0, 0, 0, 0);
+        } else if (range === 'last_month') {
+            startDate.setMonth(now.getMonth() - 1);
+            startDate.setDate(1);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setDate(0);
+            endDate.setHours(23, 59, 59, 999);
+        } else if (range === 'last_30d') {
+            startDate.setDate(now.getDate() - 30);
+        } else if (range === 'last_90d') {
+            startDate.setDate(now.getDate() - 90);
+        } else {
+            startDate = new Date('2000-01-01'); // maximum
         }
 
-        const adsets = (data.data || []).map(adset => {
-            const ins = adset.insights?.data?.[0] || {};
-            return {
-                id: adset.id,
-                name: adset.name,
-                status: adset.status,
-                campaign_id: adset.campaign_id,
-                optimization_goal: adset.optimization_goal,
-                daily_budget: adset.daily_budget ? Number(adset.daily_budget) / 100 : null,
-                lifetime_budget: adset.lifetime_budget ? Number(adset.lifetime_budget) / 100 : null,
-                spend: parseFloat(ins.spend || 0),
-                impressions: parseInt(ins.impressions || 0),
-                clicks: parseInt(ins.clicks || 0),
-                reach: parseInt(ins.reach || 0),
-                cpc: parseFloat(ins.cpc || 0),
-                cpm: parseFloat(ins.cpm || 0),
-                ctr: parseFloat(ins.ctr || 0),
-                actions: ins.actions || [],
-                action_values: ins.action_values || [],
-                cost_per_action_type: ins.cost_per_action_type || [],
-            };
+        const statusFilter = status ? { status: { in: status.split(',').map(s => s.trim()) } } : {};
+
+        const adSets = await prisma.adSet.findMany({
+            where: statusFilter,
+            include: {
+                campaign: {
+                    select: { campaignId: true }
+                },
+                ads: {
+                    include: {
+                        dailyMetrics: {
+                            where: {
+                                date: {
+                                    gte: startDate,
+                                    lte: endDate
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         });
+
+        const formatted = adSets.map(as => {
+            let spend = 0, impressions = 0, clicks = 0, leads = 0, purchases = 0, revenue = 0;
+
+            as.ads.forEach(ad => {
+                ad.dailyMetrics.forEach(m => {
+                    spend += m.spend;
+                    impressions += m.impressions;
+                    clicks += m.clicks;
+                    leads += m.leads;
+                    purchases += m.purchases;
+                    revenue += m.revenue;
+                });
+            });
+
+            return {
+                id: as.adSetId,                         // FB adset ID (not cuid)
+                name: as.name,
+                status: as.status,
+                campaign_id: as.campaign?.campaignId,    // FB campaign ID (not cuid)
+                optimization_goal: null,                 // Not stored in DB
+                daily_budget: as.dailyBudget,
+                lifetime_budget: null,                   // Not stored in DB
+                spend,
+                impressions,
+                clicks,
+                reach: 0,                                // Not stored in DB
+                cpc: clicks > 0 ? spend / clicks : 0,
+                cpm: impressions > 0 ? (spend / impressions) * 1000 : 0,
+                ctr: impressions > 0 ? (clicks / impressions) * 100 : 0,
+                actions: [],                             // Frontend aggregates from ads level
+                action_values: [],
+                cost_per_action_type: [],
+            };
+        }).filter(as => as.spend > 0 || as.status === 'ACTIVE');
+
+        // Sort by spend descending
+        formatted.sort((a, b) => b.spend - a.spend);
 
         return NextResponse.json({
             success: true,
-            data: adsets
+            data: formatted
         });
 
     } catch (error) {
-        console.error('Adsets API Route Error:', error);
+        console.error('[Adsets] API Route Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

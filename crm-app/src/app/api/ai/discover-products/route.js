@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import BusinessAnalyst from '@/utils/BusinessAnalyst';
+import BusinessAnalyst from '@/utils/BusinessAnalyst.js';
 
 // Helper to read JSON files safely
 const readJsonFile = (filePath) => {
@@ -63,7 +63,7 @@ export async function GET(request) {
         const analyst = new BusinessAnalyst(apiKey);
 
         // 2. Fetch Data (Catalog & Employees)
-        const { getAllProducts, getAllEmployees } = await import('@/lib/db');
+        const { getAllProducts, getAllEmployees } = await import('@/lib/db.js');
         const [allCatalogItems, allEmployees] = await Promise.all([
             getAllProducts(),
             getAllEmployees()

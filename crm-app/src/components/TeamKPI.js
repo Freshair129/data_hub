@@ -356,21 +356,23 @@ export default function TeamKPI({ customers = [] }) {
                                             <i className="fab fa-facebook"></i> Meta Ads Attribution (฿{formatCurrency(selectedAgentDetail.agent.attributed?.revenue || 0)})
                                         </p>
                                         <div className="space-y-3">
-                                            {(selectedAgentDetail.agent.attributed?.ads || []).map((ad, idx) => (
-                                                <div key={idx} className="p-5 bg-[#C9A34E]/5 rounded-2xl border border-[#C9A34E]/10 flex justify-between items-center group hover:bg-[#C9A34E]/10 transition-all">
-                                                    <div className="max-w-[70%]">
-                                                        <p className="text-[11px] font-black text-white group-hover:text-[#C9A34E] transition-colors">{ad.name}</p>
-                                                        <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">Source: Meta Ads Manager</p>
+                                            <>
+                                                {(selectedAgentDetail.agent.attributed?.ads || []).map((ad, idx) => (
+                                                    <div key={idx} className="p-5 bg-[#C9A34E]/5 rounded-2xl border border-[#C9A34E]/10 flex justify-between items-center group hover:bg-[#C9A34E]/10 transition-all">
+                                                        <div className="max-w-[70%]">
+                                                            <p className="text-[11px] font-black text-white group-hover:text-[#C9A34E] transition-colors">{ad.name}</p>
+                                                            <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">Source: Meta Ads Manager</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-sm font-black text-[#C9A34E]">฿{formatCurrency(ad.share)}</p>
+                                                            <p className="text-[8px] text-[#C9A34E]/40 font-black uppercase">Statistically Attributed</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-sm font-black text-[#C9A34E]">฿{formatCurrency(ad.share)}</p>
-                                                        <p className="text-[8px] text-[#C9A34E]/40 font-black uppercase">Statistically Attributed</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {(selectedAgentDetail.agent.attributed?.ads || []).length === 0 && (
-                                                <div className="py-8 text-center text-white/10 text-xs italic bg-white/5 rounded-2xl border border-dashed border-white/10">No marketing attribution available for this period.</div>
-                                            )}
+                                                ))}
+                                                {(selectedAgentDetail.agent.attributed?.ads || []).length === 0 && (
+                                                    <div className="py-8 text-center text-white/10 text-xs italic bg-white/5 rounded-2xl border border-dashed border-white/10">No marketing attribution available for this period.</div>
+                                                )}
+                                            </>
                                         </div>
                                     </div>
                                 </div>

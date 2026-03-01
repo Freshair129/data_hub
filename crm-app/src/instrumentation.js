@@ -49,5 +49,22 @@ export async function register() {
                 console.error(`[${new Date().toISOString()}] Hourly sync error:`, err);
             }
         });
+
+        // 4. LINE Daily Marketing Report (Every day at 09:00 Bangkok Time = 02:00 UTC)
+        cron.schedule('0 2 * * *', async () => {
+            console.log(`[${new Date().toISOString()}] Sending LINE daily marketing report...`);
+            try {
+                const { sendDailyAdReport } = await import('./lib/lineReport.js');
+                const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+                const result = await sendDailyAdReport(baseUrl);
+                if (result.success) {
+                    console.log(`[${new Date().toISOString()}] LINE report sent: ${result.summary.totalAds} ads, ฿${result.summary.totalSpend.toFixed(0)}`);
+                } else {
+                    console.error(`[${new Date().toISOString()}] LINE report failed:`, result.error);
+                }
+            } catch (err) {
+                console.error(`[${new Date().toISOString()}] LINE report error:`, err);
+            }
+        });
     }
 }

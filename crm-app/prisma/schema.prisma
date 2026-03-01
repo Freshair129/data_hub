@@ -57,6 +57,10 @@ model Order {
   updatedAt    DateTime      @updatedAt @map("updated_at")
   customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+  closedById   String?       @map("closed_by_id")
+  closedBy     Employee?     @relation("OrderCloser", fields: [closedById], references: [id])
+  conversationId String?     @map("conversation_id")
+  conversation   Conversation? @relation("OrderConversation", fields: [conversationId], references: [id])
 
   @@map("orders")
 }
@@ -120,11 +124,14 @@ model Conversation {
   assignedAgent   String?       @map("assigned_agent")
   lastMessageAt   DateTime?     @map("last_message_at")
   unreadCount     Int           @default(0) @map("unread_count")
+  assignedEmployeeId String?      @map("assigned_employee_id")
+  assignedEmployee   Employee?    @relation("ConversationAssignee", fields: [assignedEmployeeId], references: [id])
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
   episodes        ChatEpisode[]
   customer        Customer?     @relation(fields: [customerId], references: [id])
   messages        Message[]
+  orders          Order[]       @relation("OrderConversation")
 
   @@map("conversations")
 }
@@ -141,6 +148,8 @@ model Message {
   attachmentUrl  String?      @map("attachment_url")
   createdAt      DateTime     @default(now()) @map("created_at")
   attachmentId   String?      @map("attachment_id")
+  responderId    String?      @map("responder_id")
+  responder      Employee?    @relation("MessageResponder", fields: [responderId], references: [id])
   metadata       Json?        @default("{}")
   episodeId      String?      @map("episode_id")
   sessionId      String?      @map("session_id")
@@ -191,7 +200,10 @@ model Employee {
   metadata       Json?     @default("{}")
   facebookName   String?   @map("facebook_name")
   lineName       String?   @map("line_name")
-  tasks          Task[]
+  tasks                 Task[]
+  respondedMessages     Message[]      @relation("MessageResponder")
+  assignedConversations Conversation[] @relation("ConversationAssignee")
+  closedOrders          Order[]        @relation("OrderCloser")
 
   @@map("employees")
 }

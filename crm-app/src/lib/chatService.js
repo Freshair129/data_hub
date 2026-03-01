@@ -22,13 +22,23 @@ export async function syncChat(conversationId) {
     // Try Facebook API
     try {
         if (PAGE_ACCESS_TOKEN) {
-            const url = `https://graph.facebook.com/v19.0/${sanitizedConvId}/messages?fields=id,message,from,created_time,attachments{id,mime_type,name,file_url,image_data,url}&limit=50&access_token=${PAGE_ACCESS_TOKEN}`;
+            // FB API has different endpoints for Thread IDs vs Participant IDs
+            let url;
+            if (conversationId.startsWith('t_')) {
+                // For Thread IDs (t_XXXXXX), use ?fields=messages WITH the prefix
+                url = `https://graph.facebook.com/v19.0/${conversationId}?fields=messages.limit(50){id,message,from,created_time,attachments{id,mime_type,name,file_url,image_data,url}}&access_token=${PAGE_ACCESS_TOKEN}`;
+            } else {
+                // For Participant IDs (PSID), use /messages
+                url = `https://graph.facebook.com/v19.0/${sanitizedConvId}/messages?fields=id,message,from,created_time,attachments{id,mime_type,name,file_url,image_data,url}&limit=50&access_token=${PAGE_ACCESS_TOKEN}`;
+            }
+
             const response = await fetch(url);
             const data = await response.json();
 
             if (response.ok) {
                 // Facebook returns newest first
-                messages = data.data || [];
+                // If using Thread ID, messages are nested under data.messages.data
+                messages = conversationId.startsWith('t_') ? (data.messages?.data || []) : (data.data || []);
 
                 // 1. Save to Local Cache (JSON)
                 await saveChatToCache(sanitizedConvId, messages);
@@ -41,9 +51,17 @@ export async function syncChat(conversationId) {
                     try {
                         console.log(`[ChatService] Syncing ${messages.length} messages to DB for ${sanitizedConvId}...`);
 
-                        // Find conversation to get ID mapping
-                        let dbConv = await prisma.conversation.findUnique({
-                            where: { conversationId: sanitizedConvId },
+                        // Upsert conversation to guarantee it exists before inserting messages
+                        const sanitizedIdForDB = conversationId.startsWith('t_') ? conversationId : sanitizedConvId;
+
+                        let dbConv = await prisma.conversation.upsert({
+                            where: { conversationId: sanitizedIdForDB },
+                            update: {},
+                            create: {
+                                conversationId: sanitizedIdForDB,
+                                participantId: sanitizedConvId,
+                                channel: 'facebook',
+                            },
                             include: { customer: true }
                         });
 
@@ -81,20 +99,34 @@ export async function syncChat(conversationId) {
 
                                 const attachment = msg.attachments?.data?.[0];
 
+                                // [NEW] Fetch existing to preserve manually set metadata (like agent_name)
+                                const existingMsg = await prisma.message.findUnique({
+                                    where: { messageId: msg.id },
+                                    select: { metadata: true }
+                                });
+
+                                const incomingMetadata = {
+                                    customer_id: dbConv.customerId,
+                                    agent_id: dbConv.assignedAgent,
+                                    lead_id: dbConv.customerId,
+                                    channel: channel,
+                                    origin: origin,
+                                    ad_id: dbConv.metadata?.ad_id,
+                                    campaign_id: dbConv.metadata?.campaign_id,
+                                    ad_set_id: dbConv.metadata?.ad_set_id
+                                };
+
+                                // Merge existing metadata if present
+                                const finalMetadata = {
+                                    ...incomingMetadata,
+                                    ...(existingMsg?.metadata || {})
+                                };
+
                                 await prisma.message.upsert({
                                     where: { messageId: msg.id },
                                     update: {
                                         sessionId: currentSessionId,
-                                        metadata: {
-                                            customer_id: dbConv.customerId,
-                                            agent_id: dbConv.assignedAgent,
-                                            lead_id: dbConv.customerId,
-                                            channel: channel,
-                                            origin: origin,
-                                            ad_id: dbConv.metadata?.ad_id,
-                                            campaign_id: dbConv.metadata?.campaign_id,
-                                            ad_set_id: dbConv.metadata?.ad_set_id
-                                        }
+                                        metadata: finalMetadata
                                     },
                                     create: {
                                         messageId: msg.id,
@@ -108,16 +140,7 @@ export async function syncChat(conversationId) {
                                         attachmentType: attachment?.mime_type,
                                         attachmentUrl: attachment?.image_data?.url || attachment?.video_data?.url || attachment?.file_url,
                                         createdAt: msgTime,
-                                        metadata: {
-                                            customer_id: dbConv.customerId,
-                                            agent_id: dbConv.assignedAgent,
-                                            lead_id: dbConv.customerId,
-                                            channel: channel,
-                                            origin: origin,
-                                            ad_id: dbConv.metadata?.ad_id,
-                                            campaign_id: dbConv.metadata?.campaign_id,
-                                            ad_set_id: dbConv.metadata?.ad_set_id
-                                        }
+                                        metadata: finalMetadata
                                     }
                                 });
                                 lastMsgTime = msgTime;
@@ -145,8 +168,27 @@ export async function syncChat(conversationId) {
         console.error('FB Fetch Error:', error);
     }
 
-    // [New] Full Integration: Auto-detect Agent Mentions
+    // [New] System Assignment Parsing
+    let systemAssignedAgent = null;
     if (messages.length > 0) {
+        const systemMessageRegex = /ระบบมอบหมายแชทนี้ให้กับ (.*) ผ่านระบบอัตโนมัติ/;
+        for (const msg of messages) {
+            if (!msg.message) continue;
+            const match = msg.message.match(systemMessageRegex);
+            if (match && match[1]) {
+                systemAssignedAgent = match[1].trim();
+                break;
+            }
+        }
+
+        if (systemAssignedAgent) {
+            console.log(`[System Sync] Formally assigned by system to: ${systemAssignedAgent}`);
+            await performAgentAssignment(sanitizedConvId, systemAssignedAgent, true);
+        }
+    }
+
+    // [New] Full Integration: Auto-detect Agent Mentions
+    if (messages.length > 0 && !systemAssignedAgent) {
         try {
             const apiKey = process.env.GEMINI_API_KEY;
             if (apiKey) {

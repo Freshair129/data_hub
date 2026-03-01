@@ -244,7 +244,8 @@ export default function Analytics({ customers, products }) {
                 let salesCount = 0;
                 (campaign.actions || []).forEach(action => {
                     const type = action.action_type || '';
-                    if (type.includes('purchase') || type.includes('conversion.purchase') || type === 'onsite_conversion.messaging_user_depth_5_message_send') {
+                    // T3 Fix: Removed messaging_user_depth_5 — messaging ≠ purchase
+                    if (type.includes('purchase') || type.includes('conversion.purchase')) {
                         salesCount += parseInt(action.value || 0);
                     }
                 });
@@ -418,33 +419,30 @@ export default function Analytics({ customers, products }) {
         }
         channelTable[channel].leads++;
 
+        // T2 Fix: Mutually exclusive funnel stages for clearer drop-off analysis
         if (stages.won.includes(stage)) {
             funnelCounts.won++;
-            funnelCounts.proposal++;
-            funnelCounts.qualified++;
-            funnelCounts.inquiry++;
             channelTable[channel].won++;
         } else if (stages.proposal.includes(stage)) {
             funnelCounts.proposal++;
-            funnelCounts.qualified++;
-            funnelCounts.inquiry++;
         } else if (stages.qualified.includes(stage)) {
             funnelCounts.qualified++;
-            funnelCounts.inquiry++;
         } else if (stages.inquiry.includes(stage)) {
             funnelCounts.inquiry++;
         }
     });
 
-    const totalLeads = funnelCounts.inquiry;
-    const registered = funnelCounts.qualified;
+    // T2 Fix: totalLeads = sum of ALL stages (each customer counted once)
+    const totalLeads = funnelCounts.inquiry + funnelCounts.qualified + funnelCounts.proposal + funnelCounts.won;
+    const reachedQualified = funnelCounts.qualified + funnelCounts.proposal + funnelCounts.won;
+    const reachedProposal = funnelCounts.proposal + funnelCounts.won;
     const paidCustomers = funnelCounts.won;
     const conversionRate = totalLeads > 0 ? ((paidCustomers / totalLeads) * 100).toFixed(1) : 0;
 
     const funnelData = [
         { label: 'Total Leads', value: totalLeads, color: 'bg-blue-600', sub: '100%' },
-        { label: 'Qualified', value: registered, color: 'bg-indigo-500', sub: `${totalLeads > 0 ? ((registered / totalLeads) * 100).toFixed(0) : 0}%` },
-        { label: 'Proposal', value: funnelCounts.proposal, color: 'bg-purple-500', sub: `${totalLeads > 0 ? ((funnelCounts.proposal / totalLeads) * 100).toFixed(0) : 0}%` },
+        { label: 'Qualified', value: reachedQualified, color: 'bg-indigo-500', sub: `${totalLeads > 0 ? ((reachedQualified / totalLeads) * 100).toFixed(0) : 0}%` },
+        { label: 'Proposal', value: reachedProposal, color: 'bg-purple-500', sub: `${totalLeads > 0 ? ((reachedProposal / totalLeads) * 100).toFixed(0) : 0}%` },
         { label: 'Paid Customers', value: paidCustomers, color: 'bg-emerald-500', sub: `${totalLeads > 0 ? ((paidCustomers / totalLeads) * 100).toFixed(1) : 0}%` }
     ];
 
@@ -474,7 +472,8 @@ export default function Analytics({ customers, products }) {
             const recencyDays = Math.floor((today - lastPurchaseDate) / (1000 * 60 * 60 * 24));
 
             // Frequency: count of purchase events
-            const frequency = purchaseEvents.length || c.intelligence?.metrics?.total_order || 1;
+            // T9 Fix: Non-purchasers should have frequency 0, not 1 (was inflating F-score)
+            const frequency = purchaseEvents.length || c.intelligence?.metrics?.total_order || 0;
 
             // Monetary: Total Spend
             const monetary = c.intelligence?.metrics?.total_spend || 0;
@@ -1216,7 +1215,7 @@ export default function Analytics({ customers, products }) {
                     <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
                         {[
                             { label: 'Total Leads', val: totalLeads, diff: '+12%', color: 'text-blue-400' },
-                            { label: 'Registrations', val: registered, diff: '+8%', color: 'text-purple-400' },
+                            { label: 'Registrations', val: reachedQualified, diff: '+8%', color: 'text-purple-400' },
                             { label: 'Paid Customers', val: paidCustomers, diff: '+15%', color: 'text-emerald-400' },
                             { label: 'Conversion Rate', val: `${conversionRate}%`, diff: '+2.4%', color: 'text-amber-400' }
                         ].map((stat, i) => (

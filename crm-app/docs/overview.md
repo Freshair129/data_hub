@@ -100,6 +100,23 @@ npm run dev
 
 ---
 
+### 3. Agent Sync & Attribution (Playwright)
+```text
+[Playwright Worker] ──(Deep Scroll)──> [Business Suite UI]
+         |                                     |
+         | (Extract Fiber Props: threadID, responseId)
+         v
+[API: /api/marketing/chat/message-sender] ──> [DB: Conversation (t_ID)]
+                                         └──> [DB: Message (msgId)]
+```
+
+---
+
 ## 🏗️ Architecture Decisions
 Major technical choices and their rationale.
 👉 [**View ADR Directory**](./adr/)
+
+| ADR | Title | Summary |
+|---|---|---|
+| **019** | Agent Attribution | Automation of staff tracking via Business Suite scraping. |
+| **020** | Threading Standard | Unified `t_THREAD_ID` mapping and Deep-Sync logic. |

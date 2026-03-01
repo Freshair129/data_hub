@@ -40,6 +40,38 @@ function mapSheetRowToOrder(row) {
     };
 }
 
+/**
+ * Heuristically finds the closing admin and conversation for an order.
+ */
+async function resolveAttribution(prisma, customer, orderDate) {
+    const margin = new Date(orderDate.getTime() + 10 * 60 * 1000); // 10 minute margin
+    const lastMsg = await prisma.message.findFirst({
+        where: {
+            conversation: { customerId: customer.id },
+            createdAt: { lte: margin },
+            OR: [
+                { responderId: { not: null } },
+                { NOT: { fromId: customer.facebookId } }
+            ]
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { conversationId: true, responderId: true }
+    });
+
+    if (lastMsg) {
+        let employeeId = lastMsg.responderId;
+        if (!employeeId && lastMsg.conversationId) {
+            const conv = await prisma.conversation.findUnique({
+                where: { id: lastMsg.conversationId },
+                select: { assignedEmployeeId: true }
+            });
+            employeeId = conv?.assignedEmployeeId || null;
+        }
+        return { conversationId: lastMsg.conversationId, closedById: employeeId };
+    }
+    return { conversationId: null, closedById: null };
+}
+
 async function syncSales() {
     console.log('🚀 Starting Google Sheets Sales Sync...');
 
@@ -86,6 +118,9 @@ async function syncSales() {
                 continue;
             }
 
+            // Resolve Attribution (REQ-03/04)
+            const attribution = await resolveAttribution(prisma, customer, sale.date);
+
             const orderStatus = (sale.status.toLowerCase().includes('cancel') || sale.status.toLowerCase().includes('ยกเลิก'))
                 ? 'CANCELLED'
                 : 'COMPLETED';
@@ -97,7 +132,10 @@ async function syncSales() {
                     status: orderStatus,
                     totalAmount: sale.amount,
                     paidAmount: sale.amount,
-                    items: [{ name: sale.productName, price: sale.amount, quantity: 1 }]
+                    items: [{ name: sale.productName, price: sale.amount, quantity: 1 }],
+                    // Add attribution if found
+                    ...(attribution.conversationId && { conversationId: attribution.conversationId }),
+                    ...(attribution.closedById && { closedById: attribution.closedById })
                 },
                 create: {
                     orderId: sale.externalId,
@@ -107,6 +145,8 @@ async function syncSales() {
                     totalAmount: sale.amount,
                     paidAmount: sale.amount,
                     items: [{ name: sale.productName, price: sale.amount, quantity: 1 }],
+                    conversationId: attribution.conversationId,
+                    closedById: attribution.closedById,
                     transactions: {
                         create: {
                             transactionId: `TX-${sale.externalId}`,

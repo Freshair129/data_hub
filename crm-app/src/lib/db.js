@@ -53,7 +53,7 @@ export async function getPrisma() {
 /**
  * Resolves an agent name from conversation content if assignedAgent is null.
  */
-function resolveAgentFromContent(messages) {
+export function resolveAgentFromContent(messages) {
     if (!messages || !Array.isArray(messages)) return null;
     const assignmentPatterns = [
         /กำหนดการสนทนานี้ให้กับ (.*)$/,
@@ -481,7 +481,7 @@ function getAllCustomersFromJSON() {
         try {
             const folderPath = path.join(customerDir, folder);
             const files = fs.readdirSync(folderPath);
-            const profileFile = files.find(f => f.startsWith('profile_') && f.endsWith('.json'));
+            const profileFile = files.find(f => f === 'profile.json' || (f.startsWith('profile_') && f.endsWith('.json')));
 
             if (!profileFile) return null;
 

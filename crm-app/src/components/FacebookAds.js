@@ -184,14 +184,15 @@ export default function FacebookAds({ customers }) {
     const MESSAGE_TYPES = ['onsite_conversion.messaging_conversation_started_7d', 'onsite_conversion.messaging_first_reply', 'messenger.conversation_started', 'onsite_conversion.total_messaging_connection'];
 
     // Metric Helpers
+    // T1 Fix: Sum all matching action types instead of taking max (was undercounting ROAS/purchases)
     const getBestActionValue = (campaign, types) => {
         const values = campaign.action_values?.filter(a => types.includes(a.action_type)).map(a => parseFloat(a.value || 0)) || [];
-        return values.length > 0 ? Math.max(...values) : 0;
+        return values.reduce((a, b) => a + b, 0);
     };
 
     const getBestActionCount = (campaign, types) => {
         const counts = campaign.actions?.filter(a => types.includes(a.action_type)).map(a => parseInt(a.value || 0)) || [];
-        return counts.length > 0 ? Math.max(...counts) : 0;
+        return counts.reduce((a, b) => a + b, 0);
     };
 
     // KPI Totals
@@ -240,15 +241,44 @@ export default function FacebookAds({ customers }) {
         const prev7Days = daily.slice(-8, -1);
         const avgSpend = prev7Days.reduce((s, d) => s + d.spend, 0) / prev7Days.length;
 
-        // Anomaly: Spend spike (The 500k fix)
+        // Anomaly 1: Spend spike (The 500k fix)
         if (latestDay.spend > avgSpend * 3 && avgSpend > 100) {
             anomalies.push({ label: 'Total Spend', reason: `Sudden Spend Spike: ฿${fmt(latestDay.spend)} vs Avg ฿${fmt(avgSpend)}` });
         }
 
+        // T13 Fix: Additional health checks
+        // Anomaly 2: CTR drop (< 0.5% when impressions exist)
+        const latestCtr = (latestDay.impressions || 0) > 0
+            ? ((latestDay.clicks || 0) / latestDay.impressions * 100) : null;
+        if (latestCtr !== null && latestCtr < 0.5 && latestDay.impressions > 1000) {
+            anomalies.push({ label: 'CTR', reason: `Low CTR: ${latestCtr.toFixed(2)}% (threshold: 0.5%)` });
+        }
+
+        // Anomaly 3: ROAS below 1.0x (spending more than earning)
+        const latestPurchaseValue = getBestActionValue(latestDay, PURCHASE_TYPES);
+        if ((latestDay.spend || 0) > 500 && latestPurchaseValue > 0) {
+            const latestRoas = latestPurchaseValue / latestDay.spend;
+            if (latestRoas < 1.0) {
+                anomalies.push({ label: 'ROAS', reason: `Low ROAS: ${latestRoas.toFixed(2)}x (below break-even)` });
+            }
+        }
+
+        // Anomaly 4: Creative fatigue — campaigns running 30+ days with declining performance
+        const activeLongRunning = campaigns.filter(c => {
+            if (c.status !== 'ACTIVE' || !c.start_time) return false;
+            const daysSinceStart = (Date.now() - new Date(c.start_time).getTime()) / (1000 * 60 * 60 * 24);
+            return daysSinceStart > 30;
+        });
+        if (activeLongRunning.length > 0) {
+            anomalies.push({ label: 'Creative Fatigue', reason: `${activeLongRunning.length} campaign(s) running 30+ days — review creative refresh` });
+        }
+
+        // T13: Graduated health score (100 → -10 per anomaly, min 50)
+        const healthScore = Math.max(50, 100 - (anomalies.length * 10));
         setAuditResults({
-            verified: 8 + (campaigns.length * 4), // KPI cards + Campaign metrics
+            verified: 8 + (campaigns.length * 4),
             anomalies,
-            healthScore: anomalies.length > 0 ? 75 : 100
+            healthScore
         });
     }, [daily, campaigns]);
 
@@ -258,8 +288,9 @@ export default function FacebookAds({ customers }) {
         purchases: getBestActionCount(latestDay, PURCHASE_TYPES),
         impressions: latestDay.impressions || 0,
         clicks: latestDay.clicks || 0,
-        ctr: latestDay.ctr || 0,
-        cpc: latestDay.cpc || 0,
+        // T6 Fix: Calculate CTR/CPC from primitives (daily API doesn't return these fields)
+        ctr: (latestDay.impressions || 0) > 0 ? ((latestDay.clicks || 0) / latestDay.impressions * 100) : 0,
+        cpc: (latestDay.clicks || 0) > 0 ? ((latestDay.spend || 0) / latestDay.clicks) : 0,
         results: latestDay.actions?.reduce((a, b) => a + parseInt(b.value), 0) || 0
     } : {
         spend: totalSpend,

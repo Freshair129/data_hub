@@ -124,7 +124,12 @@ export function readCacheList(entity) {
                             const cartData = JSON.parse(fs.readFileSync(cartPath, 'utf-8'));
                             data.cart = cartData;
                         }
-
+                        const chatHistoryDir = path.join(dir, folder, 'chathistory');
+                        if (fs.existsSync(chatHistoryDir)) {
+                            data.conversationIds = fs.readdirSync(chatHistoryDir)
+                                .filter(f => f.endsWith('.json'))
+                                .map(f => f.replace('.json', ''));
+                        }
 
                         return data;
                     } catch { return null; }

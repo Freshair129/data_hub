@@ -84,6 +84,11 @@ export type AdSet = $Result.DefaultSelection<Prisma.$AdSetPayload>
  */
 export type Ad = $Result.DefaultSelection<Prisma.$AdPayload>
 /**
+ * Model AdLiveStatus
+ * 
+ */
+export type AdLiveStatus = $Result.DefaultSelection<Prisma.$AdLiveStatusPayload>
+/**
  * Model AdCreative
  * 
  */
@@ -375,6 +380,16 @@ export class PrismaClient<
     * ```
     */
   get ad(): Prisma.AdDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.adLiveStatus`: Exposes CRUD operations for the **AdLiveStatus** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdLiveStatuses
+    * const adLiveStatuses = await prisma.adLiveStatus.findMany()
+    * ```
+    */
+  get adLiveStatus(): Prisma.AdLiveStatusDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.adCreative`: Exposes CRUD operations for the **AdCreative** model.
@@ -893,6 +908,7 @@ export namespace Prisma {
     AdAccount: 'AdAccount',
     AdSet: 'AdSet',
     Ad: 'Ad',
+    AdLiveStatus: 'AdLiveStatus',
     AdCreative: 'AdCreative',
     Experiment: 'Experiment',
     AdDailyMetric: 'AdDailyMetric',
@@ -915,7 +931,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "customer" | "order" | "transaction" | "inventoryItem" | "timelineEvent" | "conversation" | "message" | "chatEpisode" | "employee" | "product" | "campaign" | "adAccount" | "adSet" | "ad" | "adCreative" | "experiment" | "adDailyMetric" | "adHourlyMetric" | "task" | "cartItem" | "auditLog"
+      modelProps: "customer" | "order" | "transaction" | "inventoryItem" | "timelineEvent" | "conversation" | "message" | "chatEpisode" | "employee" | "product" | "campaign" | "adAccount" | "adSet" | "ad" | "adLiveStatus" | "adCreative" | "experiment" | "adDailyMetric" | "adHourlyMetric" | "task" | "cartItem" | "auditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1955,6 +1971,80 @@ export namespace Prisma {
           }
         }
       }
+      AdLiveStatus: {
+        payload: Prisma.$AdLiveStatusPayload<ExtArgs>
+        fields: Prisma.AdLiveStatusFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdLiveStatusFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdLiveStatusFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>
+          }
+          findFirst: {
+            args: Prisma.AdLiveStatusFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdLiveStatusFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>
+          }
+          findMany: {
+            args: Prisma.AdLiveStatusFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>[]
+          }
+          create: {
+            args: Prisma.AdLiveStatusCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>
+          }
+          createMany: {
+            args: Prisma.AdLiveStatusCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdLiveStatusCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>[]
+          }
+          delete: {
+            args: Prisma.AdLiveStatusDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>
+          }
+          update: {
+            args: Prisma.AdLiveStatusUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>
+          }
+          deleteMany: {
+            args: Prisma.AdLiveStatusDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdLiveStatusUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdLiveStatusUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>[]
+          }
+          upsert: {
+            args: Prisma.AdLiveStatusUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdLiveStatusPayload>
+          }
+          aggregate: {
+            args: Prisma.AdLiveStatusAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdLiveStatus>
+          }
+          groupBy: {
+            args: Prisma.AdLiveStatusGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdLiveStatusGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdLiveStatusCountArgs<ExtArgs>
+            result: $Utils.Optional<AdLiveStatusCountAggregateOutputType> | number
+          }
+        }
+      }
       AdCreative: {
         payload: Prisma.$AdCreativePayload<ExtArgs>
         fields: Prisma.AdCreativeFieldRefs
@@ -2595,6 +2685,7 @@ export namespace Prisma {
     adAccount?: AdAccountOmit
     adSet?: AdSetOmit
     ad?: AdOmit
+    adLiveStatus?: AdLiveStatusOmit
     adCreative?: AdCreativeOmit
     experiment?: ExperimentOmit
     adDailyMetric?: AdDailyMetricOmit
@@ -2791,11 +2882,13 @@ export namespace Prisma {
   export type ConversationCountOutputType = {
     episodes: number
     messages: number
+    orders: number
   }
 
   export type ConversationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     episodes?: boolean | ConversationCountOutputTypeCountEpisodesArgs
     messages?: boolean | ConversationCountOutputTypeCountMessagesArgs
+    orders?: boolean | ConversationCountOutputTypeCountOrdersArgs
   }
 
   // Custom InputTypes
@@ -2823,6 +2916,13 @@ export namespace Prisma {
     where?: MessageWhereInput
   }
 
+  /**
+   * ConversationCountOutputType without action
+   */
+  export type ConversationCountOutputTypeCountOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OrderWhereInput
+  }
+
 
   /**
    * Count Type EmployeeCountOutputType
@@ -2830,10 +2930,16 @@ export namespace Prisma {
 
   export type EmployeeCountOutputType = {
     tasks: number
+    respondedMessages: number
+    assignedConversations: number
+    closedOrders: number
   }
 
   export type EmployeeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tasks?: boolean | EmployeeCountOutputTypeCountTasksArgs
+    respondedMessages?: boolean | EmployeeCountOutputTypeCountRespondedMessagesArgs
+    assignedConversations?: boolean | EmployeeCountOutputTypeCountAssignedConversationsArgs
+    closedOrders?: boolean | EmployeeCountOutputTypeCountClosedOrdersArgs
   }
 
   // Custom InputTypes
@@ -2852,6 +2958,27 @@ export namespace Prisma {
    */
   export type EmployeeCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskWhereInput
+  }
+
+  /**
+   * EmployeeCountOutputType without action
+   */
+  export type EmployeeCountOutputTypeCountRespondedMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MessageWhereInput
+  }
+
+  /**
+   * EmployeeCountOutputType without action
+   */
+  export type EmployeeCountOutputTypeCountAssignedConversationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ConversationWhereInput
+  }
+
+  /**
+   * EmployeeCountOutputType without action
+   */
+  export type EmployeeCountOutputTypeCountClosedOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OrderWhereInput
   }
 
 
@@ -4621,6 +4748,8 @@ export namespace Prisma {
     paidAmount: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    closedById: string | null
+    conversationId: string | null
   }
 
   export type OrderMaxAggregateOutputType = {
@@ -4633,6 +4762,8 @@ export namespace Prisma {
     paidAmount: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    closedById: string | null
+    conversationId: string | null
   }
 
   export type OrderCountAggregateOutputType = {
@@ -4646,6 +4777,8 @@ export namespace Prisma {
     items: number
     createdAt: number
     updatedAt: number
+    closedById: number
+    conversationId: number
     _all: number
   }
 
@@ -4670,6 +4803,8 @@ export namespace Prisma {
     paidAmount?: true
     createdAt?: true
     updatedAt?: true
+    closedById?: true
+    conversationId?: true
   }
 
   export type OrderMaxAggregateInputType = {
@@ -4682,6 +4817,8 @@ export namespace Prisma {
     paidAmount?: true
     createdAt?: true
     updatedAt?: true
+    closedById?: true
+    conversationId?: true
   }
 
   export type OrderCountAggregateInputType = {
@@ -4695,6 +4832,8 @@ export namespace Prisma {
     items?: true
     createdAt?: true
     updatedAt?: true
+    closedById?: true
+    conversationId?: true
     _all?: true
   }
 
@@ -4795,6 +4934,8 @@ export namespace Prisma {
     items: JsonValue
     createdAt: Date
     updatedAt: Date
+    closedById: string | null
+    conversationId: string | null
     _count: OrderCountAggregateOutputType | null
     _avg: OrderAvgAggregateOutputType | null
     _sum: OrderSumAggregateOutputType | null
@@ -4827,8 +4968,12 @@ export namespace Prisma {
     items?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    closedById?: boolean
+    conversationId?: boolean
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
     transactions?: boolean | Order$transactionsArgs<ExtArgs>
+    closedBy?: boolean | Order$closedByArgs<ExtArgs>
+    conversation?: boolean | Order$conversationArgs<ExtArgs>
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
@@ -4843,7 +4988,11 @@ export namespace Prisma {
     items?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    closedById?: boolean
+    conversationId?: boolean
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    closedBy?: boolean | Order$closedByArgs<ExtArgs>
+    conversation?: boolean | Order$conversationArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
   export type OrderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4857,7 +5006,11 @@ export namespace Prisma {
     items?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    closedById?: boolean
+    conversationId?: boolean
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    closedBy?: boolean | Order$closedByArgs<ExtArgs>
+    conversation?: boolean | Order$conversationArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
   export type OrderSelectScalar = {
@@ -4871,19 +5024,27 @@ export namespace Prisma {
     items?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    closedById?: boolean
+    conversationId?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "customerId" | "date" | "status" | "totalAmount" | "paidAmount" | "items" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "customerId" | "date" | "status" | "totalAmount" | "paidAmount" | "items" | "createdAt" | "updatedAt" | "closedById" | "conversationId", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
     transactions?: boolean | Order$transactionsArgs<ExtArgs>
+    closedBy?: boolean | Order$closedByArgs<ExtArgs>
+    conversation?: boolean | Order$conversationArgs<ExtArgs>
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    closedBy?: boolean | Order$closedByArgs<ExtArgs>
+    conversation?: boolean | Order$conversationArgs<ExtArgs>
   }
   export type OrderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    closedBy?: boolean | Order$closedByArgs<ExtArgs>
+    conversation?: boolean | Order$conversationArgs<ExtArgs>
   }
 
   export type $OrderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4891,6 +5052,8 @@ export namespace Prisma {
     objects: {
       customer: Prisma.$CustomerPayload<ExtArgs>
       transactions: Prisma.$TransactionPayload<ExtArgs>[]
+      closedBy: Prisma.$EmployeePayload<ExtArgs> | null
+      conversation: Prisma.$ConversationPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4903,6 +5066,8 @@ export namespace Prisma {
       items: Prisma.JsonValue
       createdAt: Date
       updatedAt: Date
+      closedById: string | null
+      conversationId: string | null
     }, ExtArgs["result"]["order"]>
     composites: {}
   }
@@ -5299,6 +5464,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     transactions<T extends Order$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, Order$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    closedBy<T extends Order$closedByArgs<ExtArgs> = {}>(args?: Subset<T, Order$closedByArgs<ExtArgs>>): Prisma__EmployeeClient<$Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    conversation<T extends Order$conversationArgs<ExtArgs> = {}>(args?: Subset<T, Order$conversationArgs<ExtArgs>>): Prisma__ConversationClient<$Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5338,6 +5505,8 @@ export namespace Prisma {
     readonly items: FieldRef<"Order", 'Json'>
     readonly createdAt: FieldRef<"Order", 'DateTime'>
     readonly updatedAt: FieldRef<"Order", 'DateTime'>
+    readonly closedById: FieldRef<"Order", 'String'>
+    readonly conversationId: FieldRef<"Order", 'String'>
   }
     
 
@@ -5755,6 +5924,44 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TransactionScalarFieldEnum | TransactionScalarFieldEnum[]
+  }
+
+  /**
+   * Order.closedBy
+   */
+  export type Order$closedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Employee
+     */
+    select?: EmployeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Employee
+     */
+    omit?: EmployeeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmployeeInclude<ExtArgs> | null
+    where?: EmployeeWhereInput
+  }
+
+  /**
+   * Order.conversation
+   */
+  export type Order$conversationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Conversation
+     */
+    select?: ConversationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Conversation
+     */
+    omit?: ConversationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConversationInclude<ExtArgs> | null
+    where?: ConversationWhereInput
   }
 
   /**
@@ -9210,6 +9417,7 @@ export namespace Prisma {
     assignedAgent: string | null
     lastMessageAt: Date | null
     unreadCount: number | null
+    assignedEmployeeId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9224,6 +9432,7 @@ export namespace Prisma {
     assignedAgent: string | null
     lastMessageAt: Date | null
     unreadCount: number | null
+    assignedEmployeeId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9238,6 +9447,7 @@ export namespace Prisma {
     assignedAgent: number
     lastMessageAt: number
     unreadCount: number
+    assignedEmployeeId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -9262,6 +9472,7 @@ export namespace Prisma {
     assignedAgent?: true
     lastMessageAt?: true
     unreadCount?: true
+    assignedEmployeeId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9276,6 +9487,7 @@ export namespace Prisma {
     assignedAgent?: true
     lastMessageAt?: true
     unreadCount?: true
+    assignedEmployeeId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -9290,6 +9502,7 @@ export namespace Prisma {
     assignedAgent?: true
     lastMessageAt?: true
     unreadCount?: true
+    assignedEmployeeId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -9391,6 +9604,7 @@ export namespace Prisma {
     assignedAgent: string | null
     lastMessageAt: Date | null
     unreadCount: number
+    assignedEmployeeId: string | null
     createdAt: Date
     updatedAt: Date
     _count: ConversationCountAggregateOutputType | null
@@ -9424,11 +9638,14 @@ export namespace Prisma {
     assignedAgent?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
+    assignedEmployeeId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    assignedEmployee?: boolean | Conversation$assignedEmployeeArgs<ExtArgs>
     episodes?: boolean | Conversation$episodesArgs<ExtArgs>
     customer?: boolean | Conversation$customerArgs<ExtArgs>
     messages?: boolean | Conversation$messagesArgs<ExtArgs>
+    orders?: boolean | Conversation$ordersArgs<ExtArgs>
     _count?: boolean | ConversationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["conversation"]>
 
@@ -9442,8 +9659,10 @@ export namespace Prisma {
     assignedAgent?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
+    assignedEmployeeId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    assignedEmployee?: boolean | Conversation$assignedEmployeeArgs<ExtArgs>
     customer?: boolean | Conversation$customerArgs<ExtArgs>
   }, ExtArgs["result"]["conversation"]>
 
@@ -9457,8 +9676,10 @@ export namespace Prisma {
     assignedAgent?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
+    assignedEmployeeId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    assignedEmployee?: boolean | Conversation$assignedEmployeeArgs<ExtArgs>
     customer?: boolean | Conversation$customerArgs<ExtArgs>
   }, ExtArgs["result"]["conversation"]>
 
@@ -9472,30 +9693,37 @@ export namespace Prisma {
     assignedAgent?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
+    assignedEmployeeId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ConversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "conversationId" | "customerId" | "channel" | "participantName" | "participantId" | "assignedAgent" | "lastMessageAt" | "unreadCount" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
+  export type ConversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "conversationId" | "customerId" | "channel" | "participantName" | "participantId" | "assignedAgent" | "lastMessageAt" | "unreadCount" | "assignedEmployeeId" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
   export type ConversationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assignedEmployee?: boolean | Conversation$assignedEmployeeArgs<ExtArgs>
     episodes?: boolean | Conversation$episodesArgs<ExtArgs>
     customer?: boolean | Conversation$customerArgs<ExtArgs>
     messages?: boolean | Conversation$messagesArgs<ExtArgs>
+    orders?: boolean | Conversation$ordersArgs<ExtArgs>
     _count?: boolean | ConversationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ConversationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assignedEmployee?: boolean | Conversation$assignedEmployeeArgs<ExtArgs>
     customer?: boolean | Conversation$customerArgs<ExtArgs>
   }
   export type ConversationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assignedEmployee?: boolean | Conversation$assignedEmployeeArgs<ExtArgs>
     customer?: boolean | Conversation$customerArgs<ExtArgs>
   }
 
   export type $ConversationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Conversation"
     objects: {
+      assignedEmployee: Prisma.$EmployeePayload<ExtArgs> | null
       episodes: Prisma.$ChatEpisodePayload<ExtArgs>[]
       customer: Prisma.$CustomerPayload<ExtArgs> | null
       messages: Prisma.$MessagePayload<ExtArgs>[]
+      orders: Prisma.$OrderPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9507,6 +9735,7 @@ export namespace Prisma {
       assignedAgent: string | null
       lastMessageAt: Date | null
       unreadCount: number
+      assignedEmployeeId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["conversation"]>
@@ -9903,9 +10132,11 @@ export namespace Prisma {
    */
   export interface Prisma__ConversationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    assignedEmployee<T extends Conversation$assignedEmployeeArgs<ExtArgs> = {}>(args?: Subset<T, Conversation$assignedEmployeeArgs<ExtArgs>>): Prisma__EmployeeClient<$Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     episodes<T extends Conversation$episodesArgs<ExtArgs> = {}>(args?: Subset<T, Conversation$episodesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatEpisodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     customer<T extends Conversation$customerArgs<ExtArgs> = {}>(args?: Subset<T, Conversation$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     messages<T extends Conversation$messagesArgs<ExtArgs> = {}>(args?: Subset<T, Conversation$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    orders<T extends Conversation$ordersArgs<ExtArgs> = {}>(args?: Subset<T, Conversation$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9944,6 +10175,7 @@ export namespace Prisma {
     readonly assignedAgent: FieldRef<"Conversation", 'String'>
     readonly lastMessageAt: FieldRef<"Conversation", 'DateTime'>
     readonly unreadCount: FieldRef<"Conversation", 'Int'>
+    readonly assignedEmployeeId: FieldRef<"Conversation", 'String'>
     readonly createdAt: FieldRef<"Conversation", 'DateTime'>
     readonly updatedAt: FieldRef<"Conversation", 'DateTime'>
   }
@@ -10342,6 +10574,25 @@ export namespace Prisma {
   }
 
   /**
+   * Conversation.assignedEmployee
+   */
+  export type Conversation$assignedEmployeeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Employee
+     */
+    select?: EmployeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Employee
+     */
+    omit?: EmployeeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmployeeInclude<ExtArgs> | null
+    where?: EmployeeWhereInput
+  }
+
+  /**
    * Conversation.episodes
    */
   export type Conversation$episodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10409,6 +10660,30 @@ export namespace Prisma {
   }
 
   /**
+   * Conversation.orders
+   */
+  export type Conversation$ordersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Order
+     */
+    select?: OrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Order
+     */
+    omit?: OrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderInclude<ExtArgs> | null
+    where?: OrderWhereInput
+    orderBy?: OrderOrderByWithRelationInput | OrderOrderByWithRelationInput[]
+    cursor?: OrderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OrderScalarFieldEnum | OrderScalarFieldEnum[]
+  }
+
+  /**
    * Conversation without action
    */
   export type ConversationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10449,6 +10724,7 @@ export namespace Prisma {
     attachmentUrl: string | null
     createdAt: Date | null
     attachmentId: string | null
+    responderId: string | null
     episodeId: string | null
     sessionId: string | null
   }
@@ -10465,6 +10741,7 @@ export namespace Prisma {
     attachmentUrl: string | null
     createdAt: Date | null
     attachmentId: string | null
+    responderId: string | null
     episodeId: string | null
     sessionId: string | null
   }
@@ -10481,6 +10758,7 @@ export namespace Prisma {
     attachmentUrl: number
     createdAt: number
     attachmentId: number
+    responderId: number
     metadata: number
     episodeId: number
     sessionId: number
@@ -10500,6 +10778,7 @@ export namespace Prisma {
     attachmentUrl?: true
     createdAt?: true
     attachmentId?: true
+    responderId?: true
     episodeId?: true
     sessionId?: true
   }
@@ -10516,6 +10795,7 @@ export namespace Prisma {
     attachmentUrl?: true
     createdAt?: true
     attachmentId?: true
+    responderId?: true
     episodeId?: true
     sessionId?: true
   }
@@ -10532,6 +10812,7 @@ export namespace Prisma {
     attachmentUrl?: true
     createdAt?: true
     attachmentId?: true
+    responderId?: true
     metadata?: true
     episodeId?: true
     sessionId?: true
@@ -10622,6 +10903,7 @@ export namespace Prisma {
     attachmentUrl: string | null
     createdAt: Date
     attachmentId: string | null
+    responderId: string | null
     metadata: JsonValue | null
     episodeId: string | null
     sessionId: string | null
@@ -10656,9 +10938,11 @@ export namespace Prisma {
     attachmentUrl?: boolean
     createdAt?: boolean
     attachmentId?: boolean
+    responderId?: boolean
     metadata?: boolean
     episodeId?: boolean
     sessionId?: boolean
+    responder?: boolean | Message$responderArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
@@ -10674,9 +10958,11 @@ export namespace Prisma {
     attachmentUrl?: boolean
     createdAt?: boolean
     attachmentId?: boolean
+    responderId?: boolean
     metadata?: boolean
     episodeId?: boolean
     sessionId?: boolean
+    responder?: boolean | Message$responderArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
@@ -10692,9 +10978,11 @@ export namespace Prisma {
     attachmentUrl?: boolean
     createdAt?: boolean
     attachmentId?: boolean
+    responderId?: boolean
     metadata?: boolean
     episodeId?: boolean
     sessionId?: boolean
+    responder?: boolean | Message$responderArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
@@ -10710,25 +10998,30 @@ export namespace Prisma {
     attachmentUrl?: boolean
     createdAt?: boolean
     attachmentId?: boolean
+    responderId?: boolean
     metadata?: boolean
     episodeId?: boolean
     sessionId?: boolean
   }
 
-  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "messageId" | "conversationId" | "fromName" | "fromId" | "content" | "hasAttachment" | "attachmentType" | "attachmentUrl" | "createdAt" | "attachmentId" | "metadata" | "episodeId" | "sessionId", ExtArgs["result"]["message"]>
+  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "messageId" | "conversationId" | "fromName" | "fromId" | "content" | "hasAttachment" | "attachmentType" | "attachmentUrl" | "createdAt" | "attachmentId" | "responderId" | "metadata" | "episodeId" | "sessionId", ExtArgs["result"]["message"]>
   export type MessageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    responder?: boolean | Message$responderArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
   }
   export type MessageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    responder?: boolean | Message$responderArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
   }
   export type MessageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    responder?: boolean | Message$responderArgs<ExtArgs>
     conversation?: boolean | ConversationDefaultArgs<ExtArgs>
   }
 
   export type $MessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Message"
     objects: {
+      responder: Prisma.$EmployeePayload<ExtArgs> | null
       conversation: Prisma.$ConversationPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -10743,6 +11036,7 @@ export namespace Prisma {
       attachmentUrl: string | null
       createdAt: Date
       attachmentId: string | null
+      responderId: string | null
       metadata: Prisma.JsonValue | null
       episodeId: string | null
       sessionId: string | null
@@ -11140,6 +11434,7 @@ export namespace Prisma {
    */
   export interface Prisma__MessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    responder<T extends Message$responderArgs<ExtArgs> = {}>(args?: Subset<T, Message$responderArgs<ExtArgs>>): Prisma__EmployeeClient<$Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     conversation<T extends ConversationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ConversationDefaultArgs<ExtArgs>>): Prisma__ConversationClient<$Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -11181,6 +11476,7 @@ export namespace Prisma {
     readonly attachmentUrl: FieldRef<"Message", 'String'>
     readonly createdAt: FieldRef<"Message", 'DateTime'>
     readonly attachmentId: FieldRef<"Message", 'String'>
+    readonly responderId: FieldRef<"Message", 'String'>
     readonly metadata: FieldRef<"Message", 'Json'>
     readonly episodeId: FieldRef<"Message", 'String'>
     readonly sessionId: FieldRef<"Message", 'String'>
@@ -11577,6 +11873,25 @@ export namespace Prisma {
      * Limit how many Messages to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Message.responder
+   */
+  export type Message$responderArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Employee
+     */
+    select?: EmployeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Employee
+     */
+    omit?: EmployeeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmployeeInclude<ExtArgs> | null
+    where?: EmployeeWhereInput
   }
 
   /**
@@ -13045,6 +13360,9 @@ export namespace Prisma {
     facebookName?: boolean
     lineName?: boolean
     tasks?: boolean | Employee$tasksArgs<ExtArgs>
+    respondedMessages?: boolean | Employee$respondedMessagesArgs<ExtArgs>
+    assignedConversations?: boolean | Employee$assignedConversationsArgs<ExtArgs>
+    closedOrders?: boolean | Employee$closedOrdersArgs<ExtArgs>
     _count?: boolean | EmployeeCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["employee"]>
 
@@ -13126,6 +13444,9 @@ export namespace Prisma {
   export type EmployeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "employeeId" | "agentId" | "firstName" | "lastName" | "nickName" | "role" | "department" | "profilePicture" | "status" | "joinDate" | "email" | "phonePrimary" | "lineId" | "passwordHash" | "permissions" | "performance" | "createdAt" | "updatedAt" | "metadata" | "facebookName" | "lineName", ExtArgs["result"]["employee"]>
   export type EmployeeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tasks?: boolean | Employee$tasksArgs<ExtArgs>
+    respondedMessages?: boolean | Employee$respondedMessagesArgs<ExtArgs>
+    assignedConversations?: boolean | Employee$assignedConversationsArgs<ExtArgs>
+    closedOrders?: boolean | Employee$closedOrdersArgs<ExtArgs>
     _count?: boolean | EmployeeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type EmployeeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -13135,6 +13456,9 @@ export namespace Prisma {
     name: "Employee"
     objects: {
       tasks: Prisma.$TaskPayload<ExtArgs>[]
+      respondedMessages: Prisma.$MessagePayload<ExtArgs>[]
+      assignedConversations: Prisma.$ConversationPayload<ExtArgs>[]
+      closedOrders: Prisma.$OrderPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -13554,6 +13878,9 @@ export namespace Prisma {
   export interface Prisma__EmployeeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     tasks<T extends Employee$tasksArgs<ExtArgs> = {}>(args?: Subset<T, Employee$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    respondedMessages<T extends Employee$respondedMessagesArgs<ExtArgs> = {}>(args?: Subset<T, Employee$respondedMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    assignedConversations<T extends Employee$assignedConversationsArgs<ExtArgs> = {}>(args?: Subset<T, Employee$assignedConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    closedOrders<T extends Employee$closedOrdersArgs<ExtArgs> = {}>(args?: Subset<T, Employee$closedOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14014,6 +14341,78 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskScalarFieldEnum | TaskScalarFieldEnum[]
+  }
+
+  /**
+   * Employee.respondedMessages
+   */
+  export type Employee$respondedMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Message
+     */
+    select?: MessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Message
+     */
+    omit?: MessageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MessageInclude<ExtArgs> | null
+    where?: MessageWhereInput
+    orderBy?: MessageOrderByWithRelationInput | MessageOrderByWithRelationInput[]
+    cursor?: MessageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
+  }
+
+  /**
+   * Employee.assignedConversations
+   */
+  export type Employee$assignedConversationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Conversation
+     */
+    select?: ConversationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Conversation
+     */
+    omit?: ConversationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ConversationInclude<ExtArgs> | null
+    where?: ConversationWhereInput
+    orderBy?: ConversationOrderByWithRelationInput | ConversationOrderByWithRelationInput[]
+    cursor?: ConversationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ConversationScalarFieldEnum | ConversationScalarFieldEnum[]
+  }
+
+  /**
+   * Employee.closedOrders
+   */
+  export type Employee$closedOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Order
+     */
+    select?: OrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Order
+     */
+    omit?: OrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderInclude<ExtArgs> | null
+    where?: OrderWhereInput
+    orderBy?: OrderOrderByWithRelationInput | OrderOrderByWithRelationInput[]
+    cursor?: OrderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OrderScalarFieldEnum | OrderScalarFieldEnum[]
   }
 
   /**
@@ -15298,6 +15697,7 @@ export namespace Prisma {
     name: string | null
     objective: string | null
     status: string | null
+    isVisible: boolean | null
     spend: number | null
     impressions: number | null
     clicks: number | null
@@ -15319,6 +15719,7 @@ export namespace Prisma {
     name: string | null
     objective: string | null
     status: string | null
+    isVisible: boolean | null
     spend: number | null
     impressions: number | null
     clicks: number | null
@@ -15340,6 +15741,7 @@ export namespace Prisma {
     name: number
     objective: number
     status: number
+    isVisible: number
     spend: number
     impressions: number
     clicks: number
@@ -15384,6 +15786,7 @@ export namespace Prisma {
     name?: true
     objective?: true
     status?: true
+    isVisible?: true
     spend?: true
     impressions?: true
     clicks?: true
@@ -15405,6 +15808,7 @@ export namespace Prisma {
     name?: true
     objective?: true
     status?: true
+    isVisible?: true
     spend?: true
     impressions?: true
     clicks?: true
@@ -15426,6 +15830,7 @@ export namespace Prisma {
     name?: true
     objective?: true
     status?: true
+    isVisible?: true
     spend?: true
     impressions?: true
     clicks?: true
@@ -15535,6 +15940,7 @@ export namespace Prisma {
     name: string
     objective: string | null
     status: string
+    isVisible: boolean
     spend: number
     impressions: number
     clicks: number
@@ -15576,6 +15982,7 @@ export namespace Prisma {
     name?: boolean
     objective?: boolean
     status?: boolean
+    isVisible?: boolean
     spend?: boolean
     impressions?: boolean
     clicks?: boolean
@@ -15601,6 +16008,7 @@ export namespace Prisma {
     name?: boolean
     objective?: boolean
     status?: boolean
+    isVisible?: boolean
     spend?: boolean
     impressions?: boolean
     clicks?: boolean
@@ -15624,6 +16032,7 @@ export namespace Prisma {
     name?: boolean
     objective?: boolean
     status?: boolean
+    isVisible?: boolean
     spend?: boolean
     impressions?: boolean
     clicks?: boolean
@@ -15647,6 +16056,7 @@ export namespace Prisma {
     name?: boolean
     objective?: boolean
     status?: boolean
+    isVisible?: boolean
     spend?: boolean
     impressions?: boolean
     clicks?: boolean
@@ -15663,7 +16073,7 @@ export namespace Prisma {
     roas?: boolean
   }
 
-  export type CampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "campaignId" | "name" | "objective" | "status" | "spend" | "impressions" | "clicks" | "leads" | "purchases" | "mappedProductId" | "rawData" | "startDate" | "endDate" | "adAccountId" | "createdAt" | "updatedAt" | "revenue" | "roas", ExtArgs["result"]["campaign"]>
+  export type CampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "campaignId" | "name" | "objective" | "status" | "isVisible" | "spend" | "impressions" | "clicks" | "leads" | "purchases" | "mappedProductId" | "rawData" | "startDate" | "endDate" | "adAccountId" | "createdAt" | "updatedAt" | "revenue" | "roas", ExtArgs["result"]["campaign"]>
   export type CampaignInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     adSets?: boolean | Campaign$adSetsArgs<ExtArgs>
     adAccount?: boolean | Campaign$adAccountArgs<ExtArgs>
@@ -15688,6 +16098,7 @@ export namespace Prisma {
       name: string
       objective: string | null
       status: string
+      isVisible: boolean
       spend: number
       impressions: number
       clicks: number
@@ -16132,6 +16543,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Campaign", 'String'>
     readonly objective: FieldRef<"Campaign", 'String'>
     readonly status: FieldRef<"Campaign", 'String'>
+    readonly isVisible: FieldRef<"Campaign", 'Boolean'>
     readonly spend: FieldRef<"Campaign", 'Float'>
     readonly impressions: FieldRef<"Campaign", 'Int'>
     readonly clicks: FieldRef<"Campaign", 'Int'>
@@ -18891,6 +19303,7 @@ export namespace Prisma {
     adId: string | null
     name: string | null
     status: string | null
+    deliveryStatus: string | null
     adSetId: string | null
     creativeId: string | null
     experimentId: string | null
@@ -18910,6 +19323,7 @@ export namespace Prisma {
     adId: string | null
     name: string | null
     status: string | null
+    deliveryStatus: string | null
     adSetId: string | null
     creativeId: string | null
     experimentId: string | null
@@ -18929,6 +19343,7 @@ export namespace Prisma {
     adId: number
     name: number
     status: number
+    deliveryStatus: number
     adSetId: number
     creativeId: number
     experimentId: number
@@ -18968,6 +19383,7 @@ export namespace Prisma {
     adId?: true
     name?: true
     status?: true
+    deliveryStatus?: true
     adSetId?: true
     creativeId?: true
     experimentId?: true
@@ -18987,6 +19403,7 @@ export namespace Prisma {
     adId?: true
     name?: true
     status?: true
+    deliveryStatus?: true
     adSetId?: true
     creativeId?: true
     experimentId?: true
@@ -19006,6 +19423,7 @@ export namespace Prisma {
     adId?: true
     name?: true
     status?: true
+    deliveryStatus?: true
     adSetId?: true
     creativeId?: true
     experimentId?: true
@@ -19112,6 +19530,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus: string | null
     adSetId: string
     creativeId: string | null
     experimentId: string | null
@@ -19150,6 +19569,7 @@ export namespace Prisma {
     adId?: boolean
     name?: boolean
     status?: boolean
+    deliveryStatus?: boolean
     adSetId?: boolean
     creativeId?: boolean
     experimentId?: boolean
@@ -19164,6 +19584,7 @@ export namespace Prisma {
     roas?: boolean
     dailyMetrics?: boolean | Ad$dailyMetricsArgs<ExtArgs>
     hourlyMetrics?: boolean | Ad$hourlyMetricsArgs<ExtArgs>
+    liveStatus?: boolean | Ad$liveStatusArgs<ExtArgs>
     adSet?: boolean | AdSetDefaultArgs<ExtArgs>
     creative?: boolean | Ad$creativeArgs<ExtArgs>
     experiment?: boolean | Ad$experimentArgs<ExtArgs>
@@ -19175,6 +19596,7 @@ export namespace Prisma {
     adId?: boolean
     name?: boolean
     status?: boolean
+    deliveryStatus?: boolean
     adSetId?: boolean
     creativeId?: boolean
     experimentId?: boolean
@@ -19197,6 +19619,7 @@ export namespace Prisma {
     adId?: boolean
     name?: boolean
     status?: boolean
+    deliveryStatus?: boolean
     adSetId?: boolean
     creativeId?: boolean
     experimentId?: boolean
@@ -19219,6 +19642,7 @@ export namespace Prisma {
     adId?: boolean
     name?: boolean
     status?: boolean
+    deliveryStatus?: boolean
     adSetId?: boolean
     creativeId?: boolean
     experimentId?: boolean
@@ -19233,10 +19657,11 @@ export namespace Prisma {
     roas?: boolean
   }
 
-  export type AdOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "adId" | "name" | "status" | "adSetId" | "creativeId" | "experimentId" | "variantName" | "spend" | "impressions" | "clicks" | "cfr" | "createdAt" | "updatedAt" | "revenue" | "roas", ExtArgs["result"]["ad"]>
+  export type AdOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "adId" | "name" | "status" | "deliveryStatus" | "adSetId" | "creativeId" | "experimentId" | "variantName" | "spend" | "impressions" | "clicks" | "cfr" | "createdAt" | "updatedAt" | "revenue" | "roas", ExtArgs["result"]["ad"]>
   export type AdInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     dailyMetrics?: boolean | Ad$dailyMetricsArgs<ExtArgs>
     hourlyMetrics?: boolean | Ad$hourlyMetricsArgs<ExtArgs>
+    liveStatus?: boolean | Ad$liveStatusArgs<ExtArgs>
     adSet?: boolean | AdSetDefaultArgs<ExtArgs>
     creative?: boolean | Ad$creativeArgs<ExtArgs>
     experiment?: boolean | Ad$experimentArgs<ExtArgs>
@@ -19258,6 +19683,7 @@ export namespace Prisma {
     objects: {
       dailyMetrics: Prisma.$AdDailyMetricPayload<ExtArgs>[]
       hourlyMetrics: Prisma.$AdHourlyMetricPayload<ExtArgs>[]
+      liveStatus: Prisma.$AdLiveStatusPayload<ExtArgs> | null
       adSet: Prisma.$AdSetPayload<ExtArgs>
       creative: Prisma.$AdCreativePayload<ExtArgs> | null
       experiment: Prisma.$ExperimentPayload<ExtArgs> | null
@@ -19267,6 +19693,7 @@ export namespace Prisma {
       adId: string
       name: string
       status: string
+      deliveryStatus: string | null
       adSetId: string
       creativeId: string | null
       experimentId: string | null
@@ -19675,6 +20102,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     dailyMetrics<T extends Ad$dailyMetricsArgs<ExtArgs> = {}>(args?: Subset<T, Ad$dailyMetricsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdDailyMetricPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     hourlyMetrics<T extends Ad$hourlyMetricsArgs<ExtArgs> = {}>(args?: Subset<T, Ad$hourlyMetricsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdHourlyMetricPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    liveStatus<T extends Ad$liveStatusArgs<ExtArgs> = {}>(args?: Subset<T, Ad$liveStatusArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     adSet<T extends AdSetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AdSetDefaultArgs<ExtArgs>>): Prisma__AdSetClient<$Result.GetResult<Prisma.$AdSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     creative<T extends Ad$creativeArgs<ExtArgs> = {}>(args?: Subset<T, Ad$creativeArgs<ExtArgs>>): Prisma__AdCreativeClient<$Result.GetResult<Prisma.$AdCreativePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     experiment<T extends Ad$experimentArgs<ExtArgs> = {}>(args?: Subset<T, Ad$experimentArgs<ExtArgs>>): Prisma__ExperimentClient<$Result.GetResult<Prisma.$ExperimentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -19711,6 +20139,7 @@ export namespace Prisma {
     readonly adId: FieldRef<"Ad", 'String'>
     readonly name: FieldRef<"Ad", 'String'>
     readonly status: FieldRef<"Ad", 'String'>
+    readonly deliveryStatus: FieldRef<"Ad", 'String'>
     readonly adSetId: FieldRef<"Ad", 'String'>
     readonly creativeId: FieldRef<"Ad", 'String'>
     readonly experimentId: FieldRef<"Ad", 'String'>
@@ -20167,6 +20596,25 @@ export namespace Prisma {
   }
 
   /**
+   * Ad.liveStatus
+   */
+  export type Ad$liveStatusArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    where?: AdLiveStatusWhereInput
+  }
+
+  /**
    * Ad.creative
    */
   export type Ad$creativeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -20220,6 +20668,1064 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AdInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AdLiveStatus
+   */
+
+  export type AggregateAdLiveStatus = {
+    _count: AdLiveStatusCountAggregateOutputType | null
+    _min: AdLiveStatusMinAggregateOutputType | null
+    _max: AdLiveStatusMaxAggregateOutputType | null
+  }
+
+  export type AdLiveStatusMinAggregateOutputType = {
+    id: string | null
+    adId: string | null
+    lastImpressionTime: Date | null
+    isRunningNow: boolean | null
+    updatedAt: Date | null
+  }
+
+  export type AdLiveStatusMaxAggregateOutputType = {
+    id: string | null
+    adId: string | null
+    lastImpressionTime: Date | null
+    isRunningNow: boolean | null
+    updatedAt: Date | null
+  }
+
+  export type AdLiveStatusCountAggregateOutputType = {
+    id: number
+    adId: number
+    lastImpressionTime: number
+    isRunningNow: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AdLiveStatusMinAggregateInputType = {
+    id?: true
+    adId?: true
+    lastImpressionTime?: true
+    isRunningNow?: true
+    updatedAt?: true
+  }
+
+  export type AdLiveStatusMaxAggregateInputType = {
+    id?: true
+    adId?: true
+    lastImpressionTime?: true
+    isRunningNow?: true
+    updatedAt?: true
+  }
+
+  export type AdLiveStatusCountAggregateInputType = {
+    id?: true
+    adId?: true
+    lastImpressionTime?: true
+    isRunningNow?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AdLiveStatusAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdLiveStatus to aggregate.
+     */
+    where?: AdLiveStatusWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdLiveStatuses to fetch.
+     */
+    orderBy?: AdLiveStatusOrderByWithRelationInput | AdLiveStatusOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdLiveStatusWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdLiveStatuses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdLiveStatuses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdLiveStatuses
+    **/
+    _count?: true | AdLiveStatusCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdLiveStatusMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdLiveStatusMaxAggregateInputType
+  }
+
+  export type GetAdLiveStatusAggregateType<T extends AdLiveStatusAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdLiveStatus]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdLiveStatus[P]>
+      : GetScalarType<T[P], AggregateAdLiveStatus[P]>
+  }
+
+
+
+
+  export type AdLiveStatusGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdLiveStatusWhereInput
+    orderBy?: AdLiveStatusOrderByWithAggregationInput | AdLiveStatusOrderByWithAggregationInput[]
+    by: AdLiveStatusScalarFieldEnum[] | AdLiveStatusScalarFieldEnum
+    having?: AdLiveStatusScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdLiveStatusCountAggregateInputType | true
+    _min?: AdLiveStatusMinAggregateInputType
+    _max?: AdLiveStatusMaxAggregateInputType
+  }
+
+  export type AdLiveStatusGroupByOutputType = {
+    id: string
+    adId: string
+    lastImpressionTime: Date
+    isRunningNow: boolean
+    updatedAt: Date
+    _count: AdLiveStatusCountAggregateOutputType | null
+    _min: AdLiveStatusMinAggregateOutputType | null
+    _max: AdLiveStatusMaxAggregateOutputType | null
+  }
+
+  type GetAdLiveStatusGroupByPayload<T extends AdLiveStatusGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdLiveStatusGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdLiveStatusGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdLiveStatusGroupByOutputType[P]>
+            : GetScalarType<T[P], AdLiveStatusGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdLiveStatusSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    adId?: boolean
+    lastImpressionTime?: boolean
+    isRunningNow?: boolean
+    updatedAt?: boolean
+    ad?: boolean | AdDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["adLiveStatus"]>
+
+  export type AdLiveStatusSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    adId?: boolean
+    lastImpressionTime?: boolean
+    isRunningNow?: boolean
+    updatedAt?: boolean
+    ad?: boolean | AdDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["adLiveStatus"]>
+
+  export type AdLiveStatusSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    adId?: boolean
+    lastImpressionTime?: boolean
+    isRunningNow?: boolean
+    updatedAt?: boolean
+    ad?: boolean | AdDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["adLiveStatus"]>
+
+  export type AdLiveStatusSelectScalar = {
+    id?: boolean
+    adId?: boolean
+    lastImpressionTime?: boolean
+    isRunningNow?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AdLiveStatusOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "adId" | "lastImpressionTime" | "isRunningNow" | "updatedAt", ExtArgs["result"]["adLiveStatus"]>
+  export type AdLiveStatusInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    ad?: boolean | AdDefaultArgs<ExtArgs>
+  }
+  export type AdLiveStatusIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    ad?: boolean | AdDefaultArgs<ExtArgs>
+  }
+  export type AdLiveStatusIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    ad?: boolean | AdDefaultArgs<ExtArgs>
+  }
+
+  export type $AdLiveStatusPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdLiveStatus"
+    objects: {
+      ad: Prisma.$AdPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      adId: string
+      lastImpressionTime: Date
+      isRunningNow: boolean
+      updatedAt: Date
+    }, ExtArgs["result"]["adLiveStatus"]>
+    composites: {}
+  }
+
+  type AdLiveStatusGetPayload<S extends boolean | null | undefined | AdLiveStatusDefaultArgs> = $Result.GetResult<Prisma.$AdLiveStatusPayload, S>
+
+  type AdLiveStatusCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdLiveStatusFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdLiveStatusCountAggregateInputType | true
+    }
+
+  export interface AdLiveStatusDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdLiveStatus'], meta: { name: 'AdLiveStatus' } }
+    /**
+     * Find zero or one AdLiveStatus that matches the filter.
+     * @param {AdLiveStatusFindUniqueArgs} args - Arguments to find a AdLiveStatus
+     * @example
+     * // Get one AdLiveStatus
+     * const adLiveStatus = await prisma.adLiveStatus.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdLiveStatusFindUniqueArgs>(args: SelectSubset<T, AdLiveStatusFindUniqueArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AdLiveStatus that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdLiveStatusFindUniqueOrThrowArgs} args - Arguments to find a AdLiveStatus
+     * @example
+     * // Get one AdLiveStatus
+     * const adLiveStatus = await prisma.adLiveStatus.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdLiveStatusFindUniqueOrThrowArgs>(args: SelectSubset<T, AdLiveStatusFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdLiveStatus that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdLiveStatusFindFirstArgs} args - Arguments to find a AdLiveStatus
+     * @example
+     * // Get one AdLiveStatus
+     * const adLiveStatus = await prisma.adLiveStatus.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdLiveStatusFindFirstArgs>(args?: SelectSubset<T, AdLiveStatusFindFirstArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdLiveStatus that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdLiveStatusFindFirstOrThrowArgs} args - Arguments to find a AdLiveStatus
+     * @example
+     * // Get one AdLiveStatus
+     * const adLiveStatus = await prisma.adLiveStatus.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdLiveStatusFindFirstOrThrowArgs>(args?: SelectSubset<T, AdLiveStatusFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AdLiveStatuses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdLiveStatusFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdLiveStatuses
+     * const adLiveStatuses = await prisma.adLiveStatus.findMany()
+     * 
+     * // Get first 10 AdLiveStatuses
+     * const adLiveStatuses = await prisma.adLiveStatus.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const adLiveStatusWithIdOnly = await prisma.adLiveStatus.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AdLiveStatusFindManyArgs>(args?: SelectSubset<T, AdLiveStatusFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AdLiveStatus.
+     * @param {AdLiveStatusCreateArgs} args - Arguments to create a AdLiveStatus.
+     * @example
+     * // Create one AdLiveStatus
+     * const AdLiveStatus = await prisma.adLiveStatus.create({
+     *   data: {
+     *     // ... data to create a AdLiveStatus
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdLiveStatusCreateArgs>(args: SelectSubset<T, AdLiveStatusCreateArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AdLiveStatuses.
+     * @param {AdLiveStatusCreateManyArgs} args - Arguments to create many AdLiveStatuses.
+     * @example
+     * // Create many AdLiveStatuses
+     * const adLiveStatus = await prisma.adLiveStatus.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdLiveStatusCreateManyArgs>(args?: SelectSubset<T, AdLiveStatusCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdLiveStatuses and returns the data saved in the database.
+     * @param {AdLiveStatusCreateManyAndReturnArgs} args - Arguments to create many AdLiveStatuses.
+     * @example
+     * // Create many AdLiveStatuses
+     * const adLiveStatus = await prisma.adLiveStatus.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdLiveStatuses and only return the `id`
+     * const adLiveStatusWithIdOnly = await prisma.adLiveStatus.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdLiveStatusCreateManyAndReturnArgs>(args?: SelectSubset<T, AdLiveStatusCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AdLiveStatus.
+     * @param {AdLiveStatusDeleteArgs} args - Arguments to delete one AdLiveStatus.
+     * @example
+     * // Delete one AdLiveStatus
+     * const AdLiveStatus = await prisma.adLiveStatus.delete({
+     *   where: {
+     *     // ... filter to delete one AdLiveStatus
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdLiveStatusDeleteArgs>(args: SelectSubset<T, AdLiveStatusDeleteArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AdLiveStatus.
+     * @param {AdLiveStatusUpdateArgs} args - Arguments to update one AdLiveStatus.
+     * @example
+     * // Update one AdLiveStatus
+     * const adLiveStatus = await prisma.adLiveStatus.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdLiveStatusUpdateArgs>(args: SelectSubset<T, AdLiveStatusUpdateArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AdLiveStatuses.
+     * @param {AdLiveStatusDeleteManyArgs} args - Arguments to filter AdLiveStatuses to delete.
+     * @example
+     * // Delete a few AdLiveStatuses
+     * const { count } = await prisma.adLiveStatus.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdLiveStatusDeleteManyArgs>(args?: SelectSubset<T, AdLiveStatusDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdLiveStatuses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdLiveStatusUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdLiveStatuses
+     * const adLiveStatus = await prisma.adLiveStatus.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdLiveStatusUpdateManyArgs>(args: SelectSubset<T, AdLiveStatusUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdLiveStatuses and returns the data updated in the database.
+     * @param {AdLiveStatusUpdateManyAndReturnArgs} args - Arguments to update many AdLiveStatuses.
+     * @example
+     * // Update many AdLiveStatuses
+     * const adLiveStatus = await prisma.adLiveStatus.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AdLiveStatuses and only return the `id`
+     * const adLiveStatusWithIdOnly = await prisma.adLiveStatus.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdLiveStatusUpdateManyAndReturnArgs>(args: SelectSubset<T, AdLiveStatusUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AdLiveStatus.
+     * @param {AdLiveStatusUpsertArgs} args - Arguments to update or create a AdLiveStatus.
+     * @example
+     * // Update or create a AdLiveStatus
+     * const adLiveStatus = await prisma.adLiveStatus.upsert({
+     *   create: {
+     *     // ... data to create a AdLiveStatus
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdLiveStatus we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdLiveStatusUpsertArgs>(args: SelectSubset<T, AdLiveStatusUpsertArgs<ExtArgs>>): Prisma__AdLiveStatusClient<$Result.GetResult<Prisma.$AdLiveStatusPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AdLiveStatuses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdLiveStatusCountArgs} args - Arguments to filter AdLiveStatuses to count.
+     * @example
+     * // Count the number of AdLiveStatuses
+     * const count = await prisma.adLiveStatus.count({
+     *   where: {
+     *     // ... the filter for the AdLiveStatuses we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdLiveStatusCountArgs>(
+      args?: Subset<T, AdLiveStatusCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdLiveStatusCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdLiveStatus.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdLiveStatusAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdLiveStatusAggregateArgs>(args: Subset<T, AdLiveStatusAggregateArgs>): Prisma.PrismaPromise<GetAdLiveStatusAggregateType<T>>
+
+    /**
+     * Group by AdLiveStatus.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdLiveStatusGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdLiveStatusGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdLiveStatusGroupByArgs['orderBy'] }
+        : { orderBy?: AdLiveStatusGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdLiveStatusGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdLiveStatusGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdLiveStatus model
+   */
+  readonly fields: AdLiveStatusFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdLiveStatus.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdLiveStatusClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    ad<T extends AdDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AdDefaultArgs<ExtArgs>>): Prisma__AdClient<$Result.GetResult<Prisma.$AdPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdLiveStatus model
+   */
+  interface AdLiveStatusFieldRefs {
+    readonly id: FieldRef<"AdLiveStatus", 'String'>
+    readonly adId: FieldRef<"AdLiveStatus", 'String'>
+    readonly lastImpressionTime: FieldRef<"AdLiveStatus", 'DateTime'>
+    readonly isRunningNow: FieldRef<"AdLiveStatus", 'Boolean'>
+    readonly updatedAt: FieldRef<"AdLiveStatus", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdLiveStatus findUnique
+   */
+  export type AdLiveStatusFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * Filter, which AdLiveStatus to fetch.
+     */
+    where: AdLiveStatusWhereUniqueInput
+  }
+
+  /**
+   * AdLiveStatus findUniqueOrThrow
+   */
+  export type AdLiveStatusFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * Filter, which AdLiveStatus to fetch.
+     */
+    where: AdLiveStatusWhereUniqueInput
+  }
+
+  /**
+   * AdLiveStatus findFirst
+   */
+  export type AdLiveStatusFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * Filter, which AdLiveStatus to fetch.
+     */
+    where?: AdLiveStatusWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdLiveStatuses to fetch.
+     */
+    orderBy?: AdLiveStatusOrderByWithRelationInput | AdLiveStatusOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdLiveStatuses.
+     */
+    cursor?: AdLiveStatusWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdLiveStatuses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdLiveStatuses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdLiveStatuses.
+     */
+    distinct?: AdLiveStatusScalarFieldEnum | AdLiveStatusScalarFieldEnum[]
+  }
+
+  /**
+   * AdLiveStatus findFirstOrThrow
+   */
+  export type AdLiveStatusFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * Filter, which AdLiveStatus to fetch.
+     */
+    where?: AdLiveStatusWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdLiveStatuses to fetch.
+     */
+    orderBy?: AdLiveStatusOrderByWithRelationInput | AdLiveStatusOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdLiveStatuses.
+     */
+    cursor?: AdLiveStatusWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdLiveStatuses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdLiveStatuses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdLiveStatuses.
+     */
+    distinct?: AdLiveStatusScalarFieldEnum | AdLiveStatusScalarFieldEnum[]
+  }
+
+  /**
+   * AdLiveStatus findMany
+   */
+  export type AdLiveStatusFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * Filter, which AdLiveStatuses to fetch.
+     */
+    where?: AdLiveStatusWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdLiveStatuses to fetch.
+     */
+    orderBy?: AdLiveStatusOrderByWithRelationInput | AdLiveStatusOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdLiveStatuses.
+     */
+    cursor?: AdLiveStatusWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdLiveStatuses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdLiveStatuses.
+     */
+    skip?: number
+    distinct?: AdLiveStatusScalarFieldEnum | AdLiveStatusScalarFieldEnum[]
+  }
+
+  /**
+   * AdLiveStatus create
+   */
+  export type AdLiveStatusCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AdLiveStatus.
+     */
+    data: XOR<AdLiveStatusCreateInput, AdLiveStatusUncheckedCreateInput>
+  }
+
+  /**
+   * AdLiveStatus createMany
+   */
+  export type AdLiveStatusCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdLiveStatuses.
+     */
+    data: AdLiveStatusCreateManyInput | AdLiveStatusCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdLiveStatus createManyAndReturn
+   */
+  export type AdLiveStatusCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * The data used to create many AdLiveStatuses.
+     */
+    data: AdLiveStatusCreateManyInput | AdLiveStatusCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AdLiveStatus update
+   */
+  export type AdLiveStatusUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AdLiveStatus.
+     */
+    data: XOR<AdLiveStatusUpdateInput, AdLiveStatusUncheckedUpdateInput>
+    /**
+     * Choose, which AdLiveStatus to update.
+     */
+    where: AdLiveStatusWhereUniqueInput
+  }
+
+  /**
+   * AdLiveStatus updateMany
+   */
+  export type AdLiveStatusUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdLiveStatuses.
+     */
+    data: XOR<AdLiveStatusUpdateManyMutationInput, AdLiveStatusUncheckedUpdateManyInput>
+    /**
+     * Filter which AdLiveStatuses to update
+     */
+    where?: AdLiveStatusWhereInput
+    /**
+     * Limit how many AdLiveStatuses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdLiveStatus updateManyAndReturn
+   */
+  export type AdLiveStatusUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * The data used to update AdLiveStatuses.
+     */
+    data: XOR<AdLiveStatusUpdateManyMutationInput, AdLiveStatusUncheckedUpdateManyInput>
+    /**
+     * Filter which AdLiveStatuses to update
+     */
+    where?: AdLiveStatusWhereInput
+    /**
+     * Limit how many AdLiveStatuses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AdLiveStatus upsert
+   */
+  export type AdLiveStatusUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AdLiveStatus to update in case it exists.
+     */
+    where: AdLiveStatusWhereUniqueInput
+    /**
+     * In case the AdLiveStatus found by the `where` argument doesn't exist, create a new AdLiveStatus with this data.
+     */
+    create: XOR<AdLiveStatusCreateInput, AdLiveStatusUncheckedCreateInput>
+    /**
+     * In case the AdLiveStatus was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdLiveStatusUpdateInput, AdLiveStatusUncheckedUpdateInput>
+  }
+
+  /**
+   * AdLiveStatus delete
+   */
+  export type AdLiveStatusDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
+    /**
+     * Filter which AdLiveStatus to delete.
+     */
+    where: AdLiveStatusWhereUniqueInput
+  }
+
+  /**
+   * AdLiveStatus deleteMany
+   */
+  export type AdLiveStatusDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdLiveStatuses to delete
+     */
+    where?: AdLiveStatusWhereInput
+    /**
+     * Limit how many AdLiveStatuses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdLiveStatus without action
+   */
+  export type AdLiveStatusDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdLiveStatus
+     */
+    select?: AdLiveStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdLiveStatus
+     */
+    omit?: AdLiveStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdLiveStatusInclude<ExtArgs> | null
   }
 
 
@@ -28326,7 +29832,9 @@ export namespace Prisma {
     paidAmount: 'paidAmount',
     items: 'items',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    closedById: 'closedById',
+    conversationId: 'conversationId'
   };
 
   export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -28391,6 +29899,7 @@ export namespace Prisma {
     assignedAgent: 'assignedAgent',
     lastMessageAt: 'lastMessageAt',
     unreadCount: 'unreadCount',
+    assignedEmployeeId: 'assignedEmployeeId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -28410,6 +29919,7 @@ export namespace Prisma {
     attachmentUrl: 'attachmentUrl',
     createdAt: 'createdAt',
     attachmentId: 'attachmentId',
+    responderId: 'responderId',
     metadata: 'metadata',
     episodeId: 'episodeId',
     sessionId: 'sessionId'
@@ -28491,6 +30001,7 @@ export namespace Prisma {
     name: 'name',
     objective: 'objective',
     status: 'status',
+    isVisible: 'isVisible',
     spend: 'spend',
     impressions: 'impressions',
     clicks: 'clicks',
@@ -28542,6 +30053,7 @@ export namespace Prisma {
     adId: 'adId',
     name: 'name',
     status: 'status',
+    deliveryStatus: 'deliveryStatus',
     adSetId: 'adSetId',
     creativeId: 'creativeId',
     experimentId: 'experimentId',
@@ -28557,6 +30069,17 @@ export namespace Prisma {
   };
 
   export type AdScalarFieldEnum = (typeof AdScalarFieldEnum)[keyof typeof AdScalarFieldEnum]
+
+
+  export const AdLiveStatusScalarFieldEnum: {
+    id: 'id',
+    adId: 'adId',
+    lastImpressionTime: 'lastImpressionTime',
+    isRunningNow: 'isRunningNow',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AdLiveStatusScalarFieldEnum = (typeof AdLiveStatusScalarFieldEnum)[keyof typeof AdLiveStatusScalarFieldEnum]
 
 
   export const AdCreativeScalarFieldEnum: {
@@ -28992,8 +30515,12 @@ export namespace Prisma {
     items?: JsonFilter<"Order">
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    closedById?: StringNullableFilter<"Order"> | string | null
+    conversationId?: StringNullableFilter<"Order"> | string | null
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     transactions?: TransactionListRelationFilter
+    closedBy?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
+    conversation?: XOR<ConversationNullableScalarRelationFilter, ConversationWhereInput> | null
   }
 
   export type OrderOrderByWithRelationInput = {
@@ -29007,8 +30534,12 @@ export namespace Prisma {
     items?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    closedById?: SortOrderInput | SortOrder
+    conversationId?: SortOrderInput | SortOrder
     customer?: CustomerOrderByWithRelationInput
     transactions?: TransactionOrderByRelationAggregateInput
+    closedBy?: EmployeeOrderByWithRelationInput
+    conversation?: ConversationOrderByWithRelationInput
   }
 
   export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -29025,8 +30556,12 @@ export namespace Prisma {
     items?: JsonFilter<"Order">
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    closedById?: StringNullableFilter<"Order"> | string | null
+    conversationId?: StringNullableFilter<"Order"> | string | null
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     transactions?: TransactionListRelationFilter
+    closedBy?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
+    conversation?: XOR<ConversationNullableScalarRelationFilter, ConversationWhereInput> | null
   }, "id" | "orderId">
 
   export type OrderOrderByWithAggregationInput = {
@@ -29040,6 +30575,8 @@ export namespace Prisma {
     items?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    closedById?: SortOrderInput | SortOrder
+    conversationId?: SortOrderInput | SortOrder
     _count?: OrderCountOrderByAggregateInput
     _avg?: OrderAvgOrderByAggregateInput
     _max?: OrderMaxOrderByAggregateInput
@@ -29061,6 +30598,8 @@ export namespace Prisma {
     items?: JsonWithAggregatesFilter<"Order">
     createdAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
+    closedById?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    conversationId?: StringNullableWithAggregatesFilter<"Order"> | string | null
   }
 
   export type TransactionWhereInput = {
@@ -29323,11 +30862,14 @@ export namespace Prisma {
     assignedAgent?: StringNullableFilter<"Conversation"> | string | null
     lastMessageAt?: DateTimeNullableFilter<"Conversation"> | Date | string | null
     unreadCount?: IntFilter<"Conversation"> | number
+    assignedEmployeeId?: StringNullableFilter<"Conversation"> | string | null
     createdAt?: DateTimeFilter<"Conversation"> | Date | string
     updatedAt?: DateTimeFilter<"Conversation"> | Date | string
+    assignedEmployee?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
     episodes?: ChatEpisodeListRelationFilter
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     messages?: MessageListRelationFilter
+    orders?: OrderListRelationFilter
   }
 
   export type ConversationOrderByWithRelationInput = {
@@ -29340,11 +30882,14 @@ export namespace Prisma {
     assignedAgent?: SortOrderInput | SortOrder
     lastMessageAt?: SortOrderInput | SortOrder
     unreadCount?: SortOrder
+    assignedEmployeeId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    assignedEmployee?: EmployeeOrderByWithRelationInput
     episodes?: ChatEpisodeOrderByRelationAggregateInput
     customer?: CustomerOrderByWithRelationInput
     messages?: MessageOrderByRelationAggregateInput
+    orders?: OrderOrderByRelationAggregateInput
   }
 
   export type ConversationWhereUniqueInput = Prisma.AtLeast<{
@@ -29360,11 +30905,14 @@ export namespace Prisma {
     assignedAgent?: StringNullableFilter<"Conversation"> | string | null
     lastMessageAt?: DateTimeNullableFilter<"Conversation"> | Date | string | null
     unreadCount?: IntFilter<"Conversation"> | number
+    assignedEmployeeId?: StringNullableFilter<"Conversation"> | string | null
     createdAt?: DateTimeFilter<"Conversation"> | Date | string
     updatedAt?: DateTimeFilter<"Conversation"> | Date | string
+    assignedEmployee?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
     episodes?: ChatEpisodeListRelationFilter
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     messages?: MessageListRelationFilter
+    orders?: OrderListRelationFilter
   }, "id" | "conversationId">
 
   export type ConversationOrderByWithAggregationInput = {
@@ -29377,6 +30925,7 @@ export namespace Prisma {
     assignedAgent?: SortOrderInput | SortOrder
     lastMessageAt?: SortOrderInput | SortOrder
     unreadCount?: SortOrder
+    assignedEmployeeId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ConversationCountOrderByAggregateInput
@@ -29399,6 +30948,7 @@ export namespace Prisma {
     assignedAgent?: StringNullableWithAggregatesFilter<"Conversation"> | string | null
     lastMessageAt?: DateTimeNullableWithAggregatesFilter<"Conversation"> | Date | string | null
     unreadCount?: IntWithAggregatesFilter<"Conversation"> | number
+    assignedEmployeeId?: StringNullableWithAggregatesFilter<"Conversation"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Conversation"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Conversation"> | Date | string
   }
@@ -29418,9 +30968,11 @@ export namespace Prisma {
     attachmentUrl?: StringNullableFilter<"Message"> | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
     attachmentId?: StringNullableFilter<"Message"> | string | null
+    responderId?: StringNullableFilter<"Message"> | string | null
     metadata?: JsonNullableFilter<"Message">
     episodeId?: StringNullableFilter<"Message"> | string | null
     sessionId?: StringNullableFilter<"Message"> | string | null
+    responder?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
     conversation?: XOR<ConversationScalarRelationFilter, ConversationWhereInput>
   }
 
@@ -29436,9 +30988,11 @@ export namespace Prisma {
     attachmentUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     attachmentId?: SortOrderInput | SortOrder
+    responderId?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
     episodeId?: SortOrderInput | SortOrder
     sessionId?: SortOrderInput | SortOrder
+    responder?: EmployeeOrderByWithRelationInput
     conversation?: ConversationOrderByWithRelationInput
   }
 
@@ -29457,9 +31011,11 @@ export namespace Prisma {
     attachmentUrl?: StringNullableFilter<"Message"> | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
     attachmentId?: StringNullableFilter<"Message"> | string | null
+    responderId?: StringNullableFilter<"Message"> | string | null
     metadata?: JsonNullableFilter<"Message">
     episodeId?: StringNullableFilter<"Message"> | string | null
     sessionId?: StringNullableFilter<"Message"> | string | null
+    responder?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
     conversation?: XOR<ConversationScalarRelationFilter, ConversationWhereInput>
   }, "id" | "messageId">
 
@@ -29475,6 +31031,7 @@ export namespace Prisma {
     attachmentUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     attachmentId?: SortOrderInput | SortOrder
+    responderId?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
     episodeId?: SortOrderInput | SortOrder
     sessionId?: SortOrderInput | SortOrder
@@ -29498,6 +31055,7 @@ export namespace Prisma {
     attachmentUrl?: StringNullableWithAggregatesFilter<"Message"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
     attachmentId?: StringNullableWithAggregatesFilter<"Message"> | string | null
+    responderId?: StringNullableWithAggregatesFilter<"Message"> | string | null
     metadata?: JsonNullableWithAggregatesFilter<"Message">
     episodeId?: StringNullableWithAggregatesFilter<"Message"> | string | null
     sessionId?: StringNullableWithAggregatesFilter<"Message"> | string | null
@@ -29625,6 +31183,9 @@ export namespace Prisma {
     facebookName?: StringNullableFilter<"Employee"> | string | null
     lineName?: StringNullableFilter<"Employee"> | string | null
     tasks?: TaskListRelationFilter
+    respondedMessages?: MessageListRelationFilter
+    assignedConversations?: ConversationListRelationFilter
+    closedOrders?: OrderListRelationFilter
   }
 
   export type EmployeeOrderByWithRelationInput = {
@@ -29651,6 +31212,9 @@ export namespace Prisma {
     facebookName?: SortOrderInput | SortOrder
     lineName?: SortOrderInput | SortOrder
     tasks?: TaskOrderByRelationAggregateInput
+    respondedMessages?: MessageOrderByRelationAggregateInput
+    assignedConversations?: ConversationOrderByRelationAggregateInput
+    closedOrders?: OrderOrderByRelationAggregateInput
   }
 
   export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
@@ -29680,6 +31244,9 @@ export namespace Prisma {
     facebookName?: StringNullableFilter<"Employee"> | string | null
     lineName?: StringNullableFilter<"Employee"> | string | null
     tasks?: TaskListRelationFilter
+    respondedMessages?: MessageListRelationFilter
+    assignedConversations?: ConversationListRelationFilter
+    closedOrders?: OrderListRelationFilter
   }, "id" | "employeeId" | "agentId" | "email">
 
   export type EmployeeOrderByWithAggregationInput = {
@@ -29849,6 +31416,7 @@ export namespace Prisma {
     name?: StringFilter<"Campaign"> | string
     objective?: StringNullableFilter<"Campaign"> | string | null
     status?: StringFilter<"Campaign"> | string
+    isVisible?: BoolFilter<"Campaign"> | boolean
     spend?: FloatFilter<"Campaign"> | number
     impressions?: IntFilter<"Campaign"> | number
     clicks?: IntFilter<"Campaign"> | number
@@ -29873,6 +31441,7 @@ export namespace Prisma {
     name?: SortOrder
     objective?: SortOrderInput | SortOrder
     status?: SortOrder
+    isVisible?: SortOrder
     spend?: SortOrder
     impressions?: SortOrder
     clicks?: SortOrder
@@ -29900,6 +31469,7 @@ export namespace Prisma {
     name?: StringFilter<"Campaign"> | string
     objective?: StringNullableFilter<"Campaign"> | string | null
     status?: StringFilter<"Campaign"> | string
+    isVisible?: BoolFilter<"Campaign"> | boolean
     spend?: FloatFilter<"Campaign"> | number
     impressions?: IntFilter<"Campaign"> | number
     clicks?: IntFilter<"Campaign"> | number
@@ -29924,6 +31494,7 @@ export namespace Prisma {
     name?: SortOrder
     objective?: SortOrderInput | SortOrder
     status?: SortOrder
+    isVisible?: SortOrder
     spend?: SortOrder
     impressions?: SortOrder
     clicks?: SortOrder
@@ -29954,6 +31525,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Campaign"> | string
     objective?: StringNullableWithAggregatesFilter<"Campaign"> | string | null
     status?: StringWithAggregatesFilter<"Campaign"> | string
+    isVisible?: BoolWithAggregatesFilter<"Campaign"> | boolean
     spend?: FloatWithAggregatesFilter<"Campaign"> | number
     impressions?: IntWithAggregatesFilter<"Campaign"> | number
     clicks?: IntWithAggregatesFilter<"Campaign"> | number
@@ -30118,6 +31690,7 @@ export namespace Prisma {
     adId?: StringFilter<"Ad"> | string
     name?: StringFilter<"Ad"> | string
     status?: StringFilter<"Ad"> | string
+    deliveryStatus?: StringNullableFilter<"Ad"> | string | null
     adSetId?: StringFilter<"Ad"> | string
     creativeId?: StringNullableFilter<"Ad"> | string | null
     experimentId?: StringNullableFilter<"Ad"> | string | null
@@ -30132,6 +31705,7 @@ export namespace Prisma {
     roas?: FloatFilter<"Ad"> | number
     dailyMetrics?: AdDailyMetricListRelationFilter
     hourlyMetrics?: AdHourlyMetricListRelationFilter
+    liveStatus?: XOR<AdLiveStatusNullableScalarRelationFilter, AdLiveStatusWhereInput> | null
     adSet?: XOR<AdSetScalarRelationFilter, AdSetWhereInput>
     creative?: XOR<AdCreativeNullableScalarRelationFilter, AdCreativeWhereInput> | null
     experiment?: XOR<ExperimentNullableScalarRelationFilter, ExperimentWhereInput> | null
@@ -30142,6 +31716,7 @@ export namespace Prisma {
     adId?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    deliveryStatus?: SortOrderInput | SortOrder
     adSetId?: SortOrder
     creativeId?: SortOrderInput | SortOrder
     experimentId?: SortOrderInput | SortOrder
@@ -30156,6 +31731,7 @@ export namespace Prisma {
     roas?: SortOrder
     dailyMetrics?: AdDailyMetricOrderByRelationAggregateInput
     hourlyMetrics?: AdHourlyMetricOrderByRelationAggregateInput
+    liveStatus?: AdLiveStatusOrderByWithRelationInput
     adSet?: AdSetOrderByWithRelationInput
     creative?: AdCreativeOrderByWithRelationInput
     experiment?: ExperimentOrderByWithRelationInput
@@ -30169,6 +31745,7 @@ export namespace Prisma {
     NOT?: AdWhereInput | AdWhereInput[]
     name?: StringFilter<"Ad"> | string
     status?: StringFilter<"Ad"> | string
+    deliveryStatus?: StringNullableFilter<"Ad"> | string | null
     adSetId?: StringFilter<"Ad"> | string
     creativeId?: StringNullableFilter<"Ad"> | string | null
     experimentId?: StringNullableFilter<"Ad"> | string | null
@@ -30183,6 +31760,7 @@ export namespace Prisma {
     roas?: FloatFilter<"Ad"> | number
     dailyMetrics?: AdDailyMetricListRelationFilter
     hourlyMetrics?: AdHourlyMetricListRelationFilter
+    liveStatus?: XOR<AdLiveStatusNullableScalarRelationFilter, AdLiveStatusWhereInput> | null
     adSet?: XOR<AdSetScalarRelationFilter, AdSetWhereInput>
     creative?: XOR<AdCreativeNullableScalarRelationFilter, AdCreativeWhereInput> | null
     experiment?: XOR<ExperimentNullableScalarRelationFilter, ExperimentWhereInput> | null
@@ -30193,6 +31771,7 @@ export namespace Prisma {
     adId?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    deliveryStatus?: SortOrderInput | SortOrder
     adSetId?: SortOrder
     creativeId?: SortOrderInput | SortOrder
     experimentId?: SortOrderInput | SortOrder
@@ -30220,6 +31799,7 @@ export namespace Prisma {
     adId?: StringWithAggregatesFilter<"Ad"> | string
     name?: StringWithAggregatesFilter<"Ad"> | string
     status?: StringWithAggregatesFilter<"Ad"> | string
+    deliveryStatus?: StringNullableWithAggregatesFilter<"Ad"> | string | null
     adSetId?: StringWithAggregatesFilter<"Ad"> | string
     creativeId?: StringNullableWithAggregatesFilter<"Ad"> | string | null
     experimentId?: StringNullableWithAggregatesFilter<"Ad"> | string | null
@@ -30232,6 +31812,61 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Ad"> | Date | string
     revenue?: FloatWithAggregatesFilter<"Ad"> | number
     roas?: FloatWithAggregatesFilter<"Ad"> | number
+  }
+
+  export type AdLiveStatusWhereInput = {
+    AND?: AdLiveStatusWhereInput | AdLiveStatusWhereInput[]
+    OR?: AdLiveStatusWhereInput[]
+    NOT?: AdLiveStatusWhereInput | AdLiveStatusWhereInput[]
+    id?: StringFilter<"AdLiveStatus"> | string
+    adId?: StringFilter<"AdLiveStatus"> | string
+    lastImpressionTime?: DateTimeFilter<"AdLiveStatus"> | Date | string
+    isRunningNow?: BoolFilter<"AdLiveStatus"> | boolean
+    updatedAt?: DateTimeFilter<"AdLiveStatus"> | Date | string
+    ad?: XOR<AdScalarRelationFilter, AdWhereInput>
+  }
+
+  export type AdLiveStatusOrderByWithRelationInput = {
+    id?: SortOrder
+    adId?: SortOrder
+    lastImpressionTime?: SortOrder
+    isRunningNow?: SortOrder
+    updatedAt?: SortOrder
+    ad?: AdOrderByWithRelationInput
+  }
+
+  export type AdLiveStatusWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    adId?: string
+    AND?: AdLiveStatusWhereInput | AdLiveStatusWhereInput[]
+    OR?: AdLiveStatusWhereInput[]
+    NOT?: AdLiveStatusWhereInput | AdLiveStatusWhereInput[]
+    lastImpressionTime?: DateTimeFilter<"AdLiveStatus"> | Date | string
+    isRunningNow?: BoolFilter<"AdLiveStatus"> | boolean
+    updatedAt?: DateTimeFilter<"AdLiveStatus"> | Date | string
+    ad?: XOR<AdScalarRelationFilter, AdWhereInput>
+  }, "id" | "adId">
+
+  export type AdLiveStatusOrderByWithAggregationInput = {
+    id?: SortOrder
+    adId?: SortOrder
+    lastImpressionTime?: SortOrder
+    isRunningNow?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AdLiveStatusCountOrderByAggregateInput
+    _max?: AdLiveStatusMaxOrderByAggregateInput
+    _min?: AdLiveStatusMinOrderByAggregateInput
+  }
+
+  export type AdLiveStatusScalarWhereWithAggregatesInput = {
+    AND?: AdLiveStatusScalarWhereWithAggregatesInput | AdLiveStatusScalarWhereWithAggregatesInput[]
+    OR?: AdLiveStatusScalarWhereWithAggregatesInput[]
+    NOT?: AdLiveStatusScalarWhereWithAggregatesInput | AdLiveStatusScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AdLiveStatus"> | string
+    adId?: StringWithAggregatesFilter<"AdLiveStatus"> | string
+    lastImpressionTime?: DateTimeWithAggregatesFilter<"AdLiveStatus"> | Date | string
+    isRunningNow?: BoolWithAggregatesFilter<"AdLiveStatus"> | boolean
+    updatedAt?: DateTimeWithAggregatesFilter<"AdLiveStatus"> | Date | string
   }
 
   export type AdCreativeWhereInput = {
@@ -31048,6 +32683,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     customer: CustomerCreateNestedOneWithoutOrdersInput
     transactions?: TransactionCreateNestedManyWithoutOrderInput
+    closedBy?: EmployeeCreateNestedOneWithoutClosedOrdersInput
+    conversation?: ConversationCreateNestedOneWithoutOrdersInput
   }
 
   export type OrderUncheckedCreateInput = {
@@ -31061,6 +32698,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    closedById?: string | null
+    conversationId?: string | null
     transactions?: TransactionUncheckedCreateNestedManyWithoutOrderInput
   }
 
@@ -31076,6 +32715,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: CustomerUpdateOneRequiredWithoutOrdersNestedInput
     transactions?: TransactionUpdateManyWithoutOrderNestedInput
+    closedBy?: EmployeeUpdateOneWithoutClosedOrdersNestedInput
+    conversation?: ConversationUpdateOneWithoutOrdersNestedInput
   }
 
   export type OrderUncheckedUpdateInput = {
@@ -31089,6 +32730,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedById?: NullableStringFieldUpdateOperationsInput | string | null
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     transactions?: TransactionUncheckedUpdateManyWithoutOrderNestedInput
   }
 
@@ -31103,6 +32746,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    closedById?: string | null
+    conversationId?: string | null
   }
 
   export type OrderUpdateManyMutationInput = {
@@ -31128,6 +32773,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedById?: NullableStringFieldUpdateOperationsInput | string | null
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TransactionCreateInput = {
@@ -31418,9 +33065,11 @@ export namespace Prisma {
     unreadCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    assignedEmployee?: EmployeeCreateNestedOneWithoutAssignedConversationsInput
     episodes?: ChatEpisodeCreateNestedManyWithoutConversationInput
     customer?: CustomerCreateNestedOneWithoutConversationsInput
     messages?: MessageCreateNestedManyWithoutConversationInput
+    orders?: OrderCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationUncheckedCreateInput = {
@@ -31433,10 +33082,12 @@ export namespace Prisma {
     assignedAgent?: string | null
     lastMessageAt?: Date | string | null
     unreadCount?: number
+    assignedEmployeeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     episodes?: ChatEpisodeUncheckedCreateNestedManyWithoutConversationInput
     messages?: MessageUncheckedCreateNestedManyWithoutConversationInput
+    orders?: OrderUncheckedCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationUpdateInput = {
@@ -31450,9 +33101,11 @@ export namespace Prisma {
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedEmployee?: EmployeeUpdateOneWithoutAssignedConversationsNestedInput
     episodes?: ChatEpisodeUpdateManyWithoutConversationNestedInput
     customer?: CustomerUpdateOneWithoutConversationsNestedInput
     messages?: MessageUpdateManyWithoutConversationNestedInput
+    orders?: OrderUpdateManyWithoutConversationNestedInput
   }
 
   export type ConversationUncheckedUpdateInput = {
@@ -31465,10 +33118,12 @@ export namespace Prisma {
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
+    assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     episodes?: ChatEpisodeUncheckedUpdateManyWithoutConversationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutConversationNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutConversationNestedInput
   }
 
   export type ConversationCreateManyInput = {
@@ -31481,6 +33136,7 @@ export namespace Prisma {
     assignedAgent?: string | null
     lastMessageAt?: Date | string | null
     unreadCount?: number
+    assignedEmployeeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31508,6 +33164,7 @@ export namespace Prisma {
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
+    assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31526,6 +33183,7 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: string | null
     sessionId?: string | null
+    responder?: EmployeeCreateNestedOneWithoutRespondedMessagesInput
     conversation: ConversationCreateNestedOneWithoutMessagesInput
   }
 
@@ -31541,6 +33199,7 @@ export namespace Prisma {
     attachmentUrl?: string | null
     createdAt?: Date | string
     attachmentId?: string | null
+    responderId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: string | null
     sessionId?: string | null
@@ -31560,6 +33219,7 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    responder?: EmployeeUpdateOneWithoutRespondedMessagesNestedInput
     conversation?: ConversationUpdateOneRequiredWithoutMessagesNestedInput
   }
 
@@ -31575,6 +33235,7 @@ export namespace Prisma {
     attachmentUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attachmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    responderId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31592,6 +33253,7 @@ export namespace Prisma {
     attachmentUrl?: string | null
     createdAt?: Date | string
     attachmentId?: string | null
+    responderId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: string | null
     sessionId?: string | null
@@ -31625,6 +33287,7 @@ export namespace Prisma {
     attachmentUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attachmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    responderId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31765,6 +33428,9 @@ export namespace Prisma {
     facebookName?: string | null
     lineName?: string | null
     tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    respondedMessages?: MessageCreateNestedManyWithoutResponderInput
+    assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
+    closedOrders?: OrderCreateNestedManyWithoutClosedByInput
   }
 
   export type EmployeeUncheckedCreateInput = {
@@ -31791,6 +33457,9 @@ export namespace Prisma {
     facebookName?: string | null
     lineName?: string | null
     tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
+    assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
+    closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
   }
 
   export type EmployeeUpdateInput = {
@@ -31817,6 +33486,9 @@ export namespace Prisma {
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
+    assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
+    closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
   }
 
   export type EmployeeUncheckedUpdateInput = {
@@ -31843,6 +33515,9 @@ export namespace Prisma {
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
+    assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
+    closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
   }
 
   export type EmployeeCreateManyInput = {
@@ -32049,6 +33724,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -32072,6 +33748,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -32095,6 +33772,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -32118,6 +33796,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -32141,6 +33820,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -32163,6 +33843,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -32184,6 +33865,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -32359,6 +34041,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     variantName?: string | null
     spend?: number
     impressions?: number
@@ -32370,6 +34053,7 @@ export namespace Prisma {
     roas?: number
     dailyMetrics?: AdDailyMetricCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusCreateNestedOneWithoutAdInput
     adSet: AdSetCreateNestedOneWithoutAdsInput
     creative?: AdCreativeCreateNestedOneWithoutAdsInput
     experiment?: ExperimentCreateNestedOneWithoutAdsInput
@@ -32380,6 +34064,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     creativeId?: string | null
     experimentId?: string | null
@@ -32394,6 +34079,7 @@ export namespace Prisma {
     roas?: number
     dailyMetrics?: AdDailyMetricUncheckedCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricUncheckedCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusUncheckedCreateNestedOneWithoutAdInput
   }
 
   export type AdUpdateInput = {
@@ -32401,6 +34087,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
@@ -32412,6 +34099,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUpdateOneWithoutAdNestedInput
     adSet?: AdSetUpdateOneRequiredWithoutAdsNestedInput
     creative?: AdCreativeUpdateOneWithoutAdsNestedInput
     experiment?: ExperimentUpdateOneWithoutAdsNestedInput
@@ -32422,6 +34110,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32436,6 +34125,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUncheckedUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUncheckedUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput
   }
 
   export type AdCreateManyInput = {
@@ -32443,6 +34133,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     creativeId?: string | null
     experimentId?: string | null
@@ -32462,6 +34153,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
@@ -32478,6 +34170,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32490,6 +34183,61 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revenue?: FloatFieldUpdateOperationsInput | number
     roas?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type AdLiveStatusCreateInput = {
+    id?: string
+    lastImpressionTime: Date | string
+    isRunningNow?: boolean
+    updatedAt?: Date | string
+    ad: AdCreateNestedOneWithoutLiveStatusInput
+  }
+
+  export type AdLiveStatusUncheckedCreateInput = {
+    id?: string
+    adId: string
+    lastImpressionTime: Date | string
+    isRunningNow?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type AdLiveStatusUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lastImpressionTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    isRunningNow?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ad?: AdUpdateOneRequiredWithoutLiveStatusNestedInput
+  }
+
+  export type AdLiveStatusUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    adId?: StringFieldUpdateOperationsInput | string
+    lastImpressionTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    isRunningNow?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdLiveStatusCreateManyInput = {
+    id?: string
+    adId: string
+    lastImpressionTime: Date | string
+    isRunningNow?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type AdLiveStatusUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lastImpressionTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    isRunningNow?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdLiveStatusUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    adId?: StringFieldUpdateOperationsInput | string
+    lastImpressionTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    isRunningNow?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AdCreativeCreateInput = {
@@ -33555,6 +35303,16 @@ export namespace Prisma {
     none?: TransactionWhereInput
   }
 
+  export type EmployeeNullableScalarRelationFilter = {
+    is?: EmployeeWhereInput | null
+    isNot?: EmployeeWhereInput | null
+  }
+
+  export type ConversationNullableScalarRelationFilter = {
+    is?: ConversationWhereInput | null
+    isNot?: ConversationWhereInput | null
+  }
+
   export type TransactionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -33570,6 +35328,8 @@ export namespace Prisma {
     items?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    closedById?: SortOrder
+    conversationId?: SortOrder
   }
 
   export type OrderAvgOrderByAggregateInput = {
@@ -33587,6 +35347,8 @@ export namespace Prisma {
     paidAmount?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    closedById?: SortOrder
+    conversationId?: SortOrder
   }
 
   export type OrderMinOrderByAggregateInput = {
@@ -33599,6 +35361,8 @@ export namespace Prisma {
     paidAmount?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    closedById?: SortOrder
+    conversationId?: SortOrder
   }
 
   export type OrderSumOrderByAggregateInput = {
@@ -33794,6 +35558,7 @@ export namespace Prisma {
     assignedAgent?: SortOrder
     lastMessageAt?: SortOrder
     unreadCount?: SortOrder
+    assignedEmployeeId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -33812,6 +35577,7 @@ export namespace Prisma {
     assignedAgent?: SortOrder
     lastMessageAt?: SortOrder
     unreadCount?: SortOrder
+    assignedEmployeeId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -33826,6 +35592,7 @@ export namespace Prisma {
     assignedAgent?: SortOrder
     lastMessageAt?: SortOrder
     unreadCount?: SortOrder
+    assignedEmployeeId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -33856,6 +35623,7 @@ export namespace Prisma {
     attachmentUrl?: SortOrder
     createdAt?: SortOrder
     attachmentId?: SortOrder
+    responderId?: SortOrder
     metadata?: SortOrder
     episodeId?: SortOrder
     sessionId?: SortOrder
@@ -33873,6 +35641,7 @@ export namespace Prisma {
     attachmentUrl?: SortOrder
     createdAt?: SortOrder
     attachmentId?: SortOrder
+    responderId?: SortOrder
     episodeId?: SortOrder
     sessionId?: SortOrder
   }
@@ -33889,6 +35658,7 @@ export namespace Prisma {
     attachmentUrl?: SortOrder
     createdAt?: SortOrder
     attachmentId?: SortOrder
+    responderId?: SortOrder
     episodeId?: SortOrder
     sessionId?: SortOrder
   }
@@ -34152,6 +35922,7 @@ export namespace Prisma {
     name?: SortOrder
     objective?: SortOrder
     status?: SortOrder
+    isVisible?: SortOrder
     spend?: SortOrder
     impressions?: SortOrder
     clicks?: SortOrder
@@ -34184,6 +35955,7 @@ export namespace Prisma {
     name?: SortOrder
     objective?: SortOrder
     status?: SortOrder
+    isVisible?: SortOrder
     spend?: SortOrder
     impressions?: SortOrder
     clicks?: SortOrder
@@ -34205,6 +35977,7 @@ export namespace Prisma {
     name?: SortOrder
     objective?: SortOrder
     status?: SortOrder
+    isVisible?: SortOrder
     spend?: SortOrder
     impressions?: SortOrder
     clicks?: SortOrder
@@ -34336,6 +36109,11 @@ export namespace Prisma {
     none?: AdHourlyMetricWhereInput
   }
 
+  export type AdLiveStatusNullableScalarRelationFilter = {
+    is?: AdLiveStatusWhereInput | null
+    isNot?: AdLiveStatusWhereInput | null
+  }
+
   export type AdSetScalarRelationFilter = {
     is?: AdSetWhereInput
     isNot?: AdSetWhereInput
@@ -34364,6 +36142,7 @@ export namespace Prisma {
     adId?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    deliveryStatus?: SortOrder
     adSetId?: SortOrder
     creativeId?: SortOrder
     experimentId?: SortOrder
@@ -34392,6 +36171,7 @@ export namespace Prisma {
     adId?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    deliveryStatus?: SortOrder
     adSetId?: SortOrder
     creativeId?: SortOrder
     experimentId?: SortOrder
@@ -34411,6 +36191,7 @@ export namespace Prisma {
     adId?: SortOrder
     name?: SortOrder
     status?: SortOrder
+    deliveryStatus?: SortOrder
     adSetId?: SortOrder
     creativeId?: SortOrder
     experimentId?: SortOrder
@@ -34432,6 +36213,35 @@ export namespace Prisma {
     cfr?: SortOrder
     revenue?: SortOrder
     roas?: SortOrder
+  }
+
+  export type AdScalarRelationFilter = {
+    is?: AdWhereInput
+    isNot?: AdWhereInput
+  }
+
+  export type AdLiveStatusCountOrderByAggregateInput = {
+    id?: SortOrder
+    adId?: SortOrder
+    lastImpressionTime?: SortOrder
+    isRunningNow?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdLiveStatusMaxOrderByAggregateInput = {
+    id?: SortOrder
+    adId?: SortOrder
+    lastImpressionTime?: SortOrder
+    isRunningNow?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdLiveStatusMinOrderByAggregateInput = {
+    id?: SortOrder
+    adId?: SortOrder
+    lastImpressionTime?: SortOrder
+    isRunningNow?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type AdCreativeCountOrderByAggregateInput = {
@@ -34510,11 +36320,6 @@ export namespace Prisma {
     conclusion?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type AdScalarRelationFilter = {
-    is?: AdWhereInput
-    isNot?: AdWhereInput
   }
 
   export type AdDailyMetricAdIdDateCompoundUniqueInput = {
@@ -34655,11 +36460,6 @@ export namespace Prisma {
     purchases?: SortOrder
     revenue?: SortOrder
     roas?: SortOrder
-  }
-
-  export type EmployeeNullableScalarRelationFilter = {
-    is?: EmployeeWhereInput | null
-    isNot?: EmployeeWhereInput | null
   }
 
   export type TaskCountOrderByAggregateInput = {
@@ -35087,6 +36887,18 @@ export namespace Prisma {
     connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
   }
 
+  export type EmployeeCreateNestedOneWithoutClosedOrdersInput = {
+    create?: XOR<EmployeeCreateWithoutClosedOrdersInput, EmployeeUncheckedCreateWithoutClosedOrdersInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutClosedOrdersInput
+    connect?: EmployeeWhereUniqueInput
+  }
+
+  export type ConversationCreateNestedOneWithoutOrdersInput = {
+    create?: XOR<ConversationCreateWithoutOrdersInput, ConversationUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: ConversationCreateOrConnectWithoutOrdersInput
+    connect?: ConversationWhereUniqueInput
+  }
+
   export type TransactionUncheckedCreateNestedManyWithoutOrderInput = {
     create?: XOR<TransactionCreateWithoutOrderInput, TransactionUncheckedCreateWithoutOrderInput> | TransactionCreateWithoutOrderInput[] | TransactionUncheckedCreateWithoutOrderInput[]
     connectOrCreate?: TransactionCreateOrConnectWithoutOrderInput | TransactionCreateOrConnectWithoutOrderInput[]
@@ -35114,6 +36926,26 @@ export namespace Prisma {
     update?: TransactionUpdateWithWhereUniqueWithoutOrderInput | TransactionUpdateWithWhereUniqueWithoutOrderInput[]
     updateMany?: TransactionUpdateManyWithWhereWithoutOrderInput | TransactionUpdateManyWithWhereWithoutOrderInput[]
     deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
+  }
+
+  export type EmployeeUpdateOneWithoutClosedOrdersNestedInput = {
+    create?: XOR<EmployeeCreateWithoutClosedOrdersInput, EmployeeUncheckedCreateWithoutClosedOrdersInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutClosedOrdersInput
+    upsert?: EmployeeUpsertWithoutClosedOrdersInput
+    disconnect?: EmployeeWhereInput | boolean
+    delete?: EmployeeWhereInput | boolean
+    connect?: EmployeeWhereUniqueInput
+    update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutClosedOrdersInput, EmployeeUpdateWithoutClosedOrdersInput>, EmployeeUncheckedUpdateWithoutClosedOrdersInput>
+  }
+
+  export type ConversationUpdateOneWithoutOrdersNestedInput = {
+    create?: XOR<ConversationCreateWithoutOrdersInput, ConversationUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: ConversationCreateOrConnectWithoutOrdersInput
+    upsert?: ConversationUpsertWithoutOrdersInput
+    disconnect?: ConversationWhereInput | boolean
+    delete?: ConversationWhereInput | boolean
+    connect?: ConversationWhereUniqueInput
+    update?: XOR<XOR<ConversationUpdateToOneWithWhereWithoutOrdersInput, ConversationUpdateWithoutOrdersInput>, ConversationUncheckedUpdateWithoutOrdersInput>
   }
 
   export type TransactionUncheckedUpdateManyWithoutOrderNestedInput = {
@@ -35172,6 +37004,12 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutTimelineInput, CustomerUpdateWithoutTimelineInput>, CustomerUncheckedUpdateWithoutTimelineInput>
   }
 
+  export type EmployeeCreateNestedOneWithoutAssignedConversationsInput = {
+    create?: XOR<EmployeeCreateWithoutAssignedConversationsInput, EmployeeUncheckedCreateWithoutAssignedConversationsInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutAssignedConversationsInput
+    connect?: EmployeeWhereUniqueInput
+  }
+
   export type ChatEpisodeCreateNestedManyWithoutConversationInput = {
     create?: XOR<ChatEpisodeCreateWithoutConversationInput, ChatEpisodeUncheckedCreateWithoutConversationInput> | ChatEpisodeCreateWithoutConversationInput[] | ChatEpisodeUncheckedCreateWithoutConversationInput[]
     connectOrCreate?: ChatEpisodeCreateOrConnectWithoutConversationInput | ChatEpisodeCreateOrConnectWithoutConversationInput[]
@@ -35192,6 +37030,13 @@ export namespace Prisma {
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
   }
 
+  export type OrderCreateNestedManyWithoutConversationInput = {
+    create?: XOR<OrderCreateWithoutConversationInput, OrderUncheckedCreateWithoutConversationInput> | OrderCreateWithoutConversationInput[] | OrderUncheckedCreateWithoutConversationInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutConversationInput | OrderCreateOrConnectWithoutConversationInput[]
+    createMany?: OrderCreateManyConversationInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
   export type ChatEpisodeUncheckedCreateNestedManyWithoutConversationInput = {
     create?: XOR<ChatEpisodeCreateWithoutConversationInput, ChatEpisodeUncheckedCreateWithoutConversationInput> | ChatEpisodeCreateWithoutConversationInput[] | ChatEpisodeUncheckedCreateWithoutConversationInput[]
     connectOrCreate?: ChatEpisodeCreateOrConnectWithoutConversationInput | ChatEpisodeCreateOrConnectWithoutConversationInput[]
@@ -35204,6 +37049,23 @@ export namespace Prisma {
     connectOrCreate?: MessageCreateOrConnectWithoutConversationInput | MessageCreateOrConnectWithoutConversationInput[]
     createMany?: MessageCreateManyConversationInputEnvelope
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+  }
+
+  export type OrderUncheckedCreateNestedManyWithoutConversationInput = {
+    create?: XOR<OrderCreateWithoutConversationInput, OrderUncheckedCreateWithoutConversationInput> | OrderCreateWithoutConversationInput[] | OrderUncheckedCreateWithoutConversationInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutConversationInput | OrderCreateOrConnectWithoutConversationInput[]
+    createMany?: OrderCreateManyConversationInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
+  export type EmployeeUpdateOneWithoutAssignedConversationsNestedInput = {
+    create?: XOR<EmployeeCreateWithoutAssignedConversationsInput, EmployeeUncheckedCreateWithoutAssignedConversationsInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutAssignedConversationsInput
+    upsert?: EmployeeUpsertWithoutAssignedConversationsInput
+    disconnect?: EmployeeWhereInput | boolean
+    delete?: EmployeeWhereInput | boolean
+    connect?: EmployeeWhereUniqueInput
+    update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutAssignedConversationsInput, EmployeeUpdateWithoutAssignedConversationsInput>, EmployeeUncheckedUpdateWithoutAssignedConversationsInput>
   }
 
   export type ChatEpisodeUpdateManyWithoutConversationNestedInput = {
@@ -35244,6 +37106,20 @@ export namespace Prisma {
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
   }
 
+  export type OrderUpdateManyWithoutConversationNestedInput = {
+    create?: XOR<OrderCreateWithoutConversationInput, OrderUncheckedCreateWithoutConversationInput> | OrderCreateWithoutConversationInput[] | OrderUncheckedCreateWithoutConversationInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutConversationInput | OrderCreateOrConnectWithoutConversationInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutConversationInput | OrderUpsertWithWhereUniqueWithoutConversationInput[]
+    createMany?: OrderCreateManyConversationInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutConversationInput | OrderUpdateWithWhereUniqueWithoutConversationInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutConversationInput | OrderUpdateManyWithWhereWithoutConversationInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
   export type ChatEpisodeUncheckedUpdateManyWithoutConversationNestedInput = {
     create?: XOR<ChatEpisodeCreateWithoutConversationInput, ChatEpisodeUncheckedCreateWithoutConversationInput> | ChatEpisodeCreateWithoutConversationInput[] | ChatEpisodeUncheckedCreateWithoutConversationInput[]
     connectOrCreate?: ChatEpisodeCreateOrConnectWithoutConversationInput | ChatEpisodeCreateOrConnectWithoutConversationInput[]
@@ -35272,6 +37148,26 @@ export namespace Prisma {
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
   }
 
+  export type OrderUncheckedUpdateManyWithoutConversationNestedInput = {
+    create?: XOR<OrderCreateWithoutConversationInput, OrderUncheckedCreateWithoutConversationInput> | OrderCreateWithoutConversationInput[] | OrderUncheckedCreateWithoutConversationInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutConversationInput | OrderCreateOrConnectWithoutConversationInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutConversationInput | OrderUpsertWithWhereUniqueWithoutConversationInput[]
+    createMany?: OrderCreateManyConversationInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutConversationInput | OrderUpdateWithWhereUniqueWithoutConversationInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutConversationInput | OrderUpdateManyWithWhereWithoutConversationInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
+  export type EmployeeCreateNestedOneWithoutRespondedMessagesInput = {
+    create?: XOR<EmployeeCreateWithoutRespondedMessagesInput, EmployeeUncheckedCreateWithoutRespondedMessagesInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutRespondedMessagesInput
+    connect?: EmployeeWhereUniqueInput
+  }
+
   export type ConversationCreateNestedOneWithoutMessagesInput = {
     create?: XOR<ConversationCreateWithoutMessagesInput, ConversationUncheckedCreateWithoutMessagesInput>
     connectOrCreate?: ConversationCreateOrConnectWithoutMessagesInput
@@ -35280,6 +37176,16 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type EmployeeUpdateOneWithoutRespondedMessagesNestedInput = {
+    create?: XOR<EmployeeCreateWithoutRespondedMessagesInput, EmployeeUncheckedCreateWithoutRespondedMessagesInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutRespondedMessagesInput
+    upsert?: EmployeeUpsertWithoutRespondedMessagesInput
+    disconnect?: EmployeeWhereInput | boolean
+    delete?: EmployeeWhereInput | boolean
+    connect?: EmployeeWhereUniqueInput
+    update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutRespondedMessagesInput, EmployeeUpdateWithoutRespondedMessagesInput>, EmployeeUncheckedUpdateWithoutRespondedMessagesInput>
   }
 
   export type ConversationUpdateOneRequiredWithoutMessagesNestedInput = {
@@ -35311,11 +37217,53 @@ export namespace Prisma {
     connect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
   }
 
+  export type MessageCreateNestedManyWithoutResponderInput = {
+    create?: XOR<MessageCreateWithoutResponderInput, MessageUncheckedCreateWithoutResponderInput> | MessageCreateWithoutResponderInput[] | MessageUncheckedCreateWithoutResponderInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutResponderInput | MessageCreateOrConnectWithoutResponderInput[]
+    createMany?: MessageCreateManyResponderInputEnvelope
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+  }
+
+  export type ConversationCreateNestedManyWithoutAssignedEmployeeInput = {
+    create?: XOR<ConversationCreateWithoutAssignedEmployeeInput, ConversationUncheckedCreateWithoutAssignedEmployeeInput> | ConversationCreateWithoutAssignedEmployeeInput[] | ConversationUncheckedCreateWithoutAssignedEmployeeInput[]
+    connectOrCreate?: ConversationCreateOrConnectWithoutAssignedEmployeeInput | ConversationCreateOrConnectWithoutAssignedEmployeeInput[]
+    createMany?: ConversationCreateManyAssignedEmployeeInputEnvelope
+    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+  }
+
+  export type OrderCreateNestedManyWithoutClosedByInput = {
+    create?: XOR<OrderCreateWithoutClosedByInput, OrderUncheckedCreateWithoutClosedByInput> | OrderCreateWithoutClosedByInput[] | OrderUncheckedCreateWithoutClosedByInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutClosedByInput | OrderCreateOrConnectWithoutClosedByInput[]
+    createMany?: OrderCreateManyClosedByInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
   export type TaskUncheckedCreateNestedManyWithoutAssigneeInput = {
     create?: XOR<TaskCreateWithoutAssigneeInput, TaskUncheckedCreateWithoutAssigneeInput> | TaskCreateWithoutAssigneeInput[] | TaskUncheckedCreateWithoutAssigneeInput[]
     connectOrCreate?: TaskCreateOrConnectWithoutAssigneeInput | TaskCreateOrConnectWithoutAssigneeInput[]
     createMany?: TaskCreateManyAssigneeInputEnvelope
     connect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+  }
+
+  export type MessageUncheckedCreateNestedManyWithoutResponderInput = {
+    create?: XOR<MessageCreateWithoutResponderInput, MessageUncheckedCreateWithoutResponderInput> | MessageCreateWithoutResponderInput[] | MessageUncheckedCreateWithoutResponderInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutResponderInput | MessageCreateOrConnectWithoutResponderInput[]
+    createMany?: MessageCreateManyResponderInputEnvelope
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+  }
+
+  export type ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput = {
+    create?: XOR<ConversationCreateWithoutAssignedEmployeeInput, ConversationUncheckedCreateWithoutAssignedEmployeeInput> | ConversationCreateWithoutAssignedEmployeeInput[] | ConversationUncheckedCreateWithoutAssignedEmployeeInput[]
+    connectOrCreate?: ConversationCreateOrConnectWithoutAssignedEmployeeInput | ConversationCreateOrConnectWithoutAssignedEmployeeInput[]
+    createMany?: ConversationCreateManyAssignedEmployeeInputEnvelope
+    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+  }
+
+  export type OrderUncheckedCreateNestedManyWithoutClosedByInput = {
+    create?: XOR<OrderCreateWithoutClosedByInput, OrderUncheckedCreateWithoutClosedByInput> | OrderCreateWithoutClosedByInput[] | OrderUncheckedCreateWithoutClosedByInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutClosedByInput | OrderCreateOrConnectWithoutClosedByInput[]
+    createMany?: OrderCreateManyClosedByInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
   }
 
   export type TaskUpdateManyWithoutAssigneeNestedInput = {
@@ -35332,6 +37280,48 @@ export namespace Prisma {
     deleteMany?: TaskScalarWhereInput | TaskScalarWhereInput[]
   }
 
+  export type MessageUpdateManyWithoutResponderNestedInput = {
+    create?: XOR<MessageCreateWithoutResponderInput, MessageUncheckedCreateWithoutResponderInput> | MessageCreateWithoutResponderInput[] | MessageUncheckedCreateWithoutResponderInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutResponderInput | MessageCreateOrConnectWithoutResponderInput[]
+    upsert?: MessageUpsertWithWhereUniqueWithoutResponderInput | MessageUpsertWithWhereUniqueWithoutResponderInput[]
+    createMany?: MessageCreateManyResponderInputEnvelope
+    set?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    disconnect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    delete?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    update?: MessageUpdateWithWhereUniqueWithoutResponderInput | MessageUpdateWithWhereUniqueWithoutResponderInput[]
+    updateMany?: MessageUpdateManyWithWhereWithoutResponderInput | MessageUpdateManyWithWhereWithoutResponderInput[]
+    deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
+  }
+
+  export type ConversationUpdateManyWithoutAssignedEmployeeNestedInput = {
+    create?: XOR<ConversationCreateWithoutAssignedEmployeeInput, ConversationUncheckedCreateWithoutAssignedEmployeeInput> | ConversationCreateWithoutAssignedEmployeeInput[] | ConversationUncheckedCreateWithoutAssignedEmployeeInput[]
+    connectOrCreate?: ConversationCreateOrConnectWithoutAssignedEmployeeInput | ConversationCreateOrConnectWithoutAssignedEmployeeInput[]
+    upsert?: ConversationUpsertWithWhereUniqueWithoutAssignedEmployeeInput | ConversationUpsertWithWhereUniqueWithoutAssignedEmployeeInput[]
+    createMany?: ConversationCreateManyAssignedEmployeeInputEnvelope
+    set?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    disconnect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    delete?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    update?: ConversationUpdateWithWhereUniqueWithoutAssignedEmployeeInput | ConversationUpdateWithWhereUniqueWithoutAssignedEmployeeInput[]
+    updateMany?: ConversationUpdateManyWithWhereWithoutAssignedEmployeeInput | ConversationUpdateManyWithWhereWithoutAssignedEmployeeInput[]
+    deleteMany?: ConversationScalarWhereInput | ConversationScalarWhereInput[]
+  }
+
+  export type OrderUpdateManyWithoutClosedByNestedInput = {
+    create?: XOR<OrderCreateWithoutClosedByInput, OrderUncheckedCreateWithoutClosedByInput> | OrderCreateWithoutClosedByInput[] | OrderUncheckedCreateWithoutClosedByInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutClosedByInput | OrderCreateOrConnectWithoutClosedByInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutClosedByInput | OrderUpsertWithWhereUniqueWithoutClosedByInput[]
+    createMany?: OrderCreateManyClosedByInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutClosedByInput | OrderUpdateWithWhereUniqueWithoutClosedByInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutClosedByInput | OrderUpdateManyWithWhereWithoutClosedByInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
   export type TaskUncheckedUpdateManyWithoutAssigneeNestedInput = {
     create?: XOR<TaskCreateWithoutAssigneeInput, TaskUncheckedCreateWithoutAssigneeInput> | TaskCreateWithoutAssigneeInput[] | TaskUncheckedCreateWithoutAssigneeInput[]
     connectOrCreate?: TaskCreateOrConnectWithoutAssigneeInput | TaskCreateOrConnectWithoutAssigneeInput[]
@@ -35344,6 +37334,48 @@ export namespace Prisma {
     update?: TaskUpdateWithWhereUniqueWithoutAssigneeInput | TaskUpdateWithWhereUniqueWithoutAssigneeInput[]
     updateMany?: TaskUpdateManyWithWhereWithoutAssigneeInput | TaskUpdateManyWithWhereWithoutAssigneeInput[]
     deleteMany?: TaskScalarWhereInput | TaskScalarWhereInput[]
+  }
+
+  export type MessageUncheckedUpdateManyWithoutResponderNestedInput = {
+    create?: XOR<MessageCreateWithoutResponderInput, MessageUncheckedCreateWithoutResponderInput> | MessageCreateWithoutResponderInput[] | MessageUncheckedCreateWithoutResponderInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutResponderInput | MessageCreateOrConnectWithoutResponderInput[]
+    upsert?: MessageUpsertWithWhereUniqueWithoutResponderInput | MessageUpsertWithWhereUniqueWithoutResponderInput[]
+    createMany?: MessageCreateManyResponderInputEnvelope
+    set?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    disconnect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    delete?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    update?: MessageUpdateWithWhereUniqueWithoutResponderInput | MessageUpdateWithWhereUniqueWithoutResponderInput[]
+    updateMany?: MessageUpdateManyWithWhereWithoutResponderInput | MessageUpdateManyWithWhereWithoutResponderInput[]
+    deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
+  }
+
+  export type ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput = {
+    create?: XOR<ConversationCreateWithoutAssignedEmployeeInput, ConversationUncheckedCreateWithoutAssignedEmployeeInput> | ConversationCreateWithoutAssignedEmployeeInput[] | ConversationUncheckedCreateWithoutAssignedEmployeeInput[]
+    connectOrCreate?: ConversationCreateOrConnectWithoutAssignedEmployeeInput | ConversationCreateOrConnectWithoutAssignedEmployeeInput[]
+    upsert?: ConversationUpsertWithWhereUniqueWithoutAssignedEmployeeInput | ConversationUpsertWithWhereUniqueWithoutAssignedEmployeeInput[]
+    createMany?: ConversationCreateManyAssignedEmployeeInputEnvelope
+    set?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    disconnect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    delete?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+    update?: ConversationUpdateWithWhereUniqueWithoutAssignedEmployeeInput | ConversationUpdateWithWhereUniqueWithoutAssignedEmployeeInput[]
+    updateMany?: ConversationUpdateManyWithWhereWithoutAssignedEmployeeInput | ConversationUpdateManyWithWhereWithoutAssignedEmployeeInput[]
+    deleteMany?: ConversationScalarWhereInput | ConversationScalarWhereInput[]
+  }
+
+  export type OrderUncheckedUpdateManyWithoutClosedByNestedInput = {
+    create?: XOR<OrderCreateWithoutClosedByInput, OrderUncheckedCreateWithoutClosedByInput> | OrderCreateWithoutClosedByInput[] | OrderUncheckedCreateWithoutClosedByInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutClosedByInput | OrderCreateOrConnectWithoutClosedByInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutClosedByInput | OrderUpsertWithWhereUniqueWithoutClosedByInput[]
+    createMany?: OrderCreateManyClosedByInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutClosedByInput | OrderUpdateWithWhereUniqueWithoutClosedByInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutClosedByInput | OrderUpdateManyWithWhereWithoutClosedByInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
   }
 
   export type CartItemCreateNestedManyWithoutProductInput = {
@@ -35574,6 +37606,12 @@ export namespace Prisma {
     connect?: AdHourlyMetricWhereUniqueInput | AdHourlyMetricWhereUniqueInput[]
   }
 
+  export type AdLiveStatusCreateNestedOneWithoutAdInput = {
+    create?: XOR<AdLiveStatusCreateWithoutAdInput, AdLiveStatusUncheckedCreateWithoutAdInput>
+    connectOrCreate?: AdLiveStatusCreateOrConnectWithoutAdInput
+    connect?: AdLiveStatusWhereUniqueInput
+  }
+
   export type AdSetCreateNestedOneWithoutAdsInput = {
     create?: XOR<AdSetCreateWithoutAdsInput, AdSetUncheckedCreateWithoutAdsInput>
     connectOrCreate?: AdSetCreateOrConnectWithoutAdsInput
@@ -35606,6 +37644,12 @@ export namespace Prisma {
     connect?: AdHourlyMetricWhereUniqueInput | AdHourlyMetricWhereUniqueInput[]
   }
 
+  export type AdLiveStatusUncheckedCreateNestedOneWithoutAdInput = {
+    create?: XOR<AdLiveStatusCreateWithoutAdInput, AdLiveStatusUncheckedCreateWithoutAdInput>
+    connectOrCreate?: AdLiveStatusCreateOrConnectWithoutAdInput
+    connect?: AdLiveStatusWhereUniqueInput
+  }
+
   export type AdDailyMetricUpdateManyWithoutAdNestedInput = {
     create?: XOR<AdDailyMetricCreateWithoutAdInput, AdDailyMetricUncheckedCreateWithoutAdInput> | AdDailyMetricCreateWithoutAdInput[] | AdDailyMetricUncheckedCreateWithoutAdInput[]
     connectOrCreate?: AdDailyMetricCreateOrConnectWithoutAdInput | AdDailyMetricCreateOrConnectWithoutAdInput[]
@@ -35632,6 +37676,16 @@ export namespace Prisma {
     update?: AdHourlyMetricUpdateWithWhereUniqueWithoutAdInput | AdHourlyMetricUpdateWithWhereUniqueWithoutAdInput[]
     updateMany?: AdHourlyMetricUpdateManyWithWhereWithoutAdInput | AdHourlyMetricUpdateManyWithWhereWithoutAdInput[]
     deleteMany?: AdHourlyMetricScalarWhereInput | AdHourlyMetricScalarWhereInput[]
+  }
+
+  export type AdLiveStatusUpdateOneWithoutAdNestedInput = {
+    create?: XOR<AdLiveStatusCreateWithoutAdInput, AdLiveStatusUncheckedCreateWithoutAdInput>
+    connectOrCreate?: AdLiveStatusCreateOrConnectWithoutAdInput
+    upsert?: AdLiveStatusUpsertWithoutAdInput
+    disconnect?: AdLiveStatusWhereInput | boolean
+    delete?: AdLiveStatusWhereInput | boolean
+    connect?: AdLiveStatusWhereUniqueInput
+    update?: XOR<XOR<AdLiveStatusUpdateToOneWithWhereWithoutAdInput, AdLiveStatusUpdateWithoutAdInput>, AdLiveStatusUncheckedUpdateWithoutAdInput>
   }
 
   export type AdSetUpdateOneRequiredWithoutAdsNestedInput = {
@@ -35688,6 +37742,30 @@ export namespace Prisma {
     update?: AdHourlyMetricUpdateWithWhereUniqueWithoutAdInput | AdHourlyMetricUpdateWithWhereUniqueWithoutAdInput[]
     updateMany?: AdHourlyMetricUpdateManyWithWhereWithoutAdInput | AdHourlyMetricUpdateManyWithWhereWithoutAdInput[]
     deleteMany?: AdHourlyMetricScalarWhereInput | AdHourlyMetricScalarWhereInput[]
+  }
+
+  export type AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput = {
+    create?: XOR<AdLiveStatusCreateWithoutAdInput, AdLiveStatusUncheckedCreateWithoutAdInput>
+    connectOrCreate?: AdLiveStatusCreateOrConnectWithoutAdInput
+    upsert?: AdLiveStatusUpsertWithoutAdInput
+    disconnect?: AdLiveStatusWhereInput | boolean
+    delete?: AdLiveStatusWhereInput | boolean
+    connect?: AdLiveStatusWhereUniqueInput
+    update?: XOR<XOR<AdLiveStatusUpdateToOneWithWhereWithoutAdInput, AdLiveStatusUpdateWithoutAdInput>, AdLiveStatusUncheckedUpdateWithoutAdInput>
+  }
+
+  export type AdCreateNestedOneWithoutLiveStatusInput = {
+    create?: XOR<AdCreateWithoutLiveStatusInput, AdUncheckedCreateWithoutLiveStatusInput>
+    connectOrCreate?: AdCreateOrConnectWithoutLiveStatusInput
+    connect?: AdWhereUniqueInput
+  }
+
+  export type AdUpdateOneRequiredWithoutLiveStatusNestedInput = {
+    create?: XOR<AdCreateWithoutLiveStatusInput, AdUncheckedCreateWithoutLiveStatusInput>
+    connectOrCreate?: AdCreateOrConnectWithoutLiveStatusInput
+    upsert?: AdUpsertWithoutLiveStatusInput
+    connect?: AdWhereUniqueInput
+    update?: XOR<XOR<AdUpdateToOneWithWhereWithoutLiveStatusInput, AdUpdateWithoutLiveStatusInput>, AdUncheckedUpdateWithoutLiveStatusInput>
   }
 
   export type AdCreateNestedManyWithoutCreativeInput = {
@@ -36178,8 +38256,10 @@ export namespace Prisma {
     unreadCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    assignedEmployee?: EmployeeCreateNestedOneWithoutAssignedConversationsInput
     episodes?: ChatEpisodeCreateNestedManyWithoutConversationInput
     messages?: MessageCreateNestedManyWithoutConversationInput
+    orders?: OrderCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationUncheckedCreateWithoutCustomerInput = {
@@ -36191,10 +38271,12 @@ export namespace Prisma {
     assignedAgent?: string | null
     lastMessageAt?: Date | string | null
     unreadCount?: number
+    assignedEmployeeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     episodes?: ChatEpisodeUncheckedCreateNestedManyWithoutConversationInput
     messages?: MessageUncheckedCreateNestedManyWithoutConversationInput
+    orders?: OrderUncheckedCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationCreateOrConnectWithoutCustomerInput = {
@@ -36252,6 +38334,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: TransactionCreateNestedManyWithoutOrderInput
+    closedBy?: EmployeeCreateNestedOneWithoutClosedOrdersInput
+    conversation?: ConversationCreateNestedOneWithoutOrdersInput
   }
 
   export type OrderUncheckedCreateWithoutCustomerInput = {
@@ -36264,6 +38348,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    closedById?: string | null
+    conversationId?: string | null
     transactions?: TransactionUncheckedCreateNestedManyWithoutOrderInput
   }
 
@@ -36408,6 +38494,7 @@ export namespace Prisma {
     assignedAgent?: StringNullableFilter<"Conversation"> | string | null
     lastMessageAt?: DateTimeNullableFilter<"Conversation"> | Date | string | null
     unreadCount?: IntFilter<"Conversation"> | number
+    assignedEmployeeId?: StringNullableFilter<"Conversation"> | string | null
     createdAt?: DateTimeFilter<"Conversation"> | Date | string
     updatedAt?: DateTimeFilter<"Conversation"> | Date | string
   }
@@ -36474,6 +38561,8 @@ export namespace Prisma {
     items?: JsonFilter<"Order">
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    closedById?: StringNullableFilter<"Order"> | string | null
+    conversationId?: StringNullableFilter<"Order"> | string | null
   }
 
   export type TaskUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -36654,6 +38743,106 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type EmployeeCreateWithoutClosedOrdersInput = {
+    id?: string
+    employeeId: string
+    agentId?: string | null
+    firstName: string
+    lastName: string
+    nickName?: string | null
+    role?: string
+    department?: string | null
+    profilePicture?: string | null
+    status?: string
+    joinDate?: Date | string | null
+    email: string
+    phonePrimary?: string | null
+    lineId?: string | null
+    passwordHash: string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: string | null
+    lineName?: string | null
+    tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    respondedMessages?: MessageCreateNestedManyWithoutResponderInput
+    assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
+  }
+
+  export type EmployeeUncheckedCreateWithoutClosedOrdersInput = {
+    id?: string
+    employeeId: string
+    agentId?: string | null
+    firstName: string
+    lastName: string
+    nickName?: string | null
+    role?: string
+    department?: string | null
+    profilePicture?: string | null
+    status?: string
+    joinDate?: Date | string | null
+    email: string
+    phonePrimary?: string | null
+    lineId?: string | null
+    passwordHash: string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: string | null
+    lineName?: string | null
+    tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
+    assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
+  }
+
+  export type EmployeeCreateOrConnectWithoutClosedOrdersInput = {
+    where: EmployeeWhereUniqueInput
+    create: XOR<EmployeeCreateWithoutClosedOrdersInput, EmployeeUncheckedCreateWithoutClosedOrdersInput>
+  }
+
+  export type ConversationCreateWithoutOrdersInput = {
+    id?: string
+    conversationId: string
+    channel?: string
+    participantName?: string | null
+    participantId?: string | null
+    assignedAgent?: string | null
+    lastMessageAt?: Date | string | null
+    unreadCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignedEmployee?: EmployeeCreateNestedOneWithoutAssignedConversationsInput
+    episodes?: ChatEpisodeCreateNestedManyWithoutConversationInput
+    customer?: CustomerCreateNestedOneWithoutConversationsInput
+    messages?: MessageCreateNestedManyWithoutConversationInput
+  }
+
+  export type ConversationUncheckedCreateWithoutOrdersInput = {
+    id?: string
+    conversationId: string
+    customerId?: string | null
+    channel?: string
+    participantName?: string | null
+    participantId?: string | null
+    assignedAgent?: string | null
+    lastMessageAt?: Date | string | null
+    unreadCount?: number
+    assignedEmployeeId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    episodes?: ChatEpisodeUncheckedCreateNestedManyWithoutConversationInput
+    messages?: MessageUncheckedCreateNestedManyWithoutConversationInput
+  }
+
+  export type ConversationCreateOrConnectWithoutOrdersInput = {
+    where: ConversationWhereUniqueInput
+    create: XOR<ConversationCreateWithoutOrdersInput, ConversationUncheckedCreateWithoutOrdersInput>
+  }
+
   export type CustomerUpsertWithoutOrdersInput = {
     update: XOR<CustomerUpdateWithoutOrdersInput, CustomerUncheckedUpdateWithoutOrdersInput>
     create: XOR<CustomerCreateWithoutOrdersInput, CustomerUncheckedCreateWithoutOrdersInput>
@@ -36766,6 +38955,118 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
   }
 
+  export type EmployeeUpsertWithoutClosedOrdersInput = {
+    update: XOR<EmployeeUpdateWithoutClosedOrdersInput, EmployeeUncheckedUpdateWithoutClosedOrdersInput>
+    create: XOR<EmployeeCreateWithoutClosedOrdersInput, EmployeeUncheckedCreateWithoutClosedOrdersInput>
+    where?: EmployeeWhereInput
+  }
+
+  export type EmployeeUpdateToOneWithWhereWithoutClosedOrdersInput = {
+    where?: EmployeeWhereInput
+    data: XOR<EmployeeUpdateWithoutClosedOrdersInput, EmployeeUncheckedUpdateWithoutClosedOrdersInput>
+  }
+
+  export type EmployeeUpdateWithoutClosedOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    employeeId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nickName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
+    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
+    assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
+  }
+
+  export type EmployeeUncheckedUpdateWithoutClosedOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    employeeId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nickName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
+    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
+    assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
+  }
+
+  export type ConversationUpsertWithoutOrdersInput = {
+    update: XOR<ConversationUpdateWithoutOrdersInput, ConversationUncheckedUpdateWithoutOrdersInput>
+    create: XOR<ConversationCreateWithoutOrdersInput, ConversationUncheckedCreateWithoutOrdersInput>
+    where?: ConversationWhereInput
+  }
+
+  export type ConversationUpdateToOneWithWhereWithoutOrdersInput = {
+    where?: ConversationWhereInput
+    data: XOR<ConversationUpdateWithoutOrdersInput, ConversationUncheckedUpdateWithoutOrdersInput>
+  }
+
+  export type ConversationUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    channel?: StringFieldUpdateOperationsInput | string
+    participantName?: NullableStringFieldUpdateOperationsInput | string | null
+    participantId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unreadCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedEmployee?: EmployeeUpdateOneWithoutAssignedConversationsNestedInput
+    episodes?: ChatEpisodeUpdateManyWithoutConversationNestedInput
+    customer?: CustomerUpdateOneWithoutConversationsNestedInput
+    messages?: MessageUpdateManyWithoutConversationNestedInput
+  }
+
+  export type ConversationUncheckedUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    channel?: StringFieldUpdateOperationsInput | string
+    participantName?: NullableStringFieldUpdateOperationsInput | string | null
+    participantId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unreadCount?: IntFieldUpdateOperationsInput | number
+    assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodes?: ChatEpisodeUncheckedUpdateManyWithoutConversationNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutConversationNestedInput
+  }
+
   export type OrderCreateWithoutTransactionsInput = {
     id?: string
     orderId: string
@@ -36777,6 +39078,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     customer: CustomerCreateNestedOneWithoutOrdersInput
+    closedBy?: EmployeeCreateNestedOneWithoutClosedOrdersInput
+    conversation?: ConversationCreateNestedOneWithoutOrdersInput
   }
 
   export type OrderUncheckedCreateWithoutTransactionsInput = {
@@ -36790,6 +39093,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    closedById?: string | null
+    conversationId?: string | null
   }
 
   export type OrderCreateOrConnectWithoutTransactionsInput = {
@@ -36819,6 +39124,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: CustomerUpdateOneRequiredWithoutOrdersNestedInput
+    closedBy?: EmployeeUpdateOneWithoutClosedOrdersNestedInput
+    conversation?: ConversationUpdateOneWithoutOrdersNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutTransactionsInput = {
@@ -36832,6 +39139,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedById?: NullableStringFieldUpdateOperationsInput | string | null
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CustomerCreateWithoutInventoryInput = {
@@ -37130,6 +39439,67 @@ export namespace Prisma {
     tasks?: TaskUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
+  export type EmployeeCreateWithoutAssignedConversationsInput = {
+    id?: string
+    employeeId: string
+    agentId?: string | null
+    firstName: string
+    lastName: string
+    nickName?: string | null
+    role?: string
+    department?: string | null
+    profilePicture?: string | null
+    status?: string
+    joinDate?: Date | string | null
+    email: string
+    phonePrimary?: string | null
+    lineId?: string | null
+    passwordHash: string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: string | null
+    lineName?: string | null
+    tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    respondedMessages?: MessageCreateNestedManyWithoutResponderInput
+    closedOrders?: OrderCreateNestedManyWithoutClosedByInput
+  }
+
+  export type EmployeeUncheckedCreateWithoutAssignedConversationsInput = {
+    id?: string
+    employeeId: string
+    agentId?: string | null
+    firstName: string
+    lastName: string
+    nickName?: string | null
+    role?: string
+    department?: string | null
+    profilePicture?: string | null
+    status?: string
+    joinDate?: Date | string | null
+    email: string
+    phonePrimary?: string | null
+    lineId?: string | null
+    passwordHash: string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: string | null
+    lineName?: string | null
+    tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
+    closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
+  }
+
+  export type EmployeeCreateOrConnectWithoutAssignedConversationsInput = {
+    where: EmployeeWhereUniqueInput
+    create: XOR<EmployeeCreateWithoutAssignedConversationsInput, EmployeeUncheckedCreateWithoutAssignedConversationsInput>
+  }
+
   export type ChatEpisodeCreateWithoutConversationInput = {
     id?: string
     episodicId: string
@@ -37255,6 +39625,7 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: string | null
     sessionId?: string | null
+    responder?: EmployeeCreateNestedOneWithoutRespondedMessagesInput
   }
 
   export type MessageUncheckedCreateWithoutConversationInput = {
@@ -37268,6 +39639,7 @@ export namespace Prisma {
     attachmentUrl?: string | null
     createdAt?: Date | string
     attachmentId?: string | null
+    responderId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: string | null
     sessionId?: string | null
@@ -37281,6 +39653,113 @@ export namespace Prisma {
   export type MessageCreateManyConversationInputEnvelope = {
     data: MessageCreateManyConversationInput | MessageCreateManyConversationInput[]
     skipDuplicates?: boolean
+  }
+
+  export type OrderCreateWithoutConversationInput = {
+    id?: string
+    orderId: string
+    date: Date | string
+    status?: string
+    totalAmount: number
+    paidAmount?: number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer: CustomerCreateNestedOneWithoutOrdersInput
+    transactions?: TransactionCreateNestedManyWithoutOrderInput
+    closedBy?: EmployeeCreateNestedOneWithoutClosedOrdersInput
+  }
+
+  export type OrderUncheckedCreateWithoutConversationInput = {
+    id?: string
+    orderId: string
+    customerId: string
+    date: Date | string
+    status?: string
+    totalAmount: number
+    paidAmount?: number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedById?: string | null
+    transactions?: TransactionUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderCreateOrConnectWithoutConversationInput = {
+    where: OrderWhereUniqueInput
+    create: XOR<OrderCreateWithoutConversationInput, OrderUncheckedCreateWithoutConversationInput>
+  }
+
+  export type OrderCreateManyConversationInputEnvelope = {
+    data: OrderCreateManyConversationInput | OrderCreateManyConversationInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type EmployeeUpsertWithoutAssignedConversationsInput = {
+    update: XOR<EmployeeUpdateWithoutAssignedConversationsInput, EmployeeUncheckedUpdateWithoutAssignedConversationsInput>
+    create: XOR<EmployeeCreateWithoutAssignedConversationsInput, EmployeeUncheckedCreateWithoutAssignedConversationsInput>
+    where?: EmployeeWhereInput
+  }
+
+  export type EmployeeUpdateToOneWithWhereWithoutAssignedConversationsInput = {
+    where?: EmployeeWhereInput
+    data: XOR<EmployeeUpdateWithoutAssignedConversationsInput, EmployeeUncheckedUpdateWithoutAssignedConversationsInput>
+  }
+
+  export type EmployeeUpdateWithoutAssignedConversationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    employeeId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nickName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
+    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
+    closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
+  }
+
+  export type EmployeeUncheckedUpdateWithoutAssignedConversationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    employeeId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nickName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
+    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
+    closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
   }
 
   export type ChatEpisodeUpsertWithWhereUniqueWithoutConversationInput = {
@@ -37426,9 +39905,87 @@ export namespace Prisma {
     attachmentUrl?: StringNullableFilter<"Message"> | string | null
     createdAt?: DateTimeFilter<"Message"> | Date | string
     attachmentId?: StringNullableFilter<"Message"> | string | null
+    responderId?: StringNullableFilter<"Message"> | string | null
     metadata?: JsonNullableFilter<"Message">
     episodeId?: StringNullableFilter<"Message"> | string | null
     sessionId?: StringNullableFilter<"Message"> | string | null
+  }
+
+  export type OrderUpsertWithWhereUniqueWithoutConversationInput = {
+    where: OrderWhereUniqueInput
+    update: XOR<OrderUpdateWithoutConversationInput, OrderUncheckedUpdateWithoutConversationInput>
+    create: XOR<OrderCreateWithoutConversationInput, OrderUncheckedCreateWithoutConversationInput>
+  }
+
+  export type OrderUpdateWithWhereUniqueWithoutConversationInput = {
+    where: OrderWhereUniqueInput
+    data: XOR<OrderUpdateWithoutConversationInput, OrderUncheckedUpdateWithoutConversationInput>
+  }
+
+  export type OrderUpdateManyWithWhereWithoutConversationInput = {
+    where: OrderScalarWhereInput
+    data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutConversationInput>
+  }
+
+  export type EmployeeCreateWithoutRespondedMessagesInput = {
+    id?: string
+    employeeId: string
+    agentId?: string | null
+    firstName: string
+    lastName: string
+    nickName?: string | null
+    role?: string
+    department?: string | null
+    profilePicture?: string | null
+    status?: string
+    joinDate?: Date | string | null
+    email: string
+    phonePrimary?: string | null
+    lineId?: string | null
+    passwordHash: string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: string | null
+    lineName?: string | null
+    tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
+    closedOrders?: OrderCreateNestedManyWithoutClosedByInput
+  }
+
+  export type EmployeeUncheckedCreateWithoutRespondedMessagesInput = {
+    id?: string
+    employeeId: string
+    agentId?: string | null
+    firstName: string
+    lastName: string
+    nickName?: string | null
+    role?: string
+    department?: string | null
+    profilePicture?: string | null
+    status?: string
+    joinDate?: Date | string | null
+    email: string
+    phonePrimary?: string | null
+    lineId?: string | null
+    passwordHash: string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: string | null
+    lineName?: string | null
+    tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
+    closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
+  }
+
+  export type EmployeeCreateOrConnectWithoutRespondedMessagesInput = {
+    where: EmployeeWhereUniqueInput
+    create: XOR<EmployeeCreateWithoutRespondedMessagesInput, EmployeeUncheckedCreateWithoutRespondedMessagesInput>
   }
 
   export type ConversationCreateWithoutMessagesInput = {
@@ -37442,8 +39999,10 @@ export namespace Prisma {
     unreadCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    assignedEmployee?: EmployeeCreateNestedOneWithoutAssignedConversationsInput
     episodes?: ChatEpisodeCreateNestedManyWithoutConversationInput
     customer?: CustomerCreateNestedOneWithoutConversationsInput
+    orders?: OrderCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationUncheckedCreateWithoutMessagesInput = {
@@ -37456,14 +40015,83 @@ export namespace Prisma {
     assignedAgent?: string | null
     lastMessageAt?: Date | string | null
     unreadCount?: number
+    assignedEmployeeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     episodes?: ChatEpisodeUncheckedCreateNestedManyWithoutConversationInput
+    orders?: OrderUncheckedCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationCreateOrConnectWithoutMessagesInput = {
     where: ConversationWhereUniqueInput
     create: XOR<ConversationCreateWithoutMessagesInput, ConversationUncheckedCreateWithoutMessagesInput>
+  }
+
+  export type EmployeeUpsertWithoutRespondedMessagesInput = {
+    update: XOR<EmployeeUpdateWithoutRespondedMessagesInput, EmployeeUncheckedUpdateWithoutRespondedMessagesInput>
+    create: XOR<EmployeeCreateWithoutRespondedMessagesInput, EmployeeUncheckedCreateWithoutRespondedMessagesInput>
+    where?: EmployeeWhereInput
+  }
+
+  export type EmployeeUpdateToOneWithWhereWithoutRespondedMessagesInput = {
+    where?: EmployeeWhereInput
+    data: XOR<EmployeeUpdateWithoutRespondedMessagesInput, EmployeeUncheckedUpdateWithoutRespondedMessagesInput>
+  }
+
+  export type EmployeeUpdateWithoutRespondedMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    employeeId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nickName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
+    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
+    closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
+  }
+
+  export type EmployeeUncheckedUpdateWithoutRespondedMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    employeeId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    nickName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
+    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    performance?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
+    closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
   }
 
   export type ConversationUpsertWithoutMessagesInput = {
@@ -37488,8 +40116,10 @@ export namespace Prisma {
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedEmployee?: EmployeeUpdateOneWithoutAssignedConversationsNestedInput
     episodes?: ChatEpisodeUpdateManyWithoutConversationNestedInput
     customer?: CustomerUpdateOneWithoutConversationsNestedInput
+    orders?: OrderUpdateManyWithoutConversationNestedInput
   }
 
   export type ConversationUncheckedUpdateWithoutMessagesInput = {
@@ -37502,9 +40132,11 @@ export namespace Prisma {
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
+    assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     episodes?: ChatEpisodeUncheckedUpdateManyWithoutConversationNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutConversationNestedInput
   }
 
   export type ConversationCreateWithoutEpisodesInput = {
@@ -37518,8 +40150,10 @@ export namespace Prisma {
     unreadCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    assignedEmployee?: EmployeeCreateNestedOneWithoutAssignedConversationsInput
     customer?: CustomerCreateNestedOneWithoutConversationsInput
     messages?: MessageCreateNestedManyWithoutConversationInput
+    orders?: OrderCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationUncheckedCreateWithoutEpisodesInput = {
@@ -37532,9 +40166,11 @@ export namespace Prisma {
     assignedAgent?: string | null
     lastMessageAt?: Date | string | null
     unreadCount?: number
+    assignedEmployeeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: MessageUncheckedCreateNestedManyWithoutConversationInput
+    orders?: OrderUncheckedCreateNestedManyWithoutConversationInput
   }
 
   export type ConversationCreateOrConnectWithoutEpisodesInput = {
@@ -37564,8 +40200,10 @@ export namespace Prisma {
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedEmployee?: EmployeeUpdateOneWithoutAssignedConversationsNestedInput
     customer?: CustomerUpdateOneWithoutConversationsNestedInput
     messages?: MessageUpdateManyWithoutConversationNestedInput
+    orders?: OrderUpdateManyWithoutConversationNestedInput
   }
 
   export type ConversationUncheckedUpdateWithoutEpisodesInput = {
@@ -37578,9 +40216,11 @@ export namespace Prisma {
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
+    assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: MessageUncheckedUpdateManyWithoutConversationNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutConversationNestedInput
   }
 
   export type TaskCreateWithoutAssigneeInput = {
@@ -37627,6 +40267,134 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type MessageCreateWithoutResponderInput = {
+    id?: string
+    messageId: string
+    fromName?: string | null
+    fromId?: string | null
+    content?: string | null
+    hasAttachment?: boolean
+    attachmentType?: string | null
+    attachmentUrl?: string | null
+    createdAt?: Date | string
+    attachmentId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    episodeId?: string | null
+    sessionId?: string | null
+    conversation: ConversationCreateNestedOneWithoutMessagesInput
+  }
+
+  export type MessageUncheckedCreateWithoutResponderInput = {
+    id?: string
+    messageId: string
+    conversationId: string
+    fromName?: string | null
+    fromId?: string | null
+    content?: string | null
+    hasAttachment?: boolean
+    attachmentType?: string | null
+    attachmentUrl?: string | null
+    createdAt?: Date | string
+    attachmentId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    episodeId?: string | null
+    sessionId?: string | null
+  }
+
+  export type MessageCreateOrConnectWithoutResponderInput = {
+    where: MessageWhereUniqueInput
+    create: XOR<MessageCreateWithoutResponderInput, MessageUncheckedCreateWithoutResponderInput>
+  }
+
+  export type MessageCreateManyResponderInputEnvelope = {
+    data: MessageCreateManyResponderInput | MessageCreateManyResponderInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ConversationCreateWithoutAssignedEmployeeInput = {
+    id?: string
+    conversationId: string
+    channel?: string
+    participantName?: string | null
+    participantId?: string | null
+    assignedAgent?: string | null
+    lastMessageAt?: Date | string | null
+    unreadCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    episodes?: ChatEpisodeCreateNestedManyWithoutConversationInput
+    customer?: CustomerCreateNestedOneWithoutConversationsInput
+    messages?: MessageCreateNestedManyWithoutConversationInput
+    orders?: OrderCreateNestedManyWithoutConversationInput
+  }
+
+  export type ConversationUncheckedCreateWithoutAssignedEmployeeInput = {
+    id?: string
+    conversationId: string
+    customerId?: string | null
+    channel?: string
+    participantName?: string | null
+    participantId?: string | null
+    assignedAgent?: string | null
+    lastMessageAt?: Date | string | null
+    unreadCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    episodes?: ChatEpisodeUncheckedCreateNestedManyWithoutConversationInput
+    messages?: MessageUncheckedCreateNestedManyWithoutConversationInput
+    orders?: OrderUncheckedCreateNestedManyWithoutConversationInput
+  }
+
+  export type ConversationCreateOrConnectWithoutAssignedEmployeeInput = {
+    where: ConversationWhereUniqueInput
+    create: XOR<ConversationCreateWithoutAssignedEmployeeInput, ConversationUncheckedCreateWithoutAssignedEmployeeInput>
+  }
+
+  export type ConversationCreateManyAssignedEmployeeInputEnvelope = {
+    data: ConversationCreateManyAssignedEmployeeInput | ConversationCreateManyAssignedEmployeeInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OrderCreateWithoutClosedByInput = {
+    id?: string
+    orderId: string
+    date: Date | string
+    status?: string
+    totalAmount: number
+    paidAmount?: number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer: CustomerCreateNestedOneWithoutOrdersInput
+    transactions?: TransactionCreateNestedManyWithoutOrderInput
+    conversation?: ConversationCreateNestedOneWithoutOrdersInput
+  }
+
+  export type OrderUncheckedCreateWithoutClosedByInput = {
+    id?: string
+    orderId: string
+    customerId: string
+    date: Date | string
+    status?: string
+    totalAmount: number
+    paidAmount?: number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    conversationId?: string | null
+    transactions?: TransactionUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderCreateOrConnectWithoutClosedByInput = {
+    where: OrderWhereUniqueInput
+    create: XOR<OrderCreateWithoutClosedByInput, OrderUncheckedCreateWithoutClosedByInput>
+  }
+
+  export type OrderCreateManyClosedByInputEnvelope = {
+    data: OrderCreateManyClosedByInput | OrderCreateManyClosedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TaskUpsertWithWhereUniqueWithoutAssigneeInput = {
     where: TaskWhereUniqueInput
     update: XOR<TaskUpdateWithoutAssigneeInput, TaskUncheckedUpdateWithoutAssigneeInput>
@@ -37641,6 +40409,54 @@ export namespace Prisma {
   export type TaskUpdateManyWithWhereWithoutAssigneeInput = {
     where: TaskScalarWhereInput
     data: XOR<TaskUpdateManyMutationInput, TaskUncheckedUpdateManyWithoutAssigneeInput>
+  }
+
+  export type MessageUpsertWithWhereUniqueWithoutResponderInput = {
+    where: MessageWhereUniqueInput
+    update: XOR<MessageUpdateWithoutResponderInput, MessageUncheckedUpdateWithoutResponderInput>
+    create: XOR<MessageCreateWithoutResponderInput, MessageUncheckedCreateWithoutResponderInput>
+  }
+
+  export type MessageUpdateWithWhereUniqueWithoutResponderInput = {
+    where: MessageWhereUniqueInput
+    data: XOR<MessageUpdateWithoutResponderInput, MessageUncheckedUpdateWithoutResponderInput>
+  }
+
+  export type MessageUpdateManyWithWhereWithoutResponderInput = {
+    where: MessageScalarWhereInput
+    data: XOR<MessageUpdateManyMutationInput, MessageUncheckedUpdateManyWithoutResponderInput>
+  }
+
+  export type ConversationUpsertWithWhereUniqueWithoutAssignedEmployeeInput = {
+    where: ConversationWhereUniqueInput
+    update: XOR<ConversationUpdateWithoutAssignedEmployeeInput, ConversationUncheckedUpdateWithoutAssignedEmployeeInput>
+    create: XOR<ConversationCreateWithoutAssignedEmployeeInput, ConversationUncheckedCreateWithoutAssignedEmployeeInput>
+  }
+
+  export type ConversationUpdateWithWhereUniqueWithoutAssignedEmployeeInput = {
+    where: ConversationWhereUniqueInput
+    data: XOR<ConversationUpdateWithoutAssignedEmployeeInput, ConversationUncheckedUpdateWithoutAssignedEmployeeInput>
+  }
+
+  export type ConversationUpdateManyWithWhereWithoutAssignedEmployeeInput = {
+    where: ConversationScalarWhereInput
+    data: XOR<ConversationUpdateManyMutationInput, ConversationUncheckedUpdateManyWithoutAssignedEmployeeInput>
+  }
+
+  export type OrderUpsertWithWhereUniqueWithoutClosedByInput = {
+    where: OrderWhereUniqueInput
+    update: XOR<OrderUpdateWithoutClosedByInput, OrderUncheckedUpdateWithoutClosedByInput>
+    create: XOR<OrderCreateWithoutClosedByInput, OrderUncheckedCreateWithoutClosedByInput>
+  }
+
+  export type OrderUpdateWithWhereUniqueWithoutClosedByInput = {
+    where: OrderWhereUniqueInput
+    data: XOR<OrderUpdateWithoutClosedByInput, OrderUncheckedUpdateWithoutClosedByInput>
+  }
+
+  export type OrderUpdateManyWithWhereWithoutClosedByInput = {
+    where: OrderScalarWhereInput
+    data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutClosedByInput>
   }
 
   export type CartItemCreateWithoutProductInput = {
@@ -37808,6 +40624,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -37830,6 +40647,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -37881,6 +40699,7 @@ export namespace Prisma {
     name?: StringFilter<"Campaign"> | string
     objective?: StringNullableFilter<"Campaign"> | string | null
     status?: StringFilter<"Campaign"> | string
+    isVisible?: BoolFilter<"Campaign"> | boolean
     spend?: FloatFilter<"Campaign"> | number
     impressions?: IntFilter<"Campaign"> | number
     clicks?: IntFilter<"Campaign"> | number
@@ -37903,6 +40722,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -37925,6 +40745,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -37951,6 +40772,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     variantName?: string | null
     spend?: number
     impressions?: number
@@ -37962,6 +40784,7 @@ export namespace Prisma {
     roas?: number
     dailyMetrics?: AdDailyMetricCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusCreateNestedOneWithoutAdInput
     creative?: AdCreativeCreateNestedOneWithoutAdsInput
     experiment?: ExperimentCreateNestedOneWithoutAdsInput
   }
@@ -37971,6 +40794,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     creativeId?: string | null
     experimentId?: string | null
     variantName?: string | null
@@ -37984,6 +40808,7 @@ export namespace Prisma {
     roas?: number
     dailyMetrics?: AdDailyMetricUncheckedCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricUncheckedCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusUncheckedCreateNestedOneWithoutAdInput
   }
 
   export type AdCreateOrConnectWithoutAdSetInput = {
@@ -38013,6 +40838,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -38035,6 +40861,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -38075,6 +40902,7 @@ export namespace Prisma {
     adId?: StringFilter<"Ad"> | string
     name?: StringFilter<"Ad"> | string
     status?: StringFilter<"Ad"> | string
+    deliveryStatus?: StringNullableFilter<"Ad"> | string | null
     adSetId?: StringFilter<"Ad"> | string
     creativeId?: StringNullableFilter<"Ad"> | string | null
     experimentId?: StringNullableFilter<"Ad"> | string | null
@@ -38161,6 +40989,25 @@ export namespace Prisma {
   export type AdHourlyMetricCreateManyAdInputEnvelope = {
     data: AdHourlyMetricCreateManyAdInput | AdHourlyMetricCreateManyAdInput[]
     skipDuplicates?: boolean
+  }
+
+  export type AdLiveStatusCreateWithoutAdInput = {
+    id?: string
+    lastImpressionTime: Date | string
+    isRunningNow?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type AdLiveStatusUncheckedCreateWithoutAdInput = {
+    id?: string
+    lastImpressionTime: Date | string
+    isRunningNow?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type AdLiveStatusCreateOrConnectWithoutAdInput = {
+    where: AdLiveStatusWhereUniqueInput
+    create: XOR<AdLiveStatusCreateWithoutAdInput, AdLiveStatusUncheckedCreateWithoutAdInput>
   }
 
   export type AdSetCreateWithoutAdsInput = {
@@ -38321,6 +41168,31 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"AdHourlyMetric"> | Date | string
   }
 
+  export type AdLiveStatusUpsertWithoutAdInput = {
+    update: XOR<AdLiveStatusUpdateWithoutAdInput, AdLiveStatusUncheckedUpdateWithoutAdInput>
+    create: XOR<AdLiveStatusCreateWithoutAdInput, AdLiveStatusUncheckedCreateWithoutAdInput>
+    where?: AdLiveStatusWhereInput
+  }
+
+  export type AdLiveStatusUpdateToOneWithWhereWithoutAdInput = {
+    where?: AdLiveStatusWhereInput
+    data: XOR<AdLiveStatusUpdateWithoutAdInput, AdLiveStatusUncheckedUpdateWithoutAdInput>
+  }
+
+  export type AdLiveStatusUpdateWithoutAdInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lastImpressionTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    isRunningNow?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdLiveStatusUncheckedUpdateWithoutAdInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lastImpressionTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    isRunningNow?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AdSetUpsertWithoutAdsInput = {
     update: XOR<AdSetUpdateWithoutAdsInput, AdSetUncheckedUpdateWithoutAdsInput>
     create: XOR<AdSetCreateWithoutAdsInput, AdSetUncheckedCreateWithoutAdsInput>
@@ -38430,11 +41302,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type AdCreateWithoutCreativeInput = {
+  export type AdCreateWithoutLiveStatusInput = {
     id?: string
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     variantName?: string | null
     spend?: number
     impressions?: number
@@ -38447,6 +41320,111 @@ export namespace Prisma {
     dailyMetrics?: AdDailyMetricCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricCreateNestedManyWithoutAdInput
     adSet: AdSetCreateNestedOneWithoutAdsInput
+    creative?: AdCreativeCreateNestedOneWithoutAdsInput
+    experiment?: ExperimentCreateNestedOneWithoutAdsInput
+  }
+
+  export type AdUncheckedCreateWithoutLiveStatusInput = {
+    id?: string
+    adId: string
+    name: string
+    status: string
+    deliveryStatus?: string | null
+    adSetId: string
+    creativeId?: string | null
+    experimentId?: string | null
+    variantName?: string | null
+    spend?: number
+    impressions?: number
+    clicks?: number
+    cfr?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    revenue?: number
+    roas?: number
+    dailyMetrics?: AdDailyMetricUncheckedCreateNestedManyWithoutAdInput
+    hourlyMetrics?: AdHourlyMetricUncheckedCreateNestedManyWithoutAdInput
+  }
+
+  export type AdCreateOrConnectWithoutLiveStatusInput = {
+    where: AdWhereUniqueInput
+    create: XOR<AdCreateWithoutLiveStatusInput, AdUncheckedCreateWithoutLiveStatusInput>
+  }
+
+  export type AdUpsertWithoutLiveStatusInput = {
+    update: XOR<AdUpdateWithoutLiveStatusInput, AdUncheckedUpdateWithoutLiveStatusInput>
+    create: XOR<AdCreateWithoutLiveStatusInput, AdUncheckedCreateWithoutLiveStatusInput>
+    where?: AdWhereInput
+  }
+
+  export type AdUpdateToOneWithWhereWithoutLiveStatusInput = {
+    where?: AdWhereInput
+    data: XOR<AdUpdateWithoutLiveStatusInput, AdUncheckedUpdateWithoutLiveStatusInput>
+  }
+
+  export type AdUpdateWithoutLiveStatusInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    adId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    spend?: FloatFieldUpdateOperationsInput | number
+    impressions?: IntFieldUpdateOperationsInput | number
+    clicks?: IntFieldUpdateOperationsInput | number
+    cfr?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revenue?: FloatFieldUpdateOperationsInput | number
+    roas?: FloatFieldUpdateOperationsInput | number
+    dailyMetrics?: AdDailyMetricUpdateManyWithoutAdNestedInput
+    hourlyMetrics?: AdHourlyMetricUpdateManyWithoutAdNestedInput
+    adSet?: AdSetUpdateOneRequiredWithoutAdsNestedInput
+    creative?: AdCreativeUpdateOneWithoutAdsNestedInput
+    experiment?: ExperimentUpdateOneWithoutAdsNestedInput
+  }
+
+  export type AdUncheckedUpdateWithoutLiveStatusInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    adId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    adSetId?: StringFieldUpdateOperationsInput | string
+    creativeId?: NullableStringFieldUpdateOperationsInput | string | null
+    experimentId?: NullableStringFieldUpdateOperationsInput | string | null
+    variantName?: NullableStringFieldUpdateOperationsInput | string | null
+    spend?: FloatFieldUpdateOperationsInput | number
+    impressions?: IntFieldUpdateOperationsInput | number
+    clicks?: IntFieldUpdateOperationsInput | number
+    cfr?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revenue?: FloatFieldUpdateOperationsInput | number
+    roas?: FloatFieldUpdateOperationsInput | number
+    dailyMetrics?: AdDailyMetricUncheckedUpdateManyWithoutAdNestedInput
+    hourlyMetrics?: AdHourlyMetricUncheckedUpdateManyWithoutAdNestedInput
+  }
+
+  export type AdCreateWithoutCreativeInput = {
+    id?: string
+    adId: string
+    name: string
+    status: string
+    deliveryStatus?: string | null
+    variantName?: string | null
+    spend?: number
+    impressions?: number
+    clicks?: number
+    cfr?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    revenue?: number
+    roas?: number
+    dailyMetrics?: AdDailyMetricCreateNestedManyWithoutAdInput
+    hourlyMetrics?: AdHourlyMetricCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusCreateNestedOneWithoutAdInput
+    adSet: AdSetCreateNestedOneWithoutAdsInput
     experiment?: ExperimentCreateNestedOneWithoutAdsInput
   }
 
@@ -38455,6 +41433,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     experimentId?: string | null
     variantName?: string | null
@@ -38468,6 +41447,7 @@ export namespace Prisma {
     roas?: number
     dailyMetrics?: AdDailyMetricUncheckedCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricUncheckedCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusUncheckedCreateNestedOneWithoutAdInput
   }
 
   export type AdCreateOrConnectWithoutCreativeInput = {
@@ -38501,6 +41481,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     variantName?: string | null
     spend?: number
     impressions?: number
@@ -38512,6 +41493,7 @@ export namespace Prisma {
     roas?: number
     dailyMetrics?: AdDailyMetricCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusCreateNestedOneWithoutAdInput
     adSet: AdSetCreateNestedOneWithoutAdsInput
     creative?: AdCreativeCreateNestedOneWithoutAdsInput
   }
@@ -38521,6 +41503,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     creativeId?: string | null
     variantName?: string | null
@@ -38534,6 +41517,7 @@ export namespace Prisma {
     roas?: number
     dailyMetrics?: AdDailyMetricUncheckedCreateNestedManyWithoutAdInput
     hourlyMetrics?: AdHourlyMetricUncheckedCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusUncheckedCreateNestedOneWithoutAdInput
   }
 
   export type AdCreateOrConnectWithoutExperimentInput = {
@@ -38567,6 +41551,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     variantName?: string | null
     spend?: number
     impressions?: number
@@ -38577,6 +41562,7 @@ export namespace Prisma {
     revenue?: number
     roas?: number
     hourlyMetrics?: AdHourlyMetricCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusCreateNestedOneWithoutAdInput
     adSet: AdSetCreateNestedOneWithoutAdsInput
     creative?: AdCreativeCreateNestedOneWithoutAdsInput
     experiment?: ExperimentCreateNestedOneWithoutAdsInput
@@ -38587,6 +41573,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     creativeId?: string | null
     experimentId?: string | null
@@ -38600,6 +41587,7 @@ export namespace Prisma {
     revenue?: number
     roas?: number
     hourlyMetrics?: AdHourlyMetricUncheckedCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusUncheckedCreateNestedOneWithoutAdInput
   }
 
   export type AdCreateOrConnectWithoutDailyMetricsInput = {
@@ -38623,6 +41611,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
@@ -38633,6 +41622,7 @@ export namespace Prisma {
     revenue?: FloatFieldUpdateOperationsInput | number
     roas?: FloatFieldUpdateOperationsInput | number
     hourlyMetrics?: AdHourlyMetricUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUpdateOneWithoutAdNestedInput
     adSet?: AdSetUpdateOneRequiredWithoutAdsNestedInput
     creative?: AdCreativeUpdateOneWithoutAdsNestedInput
     experiment?: ExperimentUpdateOneWithoutAdsNestedInput
@@ -38643,6 +41633,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -38656,6 +41647,7 @@ export namespace Prisma {
     revenue?: FloatFieldUpdateOperationsInput | number
     roas?: FloatFieldUpdateOperationsInput | number
     hourlyMetrics?: AdHourlyMetricUncheckedUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput
   }
 
   export type AdCreateWithoutHourlyMetricsInput = {
@@ -38663,6 +41655,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     variantName?: string | null
     spend?: number
     impressions?: number
@@ -38673,6 +41666,7 @@ export namespace Prisma {
     revenue?: number
     roas?: number
     dailyMetrics?: AdDailyMetricCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusCreateNestedOneWithoutAdInput
     adSet: AdSetCreateNestedOneWithoutAdsInput
     creative?: AdCreativeCreateNestedOneWithoutAdsInput
     experiment?: ExperimentCreateNestedOneWithoutAdsInput
@@ -38683,6 +41677,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     creativeId?: string | null
     experimentId?: string | null
@@ -38696,6 +41691,7 @@ export namespace Prisma {
     revenue?: number
     roas?: number
     dailyMetrics?: AdDailyMetricUncheckedCreateNestedManyWithoutAdInput
+    liveStatus?: AdLiveStatusUncheckedCreateNestedOneWithoutAdInput
   }
 
   export type AdCreateOrConnectWithoutHourlyMetricsInput = {
@@ -38719,6 +41715,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
@@ -38729,6 +41726,7 @@ export namespace Prisma {
     revenue?: FloatFieldUpdateOperationsInput | number
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUpdateOneWithoutAdNestedInput
     adSet?: AdSetUpdateOneRequiredWithoutAdsNestedInput
     creative?: AdCreativeUpdateOneWithoutAdsNestedInput
     experiment?: ExperimentUpdateOneWithoutAdsNestedInput
@@ -38739,6 +41737,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -38752,6 +41751,7 @@ export namespace Prisma {
     revenue?: FloatFieldUpdateOperationsInput | number
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUncheckedUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput
   }
 
   export type EmployeeCreateWithoutTasksInput = {
@@ -38777,6 +41777,9 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
     lineName?: string | null
+    respondedMessages?: MessageCreateNestedManyWithoutResponderInput
+    assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
+    closedOrders?: OrderCreateNestedManyWithoutClosedByInput
   }
 
   export type EmployeeUncheckedCreateWithoutTasksInput = {
@@ -38802,6 +41805,9 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
     lineName?: string | null
+    respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
+    assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
+    closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
   }
 
   export type EmployeeCreateOrConnectWithoutTasksInput = {
@@ -38914,6 +41920,9 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
+    assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
+    closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutTasksInput = {
@@ -38939,6 +41948,9 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
+    respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
+    assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
+    closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
   }
 
   export type CustomerUpsertWithoutTasksInput = {
@@ -39267,6 +42279,7 @@ export namespace Prisma {
     assignedAgent?: string | null
     lastMessageAt?: Date | string | null
     unreadCount?: number
+    assignedEmployeeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39293,6 +42306,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    closedById?: string | null
+    conversationId?: string | null
   }
 
   export type TaskCreateManyCustomerInput = {
@@ -39357,8 +42372,10 @@ export namespace Prisma {
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedEmployee?: EmployeeUpdateOneWithoutAssignedConversationsNestedInput
     episodes?: ChatEpisodeUpdateManyWithoutConversationNestedInput
     messages?: MessageUpdateManyWithoutConversationNestedInput
+    orders?: OrderUpdateManyWithoutConversationNestedInput
   }
 
   export type ConversationUncheckedUpdateWithoutCustomerInput = {
@@ -39370,10 +42387,12 @@ export namespace Prisma {
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
+    assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     episodes?: ChatEpisodeUncheckedUpdateManyWithoutConversationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutConversationNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutConversationNestedInput
   }
 
   export type ConversationUncheckedUpdateManyWithoutCustomerInput = {
@@ -39385,6 +42404,7 @@ export namespace Prisma {
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
+    assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39436,6 +42456,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUpdateManyWithoutOrderNestedInput
+    closedBy?: EmployeeUpdateOneWithoutClosedOrdersNestedInput
+    conversation?: ConversationUpdateOneWithoutOrdersNestedInput
   }
 
   export type OrderUncheckedUpdateWithoutCustomerInput = {
@@ -39448,6 +42470,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedById?: NullableStringFieldUpdateOperationsInput | string | null
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     transactions?: TransactionUncheckedUpdateManyWithoutOrderNestedInput
   }
 
@@ -39461,6 +42485,8 @@ export namespace Prisma {
     items?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedById?: NullableStringFieldUpdateOperationsInput | string | null
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskUpdateWithoutCustomerInput = {
@@ -39630,9 +42656,24 @@ export namespace Prisma {
     attachmentUrl?: string | null
     createdAt?: Date | string
     attachmentId?: string | null
+    responderId?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: string | null
     sessionId?: string | null
+  }
+
+  export type OrderCreateManyConversationInput = {
+    id?: string
+    orderId: string
+    customerId: string
+    date: Date | string
+    status?: string
+    totalAmount: number
+    paidAmount?: number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedById?: string | null
   }
 
   export type ChatEpisodeUpdateWithoutConversationInput = {
@@ -39694,6 +42735,7 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    responder?: EmployeeUpdateOneWithoutRespondedMessagesNestedInput
   }
 
   export type MessageUncheckedUpdateWithoutConversationInput = {
@@ -39707,6 +42749,7 @@ export namespace Prisma {
     attachmentUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attachmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    responderId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39723,9 +42766,54 @@ export namespace Prisma {
     attachmentUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attachmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    responderId?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     episodeId?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type OrderUpdateWithoutConversationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    paidAmount?: FloatFieldUpdateOperationsInput | number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneRequiredWithoutOrdersNestedInput
+    transactions?: TransactionUpdateManyWithoutOrderNestedInput
+    closedBy?: EmployeeUpdateOneWithoutClosedOrdersNestedInput
+  }
+
+  export type OrderUncheckedUpdateWithoutConversationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    paidAmount?: FloatFieldUpdateOperationsInput | number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedById?: NullableStringFieldUpdateOperationsInput | string | null
+    transactions?: TransactionUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateManyWithoutConversationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    paidAmount?: FloatFieldUpdateOperationsInput | number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedById?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskCreateManyAssigneeInput = {
@@ -39743,6 +42831,51 @@ export namespace Prisma {
     aiContext?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type MessageCreateManyResponderInput = {
+    id?: string
+    messageId: string
+    conversationId: string
+    fromName?: string | null
+    fromId?: string | null
+    content?: string | null
+    hasAttachment?: boolean
+    attachmentType?: string | null
+    attachmentUrl?: string | null
+    createdAt?: Date | string
+    attachmentId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    episodeId?: string | null
+    sessionId?: string | null
+  }
+
+  export type ConversationCreateManyAssignedEmployeeInput = {
+    id?: string
+    conversationId: string
+    customerId?: string | null
+    channel?: string
+    participantName?: string | null
+    participantId?: string | null
+    assignedAgent?: string | null
+    lastMessageAt?: Date | string | null
+    unreadCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OrderCreateManyClosedByInput = {
+    id?: string
+    orderId: string
+    customerId: string
+    date: Date | string
+    status?: string
+    totalAmount: number
+    paidAmount?: number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    conversationId?: string | null
   }
 
   export type TaskUpdateWithoutAssigneeInput = {
@@ -39794,6 +42927,149 @@ export namespace Prisma {
     aiContext?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MessageUpdateWithoutResponderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    messageId?: StringFieldUpdateOperationsInput | string
+    fromName?: NullableStringFieldUpdateOperationsInput | string | null
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: NullableStringFieldUpdateOperationsInput | string | null
+    hasAttachment?: BoolFieldUpdateOperationsInput | boolean
+    attachmentType?: NullableStringFieldUpdateOperationsInput | string | null
+    attachmentUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attachmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    episodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    conversation?: ConversationUpdateOneRequiredWithoutMessagesNestedInput
+  }
+
+  export type MessageUncheckedUpdateWithoutResponderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    messageId?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    fromName?: NullableStringFieldUpdateOperationsInput | string | null
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: NullableStringFieldUpdateOperationsInput | string | null
+    hasAttachment?: BoolFieldUpdateOperationsInput | boolean
+    attachmentType?: NullableStringFieldUpdateOperationsInput | string | null
+    attachmentUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attachmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    episodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MessageUncheckedUpdateManyWithoutResponderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    messageId?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    fromName?: NullableStringFieldUpdateOperationsInput | string | null
+    fromId?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: NullableStringFieldUpdateOperationsInput | string | null
+    hasAttachment?: BoolFieldUpdateOperationsInput | boolean
+    attachmentType?: NullableStringFieldUpdateOperationsInput | string | null
+    attachmentUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attachmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    episodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ConversationUpdateWithoutAssignedEmployeeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    channel?: StringFieldUpdateOperationsInput | string
+    participantName?: NullableStringFieldUpdateOperationsInput | string | null
+    participantId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unreadCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodes?: ChatEpisodeUpdateManyWithoutConversationNestedInput
+    customer?: CustomerUpdateOneWithoutConversationsNestedInput
+    messages?: MessageUpdateManyWithoutConversationNestedInput
+    orders?: OrderUpdateManyWithoutConversationNestedInput
+  }
+
+  export type ConversationUncheckedUpdateWithoutAssignedEmployeeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    channel?: StringFieldUpdateOperationsInput | string
+    participantName?: NullableStringFieldUpdateOperationsInput | string | null
+    participantId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unreadCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    episodes?: ChatEpisodeUncheckedUpdateManyWithoutConversationNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutConversationNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutConversationNestedInput
+  }
+
+  export type ConversationUncheckedUpdateManyWithoutAssignedEmployeeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    channel?: StringFieldUpdateOperationsInput | string
+    participantName?: NullableStringFieldUpdateOperationsInput | string | null
+    participantId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unreadCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OrderUpdateWithoutClosedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    paidAmount?: FloatFieldUpdateOperationsInput | number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneRequiredWithoutOrdersNestedInput
+    transactions?: TransactionUpdateManyWithoutOrderNestedInput
+    conversation?: ConversationUpdateOneWithoutOrdersNestedInput
+  }
+
+  export type OrderUncheckedUpdateWithoutClosedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    paidAmount?: FloatFieldUpdateOperationsInput | number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
+    transactions?: TransactionUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateManyWithoutClosedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    paidAmount?: FloatFieldUpdateOperationsInput | number
+    items?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CartItemCreateManyProductInput = {
@@ -39880,6 +43156,7 @@ export namespace Prisma {
     name: string
     objective?: string | null
     status?: string
+    isVisible?: boolean
     spend?: number
     impressions?: number
     clicks?: number
@@ -39901,6 +43178,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -39923,6 +43201,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -39945,6 +43224,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     objective?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
     clicks?: IntFieldUpdateOperationsInput | number
@@ -39965,6 +43245,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     creativeId?: string | null
     experimentId?: string | null
     variantName?: string | null
@@ -39983,6 +43264,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
@@ -39994,6 +43276,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUpdateOneWithoutAdNestedInput
     creative?: AdCreativeUpdateOneWithoutAdsNestedInput
     experiment?: ExperimentUpdateOneWithoutAdsNestedInput
   }
@@ -40003,6 +43286,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40016,6 +43300,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUncheckedUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUncheckedUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput
   }
 
   export type AdUncheckedUpdateManyWithoutAdSetInput = {
@@ -40023,6 +43308,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40149,6 +43435,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     experimentId?: string | null
     variantName?: string | null
@@ -40167,6 +43454,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
@@ -40178,6 +43466,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUpdateOneWithoutAdNestedInput
     adSet?: AdSetUpdateOneRequiredWithoutAdsNestedInput
     experiment?: ExperimentUpdateOneWithoutAdsNestedInput
   }
@@ -40187,6 +43476,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40200,6 +43490,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUncheckedUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUncheckedUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput
   }
 
   export type AdUncheckedUpdateManyWithoutCreativeInput = {
@@ -40207,6 +43498,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     experimentId?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40225,6 +43517,7 @@ export namespace Prisma {
     adId: string
     name: string
     status: string
+    deliveryStatus?: string | null
     adSetId: string
     creativeId?: string | null
     variantName?: string | null
@@ -40243,6 +43536,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
     spend?: FloatFieldUpdateOperationsInput | number
     impressions?: IntFieldUpdateOperationsInput | number
@@ -40254,6 +43548,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUpdateOneWithoutAdNestedInput
     adSet?: AdSetUpdateOneRequiredWithoutAdsNestedInput
     creative?: AdCreativeUpdateOneWithoutAdsNestedInput
   }
@@ -40263,6 +43558,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40276,6 +43572,7 @@ export namespace Prisma {
     roas?: FloatFieldUpdateOperationsInput | number
     dailyMetrics?: AdDailyMetricUncheckedUpdateManyWithoutAdNestedInput
     hourlyMetrics?: AdHourlyMetricUncheckedUpdateManyWithoutAdNestedInput
+    liveStatus?: AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput
   }
 
   export type AdUncheckedUpdateManyWithoutExperimentInput = {
@@ -40283,6 +43580,7 @@ export namespace Prisma {
     adId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    deliveryStatus?: NullableStringFieldUpdateOperationsInput | string | null
     adSetId?: StringFieldUpdateOperationsInput | string
     creativeId?: NullableStringFieldUpdateOperationsInput | string | null
     variantName?: NullableStringFieldUpdateOperationsInput | string | null

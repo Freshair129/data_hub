@@ -92,10 +92,11 @@ export default function EmployeeManagement({ employees, customers = [], onRefres
         const full = `${emp.firstName} ${emp.lastName}`;
         const facebook = emp.facebookName;
         const aliases = emp.metadata?.aliases || [];
-        const nameKeys = [nick, full, emp.firstName, facebook, ...aliases].filter(Boolean);
+        // T8 Fix: Case-insensitive agent matching
+        const nameKeys = [nick, full, emp.firstName, facebook, ...aliases].filter(Boolean).map(v => v.toLowerCase());
 
         const assignedCustomers = customers.filter(c => {
-            const agent = c.agent || c.intelligence?.agent || 'Unassigned';
+            const agent = (c.agent || c.intelligence?.agent || 'Unassigned').toLowerCase();
             return nameKeys.includes(agent);
         });
 

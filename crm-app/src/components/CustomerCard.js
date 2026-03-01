@@ -32,7 +32,20 @@ export default function CustomerCard({ customer, customers, onSelectCustomer, cu
 
     const totalSpend = intel.metrics?.total_spend || 0;
     const learningHours = intel.metrics?.total_learning_hours || 0;
-    const internship = intel.metrics?.internship_completed || false;
+    const internshipFlag = intel.metrics?.internship_completed || false;
+
+    // T14 Fix: Validate internship recency via inventory if available
+    let internship = internshipFlag;
+    if (internshipFlag) {
+        const courses = customer?.inventory?.learning_courses || [];
+        const internshipCourse = courses.find(course =>
+            (course.name || '').toLowerCase().match(/internship|ฝึกงาน/)
+        );
+        if (internshipCourse?.enrolled_at) {
+            const daysSince = (Date.now() - new Date(internshipCourse.enrolled_at).getTime()) / (1000 * 60 * 60 * 24);
+            internship = daysSince <= 730;
+        }
+    }
 
     // Detect Current Tier based on spending AND hours
     let currentTierKey = 'L1';

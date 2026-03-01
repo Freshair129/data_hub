@@ -17,6 +17,10 @@ We will adopt the **TVS-CUS** standard for all customers.
     - `LN`: LINE
     - `WB`: Web/Direct
     - `WL`: Walk-in
+    - `IG`: Instagram
+    - `TK`: TikTok
+    - `PH`: Phone
+    - `OT`: Other
 - **`YEAR`**: Year of registration (2 digits, e.g., `26` for 2026)
 - **`SERIAL`**: 4-digit sequential number (e.g., `0001` to `9999`)
 
