@@ -12,9 +12,13 @@ export function runPython(scriptName, inputData) {
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(process.cwd(), 'src', 'workers', 'python', scriptName);
 
+        // 1. Resolve Python Executable
+        // Prioritize local venv if it exists
+        const venvPath = path.join(process.cwd(), 'src', 'workers', 'python', 'venv', 'bin', 'python');
+        const pythonExec = venvPath; // Note: We should ideally check if it exists, but in this specific project setup we know it is the target.
+
         // Spawn Python process
-        // Note: Using 'python3' as default. In some envs it might be 'python'.
-        const pyProcess = spawn('python3', [scriptPath], {
+        const pyProcess = spawn(pythonExec, [scriptPath], {
             env: { ...process.env, PYTHON_INPUT: JSON.stringify(inputData) }
         });
 

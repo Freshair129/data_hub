@@ -19,9 +19,19 @@ export async function GET(request) {
         const range = searchParams.get('range') || 'last_30d';
         const status = searchParams.get('status') || '';
 
+        // ── Find Latest Data Date ──
+        let baseDate = new Date();
+        const latestMetric = await prisma.adDailyMetric.findFirst({
+            orderBy: { date: 'desc' },
+            select: { date: true }
+        });
+        if (latestMetric && latestMetric.date) {
+            baseDate = new Date(latestMetric.date);
+        }
+
         // Date range calculation (same pattern as campaigns/route.js)
         let startDate, endDate;
-        const now = new Date();
+        const now = new Date(baseDate);
         endDate = new Date(now);
         startDate = new Date(now);
 

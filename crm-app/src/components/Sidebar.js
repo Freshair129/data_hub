@@ -22,6 +22,7 @@ const menuGroups = [
         items: [
             { id: 'analytics', icon: 'fa-chart-line', label: 'Analytics' },
             { id: 'team-kpi', icon: 'fa-chart-network', label: 'Team KPI' },
+            { id: 'admin-performance', icon: 'fa-stopwatch', label: 'Admin Perf.' },
             { id: 'facebook-ads', icon: 'fa-bullhorn', label: 'Facebook Ads' },
             { id: 'facebook-chat', icon: 'fa-comments', label: 'Inbox' },
             { id: 'campaign-tracking', icon: 'fa-crosshairs', label: 'Campaign Tracking' }

@@ -18,6 +18,7 @@ import SlipVerificationPanel from '@/components/SlipVerificationPanel';
 import CampaignTracking from '@/components/CampaignTracking';
 import EmployeeManagement from '@/components/EmployeeManagement';
 import TeamKPI from '@/components/TeamKPI';
+import AdminPerformance from '@/components/AdminPerformance';
 
 export default function Home() {
     const [activeView, setActiveView] = useState('customers');
@@ -628,6 +629,9 @@ export default function Home() {
                             setCustomerViewMode('list');
                         }}
                     />
+                )}
+                {activeView === 'admin-performance' && (
+                    <AdminPerformance />
                 )}
                 {activeView === 'employees' && (
                     <EmployeeManagement

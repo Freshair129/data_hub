@@ -41,6 +41,10 @@ Implementation in `crm-app/src/lib/db.js` ensures high availability by falling b
 - **Consistency (Cron):** `instrumentation.js` runs a full reconciliation hourly (:10) to ensure data integrity.
 - **Efficient UI:** High-frequency polling has been replaced by event-driven updates, reducing API overhead and preventing rate limiting.
 
+### 5. Inbox Prioritization (ADR-022)
+- **Star System:** Real-time starring of conversations with dual-sync across PostgreSQL and local JSON cache. Starred chats dynamically float to the top of the inbox to ensure urgent lead follow-ups.
+- **Streamlined Filtering:** Optimized sidebar by removing legacy date filters in favor of agent-based and priority-based (Starred) sorting.
+
 ## 📂 Key Directory Structure
 
 - `crm-app/`: Main Next.js application.

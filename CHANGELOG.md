@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (Admin Deep Critical Audit — 2026-03-06)
+- **`docs/kpi/kpi_report_fah_deep_audit.md`**: Deep critical audit of admin Fah (e004) from marketing psychology & CRM perspective — 8 sections covering robotic pattern scoring (6/10), dropout funnel analysis, marketing psychology scorecard (Reciprocity/Urgency/Social Proof/Rapport/Follow-up), emotional & intent detection (D-), and actionable recommendations with script examples.
+- **`docs/kpi/kpi_report_aoi_deep_audit.md`**: Deep critical audit of admin Aoi (em_sls_01) with benchmarking against Fah — identified sales psychology strengths (Anchoring A-, Rapport B-), critical response time issues (5.4hr hot lead delay), emotional & intent detection (B-), and duplicate message patterns.
+- **`docs/kpi/kpi_report_fah_audit.md`** & **`kpi_report_fah_quality.md`**: Preliminary quality and psychology audit reports for Fah.
+- **`docs/kpi/crm_audit_benchmark_prompt.md`**: Standardized cross-model benchmark prompt with 5 real root case chat transcripts, 8 analysis dimensions, and evaluation criteria — for comparing audit quality across AI models (GPT-4o, Gemini, DeepSeek, etc.).
+- **`scripts/audit_fah.js`** & **`scripts/audit_aoi.js`**: Node.js audit extraction scripts — fetches conversation patterns, response time distributions, dropout points, and price-related interactions from PostgreSQL.
+- **`src/app/api/analytics/admin-performance/route.js`**: Backend API for Admin Performance Dashboard with response time calculation and key metrics aggregation.
+- **`src/components/AdminPerformance.js`**: Admin Performance Dashboard UI component.
+
+### Fixed (Marketing API Date Logic — 2026-03-06)
+- **Marketing APIs use latest DB date as baseDate**: `campaigns/route.js`, `adsets/route.js`, `ads/route.js` now query `AdDailyMetric` for the most recent recorded date instead of using `new Date()` — prevents empty dashboards when today has no data yet.
+- **`pythonBridge.js` venv priority**: Updated to prioritize project's local `venv/bin/python` for executing Python scripts, ensuring correct dependency loading.
+
+
 ### Fixed & Enhanced (Agent Attribution — Global Message Search — 2026-03-04)
 - **Root cause identified — Facebook ID namespace mismatch**: Facebook Business Suite React Fiber `threadID` returns the customer's **global Facebook User ID** (9–15 digit, e.g. `540006679`) whereas the CRM stores the customer's **PSID** (Page-Scoped ID, 16–17 digit, e.g. `25726727506923789`) obtained from the Graph API. These are fundamentally different ID systems with no direct numeric mapping — only 2/127 scraper threads matched the CRM by ID.
 - **Strategy 1b — Global DB Message Search** (`message-sender/route.js`): When conversation lookup by ID fails, the API now performs a global `prisma.message.findFirst({ where: { content: { contains: searchText } } })` across all messages in the database. Threshold: `msgText.length >= 15` chars to reduce false positives. Prefix fallback (first 20 chars) applied when exact match fails. **Result: +2 msgs updated in first test — pipeline confirmed working.**

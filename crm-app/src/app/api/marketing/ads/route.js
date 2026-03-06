@@ -50,6 +50,16 @@ export async function GET(request) {
             });
         }
 
+        // ── Find Latest Data Date ──
+        let baseDate = new Date();
+        const latestMetric = await prisma.adDailyMetric.findFirst({
+            orderBy: { date: 'desc' },
+            select: { date: true }
+        });
+        if (latestMetric && latestMetric.date) {
+            baseDate = new Date(latestMetric.date);
+        }
+
         // ── Handle Date Bounds for Daily Metrics ──
         let startDate, endDate;
         if (since && until) {
@@ -58,7 +68,7 @@ export async function GET(request) {
             // Include entire end date
             endDate.setHours(23, 59, 59, 999);
         } else {
-            const now = new Date();
+            const now = new Date(baseDate);
             endDate = new Date(now);
             startDate = new Date(now);
             if (range === 'today') {
