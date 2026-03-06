@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed & Enhanced (Agent Attribution — Global Message Search — 2026-03-04)
+- **Root cause identified — Facebook ID namespace mismatch**: Facebook Business Suite React Fiber `threadID` returns the customer's **global Facebook User ID** (9–15 digit, e.g. `540006679`) whereas the CRM stores the customer's **PSID** (Page-Scoped ID, 16–17 digit, e.g. `25726727506923789`) obtained from the Graph API. These are fundamentally different ID systems with no direct numeric mapping — only 2/127 scraper threads matched the CRM by ID.
+- **Strategy 1b — Global DB Message Search** (`message-sender/route.js`): When conversation lookup by ID fails, the API now performs a global `prisma.message.findFirst({ where: { content: { contains: searchText } } })` across all messages in the database. Threshold: `msgText.length >= 15` chars to reduce false positives. Prefix fallback (first 20 chars) applied when exact match fails. **Result: +2 msgs updated in first test — pipeline confirmed working.**
+- **updateCache Strategy C — Full-text Cache Scan** (`message-sender/route.js`): When conversation ID and PSID folder lookups both fail, `updateCache()` now performs a full-text scan across all 788 chathistory JSON files. Quick pre-filter (`raw.includes(prefix15)` before `JSON.parse`) keeps I/O cost low. Matches `fromName` in cache for all long-text senders found.
+- **URL-based PSID extraction attempt** (`sync_agents_v2.js`): After each conversation navigation, the scraper reads `page.url()` and extracts `selected_item_id` as a potential PSID. Finding: click-based navigation does not update the URL query params — `selected_item_id` remains empty. URL approach works only in URL-fallback navigation mode.
+- **Extended conv lookup conditions** (`message-sender/route.js`): OR conditions now include `{ participantId: incomingPsid }`, `{ conversationId: incomingPsid }`, `{ conversationId: t_${incomingPsid} }` when a PSID is provided by the scraper.
+- **updateCache Strategy A — Direct PSID folder** (`message-sender/route.js`): Tries `FB_CHAT_{psid}/chathistory/` first when PSID provided — O(1) lookup vs O(n) scan.
+- **Enhanced diagnostic logging**: `[MsgSender] ✅ Conv found: id=... | conversationId=... | participantId=...` and `[MsgSender] ❌ Conv NOT found for rawConvId="..."` — making conv lookup results visible in server logs.
+
+### Added (Data Sync & Cache Rebuild Utilities — 2026-03-03)
+- **`scripts/check_db_feb_distribution.js`**: Diagnostic script — แสดง distribution ของ `conversations.last_message_at` รายวัน พร้อม bar chart และ detect missing days อัตโนมัติ ใช้เช็คว่า DB มีข้อมูลครบหรือไม่
+- **`scripts/sync_fb_missing_range.js`**: Backfill script — ดึง conversations ที่หายไปจาก Facebook Graph API (v19.0) แล้ว upsert ลง PostgreSQL + เขียน JSON cache พร้อมกัน รองรับ `--from`, `--to`, `--dry-run` CLI args; rate-limit safety 150ms/conversation
+- **`scripts/rebuild_cache_from_db.js`**: Cache rebuild script — อ่าน conversations + messages จาก DB แล้วเขียน JSON cache ใหม่ทั้งหมด ข้าม records ที่ cache ยังใหม่กว่า DB; รองรับ `--all`, `--from`, `--to`, `--dry-run`
+
+### Fixed (Feb 2026 Data Gap — 2026-03-03)
+- **Feb 21–27 missing conversations**: ข้อมูลช่วง Feb 21–27 หายไปทั้งใน DB และ JSON cache (เนื่องจาก initial sync หยุดที่ Feb 20) — sync กลับมาได้ 241 conversations (Feb 20–26) + 45 conversations (Feb 27–Mar 3) รวมเพิ่ม ~79 records ใน February
+- **DB + cache consistency**: หลัง rebuild, DB มี 760 conversations total; February 2026 = 385 conversations; Feb 22 = peak day (143 conversations) ตรงกับ expected
+
 ### Added (REQ-01 & REQ-02: Admin Responder ID Attribution — 2026-03-01)
 - **`Message.responderId → Employee.id` (REQ-01)**: เพิ่ม FK ใน schema และ migration — ทุก message ที่แอดมินตอบจะได้รับ `responderId` แทนที่จะเก็บแค่ `fromName` string
 - **`Conversation.assignedEmployeeId → Employee.id` (REQ-02)**: เพิ่ม FK ใน schema — ทุก conversation ที่มี `assignedAgent` จะได้รับ `assignedEmployeeId` FK จริง

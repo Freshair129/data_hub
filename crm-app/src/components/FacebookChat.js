@@ -15,6 +15,7 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
     const [isSyncing, setIsSyncing] = useState(false);
     const [catalog, setCatalog] = useState({ packages: [], products: [] });
     const [employees, setEmployees] = useState([]);
+    const [filterAgent, setFilterAgent] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [discoveredProducts, setDiscoveredProducts] = useState([]);
     const [activeAd, setActiveAd] = useState(null);
@@ -309,6 +310,40 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
         } catch (err) { console.error(err); alert('Error assigning agent'); }
     };
 
+    const handleToggleStar = async (convId, currentStatus, e) => {
+        if (e) e.stopPropagation();
+
+        const newStatus = !currentStatus;
+        setConversations(prev => prev.map(c => c.id === convId ? { ...c, isStarred: newStatus } : c));
+        if (selectedConv && selectedConv.id === convId) {
+            setSelectedConv(prev => ({ ...prev, isStarred: newStatus }));
+        }
+
+        try {
+            const res = await fetch('/api/marketing/chat/star', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversationId: convId, isStarred: newStatus })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                // Revert on error
+                setConversations(prev => prev.map(c => c.id === convId ? { ...c, isStarred: currentStatus } : c));
+                if (selectedConv && selectedConv.id === convId) {
+                    setSelectedConv(prev => ({ ...prev, isStarred: currentStatus }));
+                }
+                alert('Failed to update star status: ' + data.error);
+            }
+        } catch (err) {
+            console.error('Star toggle error:', err);
+            setConversations(prev => prev.map(c => c.id === convId ? { ...c, isStarred: currentStatus } : c));
+            if (selectedConv && selectedConv.id === convId) {
+                setSelectedConv(prev => ({ ...prev, isStarred: currentStatus }));
+            }
+            alert('Error updating star status');
+        }
+    };
+
     const handleDiscoverProducts = async () => {
         if (!selectedConv) return;
         setIsAnalyzing(true);
@@ -382,6 +417,26 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
         return other?.name || 'User';
     };
 
+    const filteredConversations = React.useMemo(() => {
+        let result = conversations;
+
+        if (filterAgent) {
+            const agentLower = filterAgent.toLowerCase();
+            result = result.filter(c => {
+                const priAgent = (c.agent || c.customer?.agent || '').toLowerCase();
+                const senders = (c.intelligence?.senders || c.customer?.intelligence?.senders || []).map(s => s.toLowerCase());
+                return priAgent === agentLower || priAgent.includes(agentLower) || senders.some(s => s.includes(agentLower));
+            });
+        }
+
+        // Sort: Starred items first, then by updated_time
+        return result.sort((a, b) => {
+            if (a.isStarred && !b.isStarred) return -1;
+            if (!a.isStarred && b.isStarred) return 1;
+            return new Date(b.updated_time || 0) - new Date(a.updated_time || 0);
+        });
+    }, [conversations, filterAgent]);
+
     if (loading && conversations.length === 0) {
         return (
             <div className="flex items-center justify-center h-full text-white/50">
@@ -429,14 +484,31 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
                             Last Updated: {lastUpdated.toLocaleTimeString()}
                         </div>
                     )}
+
+                    {/* Inbox Filters */}
+                    <div className="space-y-2 pt-2 border-t border-white/5">
+                        <select
+                            value={filterAgent}
+                            onChange={(e) => setFilterAgent(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 text-white/70 text-[10px] font-bold px-3 py-2.5 rounded-xl outline-none focus:border-[#C9A34E]/50 transition-colors uppercase tracking-widest appearance-none cursor-pointer"
+                        >
+                            <option value="" className="bg-[#0A1A2F] text-white">All Agents</option>
+                            <option value="Unassigned" className="bg-[#0A1A2F] text-white">Unassigned</option>
+                            {employees.map(emp => (
+                                <option key={emp.employeeId || emp.id} value={emp.nickName || emp.firstName} className="bg-[#0A1A2F] text-white">
+                                    {emp.nickName || emp.firstName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    {conversations.length === 0 ? (
+                    {filteredConversations.length === 0 ? (
                         <div className="p-8 text-center text-white/30 text-xs font-bold uppercase tracking-widest">
-                            No conversations found
+                            No conversations match filters
                         </div>
                     ) : (
-                        conversations.map(conv => (
+                        filteredConversations.map(conv => (
                             <button
                                 key={conv.id}
                                 onClick={() => setSelectedConv(conv)}
@@ -446,7 +518,14 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                                 )}
                                 <div className="flex justify-between items-start mb-1.5">
-                                    <h3 className={`font-black text-sm truncate pr-2 ${selectedConv?.id === conv.id ? 'text-blue-400' : 'text-white'}`}>
+                                    <h3 className={`font-black text-sm truncate pr-2 flex items-center gap-1.5 ${selectedConv?.id === conv.id ? 'text-blue-400' : 'text-white'}`}>
+                                        <button
+                                            onClick={(e) => handleToggleStar(conv.id, conv.isStarred, e)}
+                                            className={`transition-colors ${conv.isStarred ? 'text-[#C9A34E] hover:text-[#e0b961]' : 'text-white/20 hover:text-white/50'}`}
+                                            title={conv.isStarred ? "Unstar" : "Star"}
+                                        >
+                                            <i className="fas fa-star text-[10px]"></i>
+                                        </button>
                                         {getParticipantName(conv)}
                                     </h3>
                                     <span className="text-[9px] text-white/30 whitespace-nowrap font-bold">
@@ -499,7 +578,16 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
                                 {getParticipantName(selectedConv).charAt(0)}
                             </div>
                             <div>
-                                <h2 className="font-black text-lg text-white leading-none">{getParticipantName(selectedConv)}</h2>
+                                <h2 className="font-black text-lg text-white leading-none flex items-center gap-2">
+                                    {getParticipantName(selectedConv)}
+                                    <button
+                                        onClick={() => handleToggleStar(selectedConv.id, selectedConv.isStarred)}
+                                        className={`transition-colors flex items-center justify-center w-6 h-6 rounded-md hover:bg-white/10 ${selectedConv.isStarred ? 'text-[#C9A34E]' : 'text-white/20 hover:text-white/50'}`}
+                                        title={selectedConv.isStarred ? "Unstar Chat" : "Star Chat"}
+                                    >
+                                        <i className="fas fa-star text-[14px]"></i>
+                                    </button>
+                                </h2>
                                 <div className="flex items-center gap-3 mt-1.5">
                                     <p className="text-[9px] text-emerald-400 font-black uppercase tracking-[0.15em] flex items-center gap-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
@@ -512,14 +600,33 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
                                         <i className="fas fa-user-shield"></i>
                                         Agent: {selectedConv.agent || 'Unassigned'}
                                     </span>
+
+                                    {/* Expose Extracted Senders explicitly to eliminate guesswork */}
+                                    {(selectedConv.intelligence?.senders?.length > 0 || selectedConv.customer?.intelligence?.senders?.length > 0) && (
+                                        <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm">
+                                            <i className="fas fa-users-cog text-[8px]"></i>
+                                            {(selectedConv.intelligence?.senders || selectedConv.customer?.intelligence?.senders).join(', ')}
+                                        </span>
+                                    )}
+
                                     {(!selectedConv.agent || selectedConv.agent === 'Unassigned') && (
                                         <button
                                             onClick={() => handleAssignAgent(currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Me')}
-                                            className="ml-4 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500/40 transition-all flex items-center gap-1.1"
+                                            className="ml-4 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500/40 transition-all flex items-center gap-1.5"
                                         >
                                             <i className="fas fa-hand-paper"></i> Claim Chat
                                         </button>
                                     )}
+
+                                    {/* Direct Facebook Business Suite Deep Link */}
+                                    <a
+                                        href={`https://business.facebook.com/latest/inbox/all?asset_id=113042456073167&selected_item_id=${(selectedConv.id || '').replace('t_', '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="ml-auto px-4 py-1.5 bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/30 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-[#1877F2]/20 hover:shadow-[0_0_10px_rgba(24,119,242,0.2)] transition-all flex items-center gap-2"
+                                    >
+                                        <i className="fab fa-facebook text-[11px]"></i> Open in Meta Suite
+                                    </a>
                                 </div>
                             </div>
                         </div>

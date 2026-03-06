@@ -25,10 +25,10 @@ if ! curl -s http://localhost:9222/json > /dev/null 2>&1; then
 fi
 
 echo "✅ Chrome พร้อม — เริ่ม sync..."
-echo ""
+echo "🔄 รันซิงก์ Agent V2 (จากล่าสุดไปเก่าสุด) ด้วย --file=feb_threads.json"
 
 # รัน script
-node "$SCRIPT_DIR/sync_agents_v2.js" --attach --limit=9999 --loop --delay=45
+node "$SCRIPT_DIR/sync_agents_v2.js" --file="$CRM_DIR/feb_threads.json" --attach --limit=9999 --loop --delay=45
 
 echo ""
 echo "✅ เสร็จแล้ว!"

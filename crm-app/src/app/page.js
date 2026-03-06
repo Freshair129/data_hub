@@ -31,6 +31,7 @@ export default function Home() {
     const [customerViewMode, setCustomerViewMode] = useState('list'); // 'list' or 'detail'
     const [initialChatCustomerId, setInitialChatCustomerId] = useState(null);
     const [pendingTaskCount, setPendingTaskCount] = useState(0);
+    const [customerListFilters, setCustomerListFilters] = useState(null);
 
     // Real-time SSE Connection for Tasks
     useEffect(() => {
@@ -530,6 +531,7 @@ export default function Home() {
                         {customerViewMode === 'list' ? (
                             <CustomerList
                                 customers={customers}
+                                initialFilters={customerListFilters}
                                 onSelectCustomer={(c) => {
                                     setActiveCustomer(c);
                                     setCustomerViewMode('detail');
@@ -618,7 +620,14 @@ export default function Home() {
                 )}
 
                 {activeView === 'team-kpi' && (
-                    <TeamKPI customers={customers} />
+                    <TeamKPI
+                        customers={customers}
+                        onInvestigate={(filters) => {
+                            setCustomerListFilters(filters);
+                            setActiveView('customers');
+                            setCustomerViewMode('list');
+                        }}
+                    />
                 )}
                 {activeView === 'employees' && (
                     <EmployeeManagement

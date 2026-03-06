@@ -14,7 +14,7 @@ echo ""
 echo "📌 ขั้นตอน:"
 echo "   1. Login Facebook ในหน้าต่างที่เปิด"
 echo "   2. เข้า Business Suite → Inbox"
-echo "   3. รัน: node /Users/ideab/Desktop/data_hub/crm-app/automation/sync_agents_v2.js --attach"
+echo "   3. รัน: node /Users/ideab/Desktop/data_hub/crm-app/automation/sync_agents_v4_unified.js --attach"
 echo ""
 
 # เปิด Chrome พร้อม remote debugging

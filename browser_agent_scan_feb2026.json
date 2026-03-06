@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-03-03T08:52:28.641Z",
+  "source": "Facebook Business Suite browser automation (Claude in Chrome)",
+  "period": "88 chats scanned — ล่าสุดจนถึงช่วง Aug 2025 (ครอบคลุม Feb 2026 ทั้งหมด)",
+  "summary": {
+    "totalChatsScanned": 88,
+    "chatsWithAdminFound": 17,
+    "adminPersonas": {
+      "Satabongkot Noinin": 15,
+      "Panxei": 2,
+      "Thanaphat Phringphrao": 1,
+      "Preeyaporn NuPhung Kornvathin": 1,
+      "Narongkorn Luathanaya": 1
+    }
+  },
+  "note": "participantId = customer PSID = Conversation.participantId in DB. admins = ชื่อจาก 'ส่งโดย [name]' ใน Business Suite — ปรากฏเฉพาะข้อความที่ส่งผ่าน Facebook Persona เท่านั้น",
+  "results": [
+    { "customer": "May Bhuangsilp",               "participantId": "540006679",                                        "admins": ["Thanaphat Phringphrao"] },
+    { "customer": "Sayumpon Onpanit",              "participantId": "100057049456197",                                  "admins": ["Satabongkot Noinin"] },
+    { "customer": "Chuchat Tasanasorn",            "participantId": "100007941637793",                                  "admins": ["Satabongkot Noinin", "Panxei"] },
+    { "customer": "Verin Keng",                    "participantId": "100001492181818",                                  "admins": ["Satabongkot Noinin"] },
+    { "customer": "Hein Kyaw Phyo",                "participantId": "61561772272539",                                   "admins": ["Satabongkot Noinin"] },
+    { "customer": "Sampiar Victoria Van Niekerk",  "participantId": "100000182537459",                                  "admins": ["Preeyaporn NuPhung Kornvathin"] },
+    { "customer": "สุริยา ศรีงาม",                 "participantId": "340282366841710301244260027361753255520",          "admins": ["Satabongkot Noinin"] },
+    { "customer": "Lek Vichiavutikoun",            "participantId": "340282366841710301244260067034662611831",          "admins": ["Satabongkot Noinin", "Panxei"] },
+    { "customer": "Prompiriya _Jomsawat",          "participantId": "340282366841710301244259969419379042076",          "admins": ["Satabongkot Noinin"] },
+    { "customer": "Peerapong Inyanual",            "participantId": "340282366841710301244260094385399878806",          "admins": ["Satabongkot Noinin"] },
+    { "customer": "Phae Khamphilanouvong",         "participantId": "100015319655403",                                  "admins": ["Satabongkot Noinin"] },
+    { "customer": "Intouch Sattayanurug",          "participantId": "100001094145881",                                  "admins": ["Narongkorn Luathanaya", "Satabongkot Noinin"] },
+    { "customer": "ファティマ ファ",                  "participantId": "340282366841710301244259556209143886080",          "admins": ["Satabongkot Noinin"] },
+    { "customer": "Jae",                           "participantId": "340282366841710301244260024365683543533",          "admins": ["Satabongkot Noinin"] },
+    { "customer": "Syrine Ferjani",                "participantId": "340282366841710301244259906981258628660",          "admins": ["Satabongkot Noinin"] },
+    { "customer": "Lu Na",                         "participantId": "340282366841710301244260071544895502707",          "admins": ["Satabongkot Noinin"] },
+    { "customer": "Kaew Footrakul",                "participantId": "340282366841710301244260108476105137747",          "admins": ["Satabongkot Noinin"] }
+  ]
+}

@@ -9415,6 +9415,7 @@ export namespace Prisma {
     participantName: string | null
     participantId: string | null
     assignedAgent: string | null
+    isStarred: boolean | null
     lastMessageAt: Date | null
     unreadCount: number | null
     assignedEmployeeId: string | null
@@ -9430,6 +9431,7 @@ export namespace Prisma {
     participantName: string | null
     participantId: string | null
     assignedAgent: string | null
+    isStarred: boolean | null
     lastMessageAt: Date | null
     unreadCount: number | null
     assignedEmployeeId: string | null
@@ -9445,6 +9447,7 @@ export namespace Prisma {
     participantName: number
     participantId: number
     assignedAgent: number
+    isStarred: number
     lastMessageAt: number
     unreadCount: number
     assignedEmployeeId: number
@@ -9470,6 +9473,7 @@ export namespace Prisma {
     participantName?: true
     participantId?: true
     assignedAgent?: true
+    isStarred?: true
     lastMessageAt?: true
     unreadCount?: true
     assignedEmployeeId?: true
@@ -9485,6 +9489,7 @@ export namespace Prisma {
     participantName?: true
     participantId?: true
     assignedAgent?: true
+    isStarred?: true
     lastMessageAt?: true
     unreadCount?: true
     assignedEmployeeId?: true
@@ -9500,6 +9505,7 @@ export namespace Prisma {
     participantName?: true
     participantId?: true
     assignedAgent?: true
+    isStarred?: true
     lastMessageAt?: true
     unreadCount?: true
     assignedEmployeeId?: true
@@ -9602,6 +9608,7 @@ export namespace Prisma {
     participantName: string | null
     participantId: string | null
     assignedAgent: string | null
+    isStarred: boolean
     lastMessageAt: Date | null
     unreadCount: number
     assignedEmployeeId: string | null
@@ -9636,6 +9643,7 @@ export namespace Prisma {
     participantName?: boolean
     participantId?: boolean
     assignedAgent?: boolean
+    isStarred?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
     assignedEmployeeId?: boolean
@@ -9657,6 +9665,7 @@ export namespace Prisma {
     participantName?: boolean
     participantId?: boolean
     assignedAgent?: boolean
+    isStarred?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
     assignedEmployeeId?: boolean
@@ -9674,6 +9683,7 @@ export namespace Prisma {
     participantName?: boolean
     participantId?: boolean
     assignedAgent?: boolean
+    isStarred?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
     assignedEmployeeId?: boolean
@@ -9691,6 +9701,7 @@ export namespace Prisma {
     participantName?: boolean
     participantId?: boolean
     assignedAgent?: boolean
+    isStarred?: boolean
     lastMessageAt?: boolean
     unreadCount?: boolean
     assignedEmployeeId?: boolean
@@ -9698,7 +9709,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ConversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "conversationId" | "customerId" | "channel" | "participantName" | "participantId" | "assignedAgent" | "lastMessageAt" | "unreadCount" | "assignedEmployeeId" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
+  export type ConversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "conversationId" | "customerId" | "channel" | "participantName" | "participantId" | "assignedAgent" | "isStarred" | "lastMessageAt" | "unreadCount" | "assignedEmployeeId" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
   export type ConversationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedEmployee?: boolean | Conversation$assignedEmployeeArgs<ExtArgs>
     episodes?: boolean | Conversation$episodesArgs<ExtArgs>
@@ -9733,6 +9744,7 @@ export namespace Prisma {
       participantName: string | null
       participantId: string | null
       assignedAgent: string | null
+      isStarred: boolean
       lastMessageAt: Date | null
       unreadCount: number
       assignedEmployeeId: string | null
@@ -10173,6 +10185,7 @@ export namespace Prisma {
     readonly participantName: FieldRef<"Conversation", 'String'>
     readonly participantId: FieldRef<"Conversation", 'String'>
     readonly assignedAgent: FieldRef<"Conversation", 'String'>
+    readonly isStarred: FieldRef<"Conversation", 'Boolean'>
     readonly lastMessageAt: FieldRef<"Conversation", 'DateTime'>
     readonly unreadCount: FieldRef<"Conversation", 'Int'>
     readonly assignedEmployeeId: FieldRef<"Conversation", 'String'>
@@ -13100,6 +13113,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     facebookName: string | null
+    facebookId: string | null
     lineName: string | null
   }
 
@@ -13122,6 +13136,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     facebookName: string | null
+    facebookId: string | null
     lineName: string | null
   }
 
@@ -13147,6 +13162,7 @@ export namespace Prisma {
     updatedAt: number
     metadata: number
     facebookName: number
+    facebookId: number
     lineName: number
     _all: number
   }
@@ -13171,6 +13187,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     facebookName?: true
+    facebookId?: true
     lineName?: true
   }
 
@@ -13193,6 +13210,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     facebookName?: true
+    facebookId?: true
     lineName?: true
   }
 
@@ -13218,6 +13236,7 @@ export namespace Prisma {
     updatedAt?: true
     metadata?: true
     facebookName?: true
+    facebookId?: true
     lineName?: true
     _all?: true
   }
@@ -13316,6 +13335,7 @@ export namespace Prisma {
     updatedAt: Date
     metadata: JsonValue | null
     facebookName: string | null
+    facebookId: string | null
     lineName: string | null
     _count: EmployeeCountAggregateOutputType | null
     _min: EmployeeMinAggregateOutputType | null
@@ -13358,6 +13378,7 @@ export namespace Prisma {
     updatedAt?: boolean
     metadata?: boolean
     facebookName?: boolean
+    facebookId?: boolean
     lineName?: boolean
     tasks?: boolean | Employee$tasksArgs<ExtArgs>
     respondedMessages?: boolean | Employee$respondedMessagesArgs<ExtArgs>
@@ -13388,6 +13409,7 @@ export namespace Prisma {
     updatedAt?: boolean
     metadata?: boolean
     facebookName?: boolean
+    facebookId?: boolean
     lineName?: boolean
   }, ExtArgs["result"]["employee"]>
 
@@ -13413,6 +13435,7 @@ export namespace Prisma {
     updatedAt?: boolean
     metadata?: boolean
     facebookName?: boolean
+    facebookId?: boolean
     lineName?: boolean
   }, ExtArgs["result"]["employee"]>
 
@@ -13438,10 +13461,11 @@ export namespace Prisma {
     updatedAt?: boolean
     metadata?: boolean
     facebookName?: boolean
+    facebookId?: boolean
     lineName?: boolean
   }
 
-  export type EmployeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "employeeId" | "agentId" | "firstName" | "lastName" | "nickName" | "role" | "department" | "profilePicture" | "status" | "joinDate" | "email" | "phonePrimary" | "lineId" | "passwordHash" | "permissions" | "performance" | "createdAt" | "updatedAt" | "metadata" | "facebookName" | "lineName", ExtArgs["result"]["employee"]>
+  export type EmployeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "employeeId" | "agentId" | "firstName" | "lastName" | "nickName" | "role" | "department" | "profilePicture" | "status" | "joinDate" | "email" | "phonePrimary" | "lineId" | "passwordHash" | "permissions" | "performance" | "createdAt" | "updatedAt" | "metadata" | "facebookName" | "facebookId" | "lineName", ExtArgs["result"]["employee"]>
   export type EmployeeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tasks?: boolean | Employee$tasksArgs<ExtArgs>
     respondedMessages?: boolean | Employee$respondedMessagesArgs<ExtArgs>
@@ -13482,6 +13506,7 @@ export namespace Prisma {
       updatedAt: Date
       metadata: Prisma.JsonValue | null
       facebookName: string | null
+      facebookId: string | null
       lineName: string | null
     }, ExtArgs["result"]["employee"]>
     composites: {}
@@ -13931,6 +13956,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"Employee", 'DateTime'>
     readonly metadata: FieldRef<"Employee", 'Json'>
     readonly facebookName: FieldRef<"Employee", 'String'>
+    readonly facebookId: FieldRef<"Employee", 'String'>
     readonly lineName: FieldRef<"Employee", 'String'>
   }
     
@@ -29897,6 +29923,7 @@ export namespace Prisma {
     participantName: 'participantName',
     participantId: 'participantId',
     assignedAgent: 'assignedAgent',
+    isStarred: 'isStarred',
     lastMessageAt: 'lastMessageAt',
     unreadCount: 'unreadCount',
     assignedEmployeeId: 'assignedEmployeeId',
@@ -29969,6 +29996,7 @@ export namespace Prisma {
     updatedAt: 'updatedAt',
     metadata: 'metadata',
     facebookName: 'facebookName',
+    facebookId: 'facebookId',
     lineName: 'lineName'
   };
 
@@ -30860,6 +30888,7 @@ export namespace Prisma {
     participantName?: StringNullableFilter<"Conversation"> | string | null
     participantId?: StringNullableFilter<"Conversation"> | string | null
     assignedAgent?: StringNullableFilter<"Conversation"> | string | null
+    isStarred?: BoolFilter<"Conversation"> | boolean
     lastMessageAt?: DateTimeNullableFilter<"Conversation"> | Date | string | null
     unreadCount?: IntFilter<"Conversation"> | number
     assignedEmployeeId?: StringNullableFilter<"Conversation"> | string | null
@@ -30880,6 +30909,7 @@ export namespace Prisma {
     participantName?: SortOrderInput | SortOrder
     participantId?: SortOrderInput | SortOrder
     assignedAgent?: SortOrderInput | SortOrder
+    isStarred?: SortOrder
     lastMessageAt?: SortOrderInput | SortOrder
     unreadCount?: SortOrder
     assignedEmployeeId?: SortOrderInput | SortOrder
@@ -30903,6 +30933,7 @@ export namespace Prisma {
     participantName?: StringNullableFilter<"Conversation"> | string | null
     participantId?: StringNullableFilter<"Conversation"> | string | null
     assignedAgent?: StringNullableFilter<"Conversation"> | string | null
+    isStarred?: BoolFilter<"Conversation"> | boolean
     lastMessageAt?: DateTimeNullableFilter<"Conversation"> | Date | string | null
     unreadCount?: IntFilter<"Conversation"> | number
     assignedEmployeeId?: StringNullableFilter<"Conversation"> | string | null
@@ -30923,6 +30954,7 @@ export namespace Prisma {
     participantName?: SortOrderInput | SortOrder
     participantId?: SortOrderInput | SortOrder
     assignedAgent?: SortOrderInput | SortOrder
+    isStarred?: SortOrder
     lastMessageAt?: SortOrderInput | SortOrder
     unreadCount?: SortOrder
     assignedEmployeeId?: SortOrderInput | SortOrder
@@ -30946,6 +30978,7 @@ export namespace Prisma {
     participantName?: StringNullableWithAggregatesFilter<"Conversation"> | string | null
     participantId?: StringNullableWithAggregatesFilter<"Conversation"> | string | null
     assignedAgent?: StringNullableWithAggregatesFilter<"Conversation"> | string | null
+    isStarred?: BoolWithAggregatesFilter<"Conversation"> | boolean
     lastMessageAt?: DateTimeNullableWithAggregatesFilter<"Conversation"> | Date | string | null
     unreadCount?: IntWithAggregatesFilter<"Conversation"> | number
     assignedEmployeeId?: StringNullableWithAggregatesFilter<"Conversation"> | string | null
@@ -31181,6 +31214,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Employee"> | Date | string
     metadata?: JsonNullableFilter<"Employee">
     facebookName?: StringNullableFilter<"Employee"> | string | null
+    facebookId?: StringNullableFilter<"Employee"> | string | null
     lineName?: StringNullableFilter<"Employee"> | string | null
     tasks?: TaskListRelationFilter
     respondedMessages?: MessageListRelationFilter
@@ -31210,6 +31244,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     metadata?: SortOrderInput | SortOrder
     facebookName?: SortOrderInput | SortOrder
+    facebookId?: SortOrderInput | SortOrder
     lineName?: SortOrderInput | SortOrder
     tasks?: TaskOrderByRelationAggregateInput
     respondedMessages?: MessageOrderByRelationAggregateInput
@@ -31222,6 +31257,7 @@ export namespace Prisma {
     employeeId?: string
     agentId?: string
     email?: string
+    facebookId?: string
     AND?: EmployeeWhereInput | EmployeeWhereInput[]
     OR?: EmployeeWhereInput[]
     NOT?: EmployeeWhereInput | EmployeeWhereInput[]
@@ -31247,7 +31283,7 @@ export namespace Prisma {
     respondedMessages?: MessageListRelationFilter
     assignedConversations?: ConversationListRelationFilter
     closedOrders?: OrderListRelationFilter
-  }, "id" | "employeeId" | "agentId" | "email">
+  }, "id" | "employeeId" | "agentId" | "email" | "facebookId">
 
   export type EmployeeOrderByWithAggregationInput = {
     id?: SortOrder
@@ -31271,6 +31307,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     metadata?: SortOrderInput | SortOrder
     facebookName?: SortOrderInput | SortOrder
+    facebookId?: SortOrderInput | SortOrder
     lineName?: SortOrderInput | SortOrder
     _count?: EmployeeCountOrderByAggregateInput
     _max?: EmployeeMaxOrderByAggregateInput
@@ -31302,6 +31339,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Employee"> | Date | string
     metadata?: JsonNullableWithAggregatesFilter<"Employee">
     facebookName?: StringNullableWithAggregatesFilter<"Employee"> | string | null
+    facebookId?: StringNullableWithAggregatesFilter<"Employee"> | string | null
     lineName?: StringNullableWithAggregatesFilter<"Employee"> | string | null
   }
 
@@ -33061,6 +33099,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -33080,6 +33119,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     assignedEmployeeId?: string | null
@@ -33097,6 +33137,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33116,6 +33157,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33134,6 +33176,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     assignedEmployeeId?: string | null
@@ -33148,6 +33191,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33162,6 +33206,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33426,6 +33471,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
@@ -33455,6 +33501,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
@@ -33484,6 +33531,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
@@ -33513,6 +33561,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
@@ -33542,6 +33591,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
   }
 
@@ -33567,6 +33617,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -33592,6 +33643,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -35523,6 +35575,11 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type ChatEpisodeListRelationFilter = {
     every?: ChatEpisodeWhereInput
     some?: ChatEpisodeWhereInput
@@ -35556,6 +35613,7 @@ export namespace Prisma {
     participantName?: SortOrder
     participantId?: SortOrder
     assignedAgent?: SortOrder
+    isStarred?: SortOrder
     lastMessageAt?: SortOrder
     unreadCount?: SortOrder
     assignedEmployeeId?: SortOrder
@@ -35575,6 +35633,7 @@ export namespace Prisma {
     participantName?: SortOrder
     participantId?: SortOrder
     assignedAgent?: SortOrder
+    isStarred?: SortOrder
     lastMessageAt?: SortOrder
     unreadCount?: SortOrder
     assignedEmployeeId?: SortOrder
@@ -35590,6 +35649,7 @@ export namespace Prisma {
     participantName?: SortOrder
     participantId?: SortOrder
     assignedAgent?: SortOrder
+    isStarred?: SortOrder
     lastMessageAt?: SortOrder
     unreadCount?: SortOrder
     assignedEmployeeId?: SortOrder
@@ -35601,9 +35661,12 @@ export namespace Prisma {
     unreadCount?: SortOrder
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type ConversationScalarRelationFilter = {
@@ -35661,14 +35724,6 @@ export namespace Prisma {
     responderId?: SortOrder
     episodeId?: SortOrder
     sessionId?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type ChatEpisodeCountOrderByAggregateInput = {
@@ -35739,6 +35794,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     metadata?: SortOrder
     facebookName?: SortOrder
+    facebookId?: SortOrder
     lineName?: SortOrder
   }
 
@@ -35761,6 +35817,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     facebookName?: SortOrder
+    facebookId?: SortOrder
     lineName?: SortOrder
   }
 
@@ -35783,6 +35840,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     facebookName?: SortOrder
+    facebookId?: SortOrder
     lineName?: SortOrder
   }
 
@@ -37058,6 +37116,10 @@ export namespace Prisma {
     connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type EmployeeUpdateOneWithoutAssignedConversationsNestedInput = {
     create?: XOR<EmployeeCreateWithoutAssignedConversationsInput, EmployeeUncheckedCreateWithoutAssignedConversationsInput>
     connectOrCreate?: EmployeeCreateOrConnectWithoutAssignedConversationsInput
@@ -37172,10 +37234,6 @@ export namespace Prisma {
     create?: XOR<ConversationCreateWithoutMessagesInput, ConversationUncheckedCreateWithoutMessagesInput>
     connectOrCreate?: ConversationCreateOrConnectWithoutMessagesInput
     connect?: ConversationWhereUniqueInput
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type EmployeeUpdateOneWithoutRespondedMessagesNestedInput = {
@@ -38252,6 +38310,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -38269,6 +38328,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     assignedEmployeeId?: string | null
@@ -38492,6 +38552,7 @@ export namespace Prisma {
     participantName?: StringNullableFilter<"Conversation"> | string | null
     participantId?: StringNullableFilter<"Conversation"> | string | null
     assignedAgent?: StringNullableFilter<"Conversation"> | string | null
+    isStarred?: BoolFilter<"Conversation"> | boolean
     lastMessageAt?: DateTimeNullableFilter<"Conversation"> | Date | string | null
     unreadCount?: IntFilter<"Conversation"> | number
     assignedEmployeeId?: StringNullableFilter<"Conversation"> | string | null
@@ -38765,6 +38826,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
@@ -38793,6 +38855,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
@@ -38811,6 +38874,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -38829,6 +38893,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     assignedEmployeeId?: string | null
@@ -38988,6 +39053,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
@@ -39016,6 +39082,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
@@ -39040,6 +39107,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39058,6 +39126,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39461,6 +39530,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
@@ -39489,6 +39559,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
@@ -39728,6 +39799,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
@@ -39756,6 +39828,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
@@ -39949,6 +40022,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskCreateNestedManyWithoutAssigneeInput
     assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
@@ -39977,6 +40051,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
@@ -39995,6 +40070,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -40013,6 +40089,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     assignedEmployeeId?: string | null
@@ -40060,6 +40137,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUpdateManyWithoutAssigneeNestedInput
     assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
@@ -40088,6 +40166,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
@@ -40112,6 +40191,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40130,6 +40210,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40146,6 +40227,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -40164,6 +40246,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     assignedEmployeeId?: string | null
@@ -40196,6 +40279,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40214,6 +40298,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -40318,6 +40403,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -40336,6 +40422,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -41776,6 +41863,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
@@ -41804,6 +41892,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: string | null
+    facebookId?: string | null
     lineName?: string | null
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
@@ -41919,6 +42008,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
@@ -41947,6 +42037,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     facebookName?: NullableStringFieldUpdateOperationsInput | string | null
+    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
     lineName?: NullableStringFieldUpdateOperationsInput | string | null
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
@@ -42277,6 +42368,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     assignedEmployeeId?: string | null
@@ -42368,6 +42460,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42385,6 +42478,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42402,6 +42496,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     assignedEmployeeId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42858,6 +42953,7 @@ export namespace Prisma {
     participantName?: string | null
     participantId?: string | null
     assignedAgent?: string | null
+    isStarred?: boolean
     lastMessageAt?: Date | string | null
     unreadCount?: number
     createdAt?: Date | string
@@ -42987,6 +43083,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -43005,6 +43102,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -43022,6 +43120,7 @@ export namespace Prisma {
     participantName?: NullableStringFieldUpdateOperationsInput | string | null
     participantId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isStarred?: BoolFieldUpdateOperationsInput | boolean
     lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     unreadCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

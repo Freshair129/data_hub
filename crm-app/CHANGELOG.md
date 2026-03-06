@@ -2,6 +2,32 @@
 
 All notable changes to the CRM project will be documented in this file.
 
+## [0.5.0] - 2026-03-06
+
+### Added
+- **Inbox Star System (ADR 022)**: Implemented a robust real-time starred chat system synced between the UI, Local JSON Cache, and PostgreSQL.
+- **Dynamic Star Sorting**: Starred conversations now dynamically float to the top of the FacebookChat inbox.
+
+### Removed
+- **Inbox Date Filters**: Removed the Start/End date filters from the Inbox UI to reduce clutter and streamline agent workflows.
+
+## [0.4.0] - 2026-03-03
+
+### Added
+- **Unified Sync Agent (v4)**: Merged and optimized Playwright-based scraper (`sync_agents_v4_unified.js`) for high-performance extraction and reduced pollutant data.
+- **Admin PSID Permanent Mapping (ADR 021)**: Automated discovery of Facebook Page-Scoped IDs (PSIDs) for admins with permanent binding to Employee records.
+- **Dual-Save Architecture**: Real-time synchronization of admin mappings between PostgreSQL and local JSON cache (`cache/employee/*.json`).
+- **Admin KPI Reporting Tool**: Message-level performance auditing script (`admin_kpi_report.js`) with weekly/monthly aggregation and name-matching fallback.
+- **DB-Driven Backfill Agent**: Targeted discovery tool (`backfill_agent_mapping.js`) that uses participant IDs from the database to drive browser navigation.
+
+### Changed
+- **Enhanced Content Extraction**: Improved `findText` and `extractSenders` to handle deep-nested React Fiber structures and complex message bubbles.
+- **Robotic Navigation Stability**: Refined `verifyActiveThread` and `wait` logic to handle Business Suite UI lag and anti-bot obstacles.
+
+### Fixed
+- **Content Pollution**: Resolved issue where shared message IDs or reused DOM elements caused data bleed between conversations.
+- **Fragmented ID Resolution**: Improved `coerceId` to handle string/numeric mismatches between Graph API and Business Suite UI identifiers.
+
 ### Added
 - **Deep Sync Mode (ADR 020)**: Implemented full historical sync logic in `sync_agents_v2.js` with February 2026 date cutoff and React Fiber-based ID extraction.
 - **Staff Attribution Logging**: Added persistent thread-level logging in `logs/synced_threads.log` for auditing sync progress.

@@ -30,6 +30,7 @@ Implementation in `crm-app/src/lib/db.js` ensures high availability by falling b
 ### 2. AI & Intelligence Layer
 - **Google Gemini (gemini-pro):** Powers the `BusinessAnalyst.js` utility for executive reporting and sentiment analysis.
 - **Chat Automation (ADR-014):** Hybrid detection for agent assignment using regex for Meta system messages and Gemini for intent/mention detection in conversations.
+- **Admin Identity Mapping (ADR-021):** Permanent Page-Scoped ID (PSID) binding for admins. Discovered via Playwright and synced across PostgreSQL and Local JSON cache to ensure 100% reliable KPI attribution.
 - **Product Extraction:** Automated discovery of products mentioned in chat history.
 
 ### 3. Reporting & Attribution Logic

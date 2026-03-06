@@ -49,8 +49,12 @@ identity:
     psid:
       field: facebookId / participantId
       format: "numeric string (Page-Scoped ID)"
-      example: "25570885055945173"
+      example: "24978506515137967"
       status: ✅ linked
+      verified_example:
+        customer_name: "Verin Keng"
+        psid: "24978506515137967"
+        cuid: "cmlxrx1v200p3xfm6kglexrs2"
       note: >
         ID ลูกค้า "เฉพาะเพจนี้" — ถ้าคนเดิมทักเพจอื่น เลขจะเปลี่ยน
         ในระบบเราใช้ตัวนี้เป็น Primary Key สำหรับผูก Customer Profile 
@@ -96,6 +100,10 @@ identity:
       format: "string"
       example: "Satabongkot Noinin"
       status: ⚠️ string
+      verified_mappings:
+        - { name: "Satabongkot Noinin", id: "em_sls_01", nickname: "พี่อ้อย" }
+        - { name: "Preeyaporn NuPhung Kornvathin", id: "em_mgr_01", nickname: "พี่ผึ้ง", psid: "100000182537459" }
+        - { name: "Jutamat Fah N'Finn Sangprakai", id: "e004", nickname: "ฟ้า / Fafah" }
       note: "ใช้ fuzzy match ใน TeamKPI — ชื่อจาก FB Business Suite"
 
     linked_to:

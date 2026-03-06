@@ -211,6 +211,7 @@ exports.Prisma.ConversationScalarFieldEnum = {
   participantName: 'participantName',
   participantId: 'participantId',
   assignedAgent: 'assignedAgent',
+  isStarred: 'isStarred',
   lastMessageAt: 'lastMessageAt',
   unreadCount: 'unreadCount',
   assignedEmployeeId: 'assignedEmployeeId',
@@ -274,6 +275,7 @@ exports.Prisma.EmployeeScalarFieldEnum = {
   updatedAt: 'updatedAt',
   metadata: 'metadata',
   facebookName: 'facebookName',
+  facebookId: 'facebookId',
   lineName: 'lineName'
 };
 

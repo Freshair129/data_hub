@@ -120,3 +120,5 @@ Major technical choices and their rationale.
 |---|---|---|
 | **019** | Agent Attribution | Automation of staff tracking via Business Suite scraping. |
 | **020** | Threading Standard | Unified `t_THREAD_ID` mapping and Deep-Sync logic. |
+| **021** | Admin PSIDs | Automated mapping of Page-Scoped IDs to Employee records. |
+| **022** | Inbox Star System | Dual-sync strategy (PG + JSON) for Starred conversations feature. |

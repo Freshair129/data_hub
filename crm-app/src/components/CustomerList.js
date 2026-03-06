@@ -35,7 +35,7 @@ function normalize(c) {
     };
 }
 
-export default function CustomerList({ customers, onSelectCustomer, onGoToChat }) {
+export default function CustomerList({ customers, onSelectCustomer, onGoToChat, initialFilters }) {
     // ─── Normalize all customers once ─────────────────────────
     const normalizedCustomers = useMemo(() => (customers || []).map(normalize), [customers]);
 
@@ -51,6 +51,8 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
     const [filterLifecycle, setFilterLifecycle] = useState(null);
     const [filterAgent, setFilterAgent] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
+    const [filterStartDate, setFilterStartDate] = useState('');
+    const [filterEndDate, setFilterEndDate] = useState('');
 
     // ─── Tier Config ──────────────────────────────────────────
     const tierConfig = {
@@ -104,6 +106,15 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
             })
             .catch(() => { });
     }, []);
+
+    // ─── Listen to External Filters ───────────────────────────
+    useEffect(() => {
+        if (initialFilters) {
+            if (initialFilters.agent !== undefined) setFilterAgent(initialFilters.agent);
+            if (initialFilters.startDate !== undefined) setFilterStartDate(initialFilters.startDate);
+            if (initialFilters.endDate !== undefined) setFilterEndDate(initialFilters.endDate);
+        }
+    }, [initialFilters]);
 
     // ─── Computed Data ────────────────────────────────────────
     const { kpis, tierDistribution, uniqueAgents, uniqueStatuses } = useMemo(() => {
@@ -159,9 +170,32 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
             result = result.filter(c => c.lifecycleStage === filterLifecycle);
         }
 
-        // Agent Filter
+        // Date Range Filter (Unified KPI Logic)
+        if (filterStartDate) {
+            const start = new Date(filterStartDate);
+            start.setHours(0, 0, 0, 0);
+            result = result.filter(c => {
+                const joinDate = new Date(c.profile?.join_date || c.timeline?.[0]?.date || c.createdAt || Date.now());
+                return joinDate >= start;
+            });
+        }
+        if (filterEndDate) {
+            const end = new Date(filterEndDate);
+            end.setHours(23, 59, 59, 999);
+            result = result.filter(c => {
+                const joinDate = new Date(c.profile?.join_date || c.timeline?.[0]?.date || c.createdAt || Date.now());
+                return joinDate <= end;
+            });
+        }
+
+        // Agent Filter (Exact mapping + Scraped Senders check)
         if (filterAgent) {
-            result = result.filter(c => c.agent === filterAgent);
+            const agentLower = filterAgent.toLowerCase();
+            result = result.filter(c => {
+                const priAgent = (c.agent || '').toLowerCase();
+                const senders = (c.intelligence?.senders || []).map(s => s.toLowerCase());
+                return priAgent === agentLower || priAgent.includes(agentLower) || senders.some(s => s.includes(agentLower));
+            });
         }
 
         // Status Filter
@@ -197,13 +231,15 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
     const safePage = Math.min(currentPage, totalPages);
     const pagedCustomers = processedCustomers.slice((safePage - 1) * pageSize, safePage * pageSize);
 
-    const activeFilterCount = [filterTier, filterLifecycle, filterAgent, filterStatus].filter(Boolean).length;
+    const activeFilterCount = [filterTier, filterLifecycle, filterAgent, filterStatus, filterStartDate, filterEndDate].filter(Boolean).length;
 
     const clearAllFilters = () => {
         setFilterTier(null);
         setFilterLifecycle(null);
         setFilterAgent('');
         setFilterStatus('');
+        setFilterStartDate('');
+        setFilterEndDate('');
         setSearchTerm('');
         setCurrentPage(1);
     };
@@ -298,6 +334,25 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
 
                 {/* Filters Row */}
                 <div className="flex items-center gap-2 flex-wrap">
+                    {/* Date Filters */}
+                    <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2">
+                        <input
+                            type="date"
+                            value={filterStartDate}
+                            onChange={(e) => { setFilterStartDate(e.target.value); setCurrentPage(1); }}
+                            className="bg-transparent py-3 text-xs font-bold text-white/70 focus:outline-none focus:text-[#C9A34E] transition-colors appearance-none cursor-pointer"
+                            title="Start Date"
+                        />
+                        <span className="text-white/20 px-1">-</span>
+                        <input
+                            type="date"
+                            value={filterEndDate}
+                            onChange={(e) => { setFilterEndDate(e.target.value); setCurrentPage(1); }}
+                            className="bg-transparent py-3 text-xs font-bold text-white/70 focus:outline-none focus:text-[#C9A34E] transition-colors appearance-none cursor-pointer"
+                            title="End Date"
+                        />
+                    </div>
+
                     {/* Lifecycle */}
                     <select
                         value={filterLifecycle || ''}
@@ -448,7 +503,16 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
                                                 )}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <p className="text-xs font-bold text-white/60">{c.agent}</p>
+                                                <p className="text-xs font-bold text-white/60">{c.agent || 'Unassigned'}</p>
+                                                {c.intelligence?.senders?.length > 0 && (
+                                                    <div className="mt-1 flex flex-wrap gap-1">
+                                                        {c.intelligence.senders.map((sender, idx) => (
+                                                            <span key={idx} className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest uppercase">
+                                                                {sender}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg text-[10px] font-black text-white/40 uppercase tracking-widest group-hover:bg-[#C9A34E]/10 group-hover:text-[#C9A34E] group-hover:border-[#C9A34E]/20 transition-all">
@@ -457,10 +521,20 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
+                                                    <a
+                                                        href={`https://business.facebook.com/latest/inbox/all?asset_id=113042456073167&selected_item_id=${(c.facebookId || c.id || '').replace('t_', '')}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="w-8 h-8 rounded-lg bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/20 flex items-center justify-center hover:bg-[#1877F2]/20 hover:scale-110 transition-all text-xs"
+                                                        title="Open in Meta Business Suite"
+                                                    >
+                                                        <i className="fab fa-facebook-f"></i>
+                                                    </a>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); onGoToChat && onGoToChat(c._raw); }}
                                                         className="w-8 h-8 rounded-lg bg-[#C9A34E]/10 text-[#C9A34E] flex items-center justify-center hover:bg-[#C9A34E] hover:text-[#0A1A2F] transition-all text-xs"
-                                                        title="Chat"
+                                                        title="CRM Chat"
                                                     >
                                                         <i className="fab fa-facebook-messenger"></i>
                                                     </button>
@@ -534,9 +608,19 @@ export default function CustomerList({ customers, onSelectCustomer, onGoToChat }
                                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${c.status === 'Won / Enrolled' ? 'bg-green-500' : 'bg-[#C9A34E] animate-pulse'}`}></div>
-                                                <span className="text-[9px] font-bold text-white/40">{c.agent}</span>
+                                                <span className="text-[9px] font-bold text-white/40">{c.agent || 'Unassigned'}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
+                                                <a
+                                                    href={`https://business.facebook.com/latest/inbox/all?asset_id=113042456073167&selected_item_id=${(c.facebookId || c.id || '').replace('t_', '')}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="w-7 h-7 rounded-md bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center hover:bg-[#1877F2]/20 hover:scale-110 transition-all text-[10px]"
+                                                    title="Open in Meta Business Suite"
+                                                >
+                                                    <i className="fab fa-facebook-f"></i>
+                                                </a>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onGoToChat && onGoToChat(c._raw); }}
                                                     className="w-7 h-7 rounded-md bg-[#C9A34E]/10 text-[#C9A34E] flex items-center justify-center hover:bg-[#C9A34E] hover:text-[#0A1A2F] transition-all text-[10px]"

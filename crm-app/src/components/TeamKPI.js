@@ -379,7 +379,33 @@ export default function TeamKPI({ customers = [] }) {
                             )}
                         </div>
 
-                        <div className="mt-10 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 text-center">
+                        <div className="mt-8 flex justify-end">
+                            <button
+                                onClick={() => {
+                                    const now = new Date();
+                                    let sd = '';
+                                    if (timeframe === 'today') sd = new Date(now.setHours(0, 0, 0, 0)).toISOString().split('T')[0];
+                                    else if (timeframe === 'weekly') {
+                                        const past = new Date(now);
+                                        past.setDate(past.getDate() - 7);
+                                        sd = past.toISOString().split('T')[0];
+                                    }
+                                    else if (timeframe === 'monthly') sd = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+                                    onInvestigate && onInvestigate({
+                                        agent: selectedAgentDetail.agent.name,
+                                        startDate: sd,
+                                        endDate: ''
+                                    });
+                                    setSelectedAgentDetail(null);
+                                }}
+                                className="px-6 py-4 bg-[#C9A34E] text-[#0A1A2F] rounded-2xl font-black text-xs tracking-widest uppercase hover:scale-105 transition-all w-full flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(201,163,78,0.2)]"
+                            >
+                                <i className="fas fa-search"></i> Inspect these chats in CRM
+                            </button>
+                        </div>
+
+                        <div className="mt-6 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 text-center">
                             <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest leading-loose">
                                 <i className="fas fa-shield-alt mr-2"></i> Hybrid attribution system: Direct CRM matches + Statistical Meta Ads distribution.
                             </p>

@@ -122,6 +122,7 @@ model Conversation {
   participantName String?       @map("participant_name")
   participantId   String?       @map("participant_id")
   assignedAgent   String?       @map("assigned_agent")
+  isStarred       Boolean       @default(false) @map("is_starred")
   lastMessageAt   DateTime?     @map("last_message_at")
   unreadCount     Int           @default(0) @map("unread_count")
   assignedEmployeeId String?      @map("assigned_employee_id")
@@ -199,6 +200,7 @@ model Employee {
   updatedAt      DateTime  @updatedAt @map("updated_at")
   metadata       Json?     @default("{}")
   facebookName   String?   @map("facebook_name")
+  facebookId     String?   @unique @map("facebook_id")
   lineName       String?   @map("line_name")
   tasks                 Task[]
   respondedMessages     Message[]      @relation("MessageResponder")

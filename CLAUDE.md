@@ -1,7 +1,7 @@
 # CLAUDE.md — V School CRM: Project Reference
 
 > ไฟล์นี้สร้างเพื่อให้ Claude (และ AI agents) ใช้เป็น reference ในการทำงานกับโปรเจคนี้
-> อัปเดตล่าสุด: 2026-02-25
+> อัปเดตล่าสุด: 2026-03-04
 
 ---
 
@@ -67,6 +67,7 @@
 | `v_school_catalog.csv` | ข้อมูล catalog หลักสูตร |
 | `.venv/` | Python virtual environment |
 | `.agents/` | WARP agent workflows |
+| `crm-app/automation/` | **Playwright automation scripts** — scraper รันบน Mac host โดยตรง (ไม่ใช่ใน Next.js) |
 
 ### `crm-app/` Structure
 
@@ -78,6 +79,7 @@
 | `src/app/api/catalog/` | Product catalog |
 | `src/app/api/employees/` | จัดการพนักงาน (list, update `[id]`, delete `[id]`) |
 | `src/app/api/marketing/sync/` | Trigger Facebook Ads sync |
+| `src/app/api/marketing/chat/message-sender/` | **Agent attribution API** — รับ sender data จาก Playwright scraper → อัปเดต `messages.responder_id` ใน DB + JSON cache |
 | `src/app/api/analytics/team/` | Team performance metrics ตาม date range |
 | `src/app/api/events/` | **SSE stream** — real-time updates ผ่าน Redis pub/sub |
 | `src/app/api/webhooks/` | Facebook webhook receiver → enqueue BullMQ |
@@ -119,12 +121,19 @@
 | `python/event_processor.py` | Python event processor — token guard, slip detection, behavioral analysis |
 | `python/marketing_sync.py` | Bulk Facebook Ads API fetcher ด้วย retry + rate-limit |
 
+#### Automation (`crm-app/automation/`)
+Playwright scripts ที่รันบน **Mac host โดยตรง** — ต้องการ Chrome ที่เปิดด้วย `--remote-debugging-port=9222`:
+- `sync_agents_v2.js` — **Agent attribution scraper** — attach to Chrome CDP → อ่าน "ส่งโดย [ชื่อ]" labels จาก Facebook Business Suite → POST ไป `message-sender` API → อัปเดต `messages.responder_id` (CLI: `--limit=N`)
+
 #### Scripts (`crm-app/scripts/`)
-39 ไฟล์ utility สำหรับ data migration และ diagnostics:
+42 ไฟล์ utility สำหรับ data migration และ diagnostics:
 - `full_initial_sync.js` — Full initial data sync
 - `sync_sales_from_sheets.ts` — นำเข้าข้อมูลการขายจาก Google Sheets
 - `bulk_update_aliases.js` — อัปเดต alias ลูกค้าแบบ bulk
 - `find_unique_agents.js` — หา unique agent names จาก conversations
+- `check_db_feb_distribution.js` — แสดง distribution ของ conversations รายวัน (ใช้เช็ค gap ใน DB)
+- `sync_fb_missing_range.js` — ดึง conversations ที่หายไปจาก FB API แล้ว upsert ลง DB + cache (CLI: `--from`, `--to`, `--dry-run`)
+- `rebuild_cache_from_db.js` — Rebuild JSON cache จาก DB (CLI: `--all`, `--from`, `--to`, `--dry-run`)
 
 #### Data & Config
 | Path | หน้าที่ |
@@ -133,6 +142,13 @@
 | `cache/` | Local JSON mirror ของ database (cache-first reads) |
 | `cache/customer/{id}/` | Profile, wallet, inventory, chathistory ต่อลูกค้า |
 | `docs/` | Arc42 architecture docs + 15 ADRs + incident log + performance reports |
+
+> **⚠️ DB Schema Gotcha (confirmed 2026-03-03):**
+> Actual PostgreSQL table/column names ใช้ **snake_case** ทั้งหมด — ไม่ใช่ PascalCase ตาม Prisma model
+> - Tables: `conversations`, `messages`, `customers` (ไม่ใช่ `"Conversation"`)
+> - Columns: `last_message_at`, `conversation_id`, `participant_id`, `assigned_agent` (ไม่ใช่ camelCase)
+> - `customers` table **ไม่มี** column `agent` — agent เก็บใน `conversations.assigned_agent`
+> - Scripts ที่ query ตรงต้องใช้ snake_case เสมอ; Prisma จัดการ mapping ให้เฉพาะผ่าน ORM layer
 
 ---
 
@@ -198,6 +214,8 @@ React Component → Next.js API route
 | `suggestProactiveTasks()` | `utils/BusinessAnalyst.js` | วิเคราะห์ intent → Task type + Priority |
 | `suggestLabels()` | `utils/BusinessAnalyst.js` | สร้าง Facebook labels สูงสุด 3 ตัว |
 | `generateSmartReply()` | `utils/BusinessAnalyst.js` | สร้าง Thai reply ในนาม persona |
+| `POST /api/marketing/chat/message-sender` | `app/api/marketing/chat/message-sender/route.js` | รับ sender list จาก scraper → lookup conv → อัปเดต `responder_id` ใน DB + cache |
+| `updateCache()` | `message-sender/route.js` (inline) | อัปเดต `fromName` ใน JSON chathistory ด้วย 3 strategies (A: PSID folder, B: filename, C: full-text scan) |
 
 ### Agent Detection Priority (ใน `db.js`)
 ```
@@ -208,6 +226,37 @@ React Component → Next.js API route
    ├── Thai: /ระบบมอบหมายแชทนี้ให้กับ (.+) ผ่านระบบอัตโนมัติ/
    └── English: /assigned this conversation to (.+)$/
 4. "Unassigned"               (fallback)
+```
+
+### Global Message Attribution (ADR-022) — ใน `message-sender/route.js`
+Playwright scraper อ่าน "ส่งโดย [ชื่อ]" จาก Business Suite UI → POST ไป API พร้อม `{ conversationId, senders, participantId }` API ทำงาน 2 layer:
+
+**DB Lookup (หา message record ที่ต้องอัปเดต `responder_id`):**
+```
+Strategy 1a: conv-scoped search — prisma.message.findMany({ where: { conversationId: conv.id } })
+             → หาข้อความที่ตรงกับ msgText (≥15 chars เพื่อลด false positives)
+
+Strategy 1b: global search — prisma.message.findFirst({ where: { content: { contains: msgText } } })
+             → fallback เมื่อ conv ID ไม่ match (เนื่องจาก FB ID Namespace Mismatch)
+             → ใช้เมื่อ msgText ≥15 chars เท่านั้น
+```
+
+**Conv Lookup (หา conversation record เพื่อกำหนด scope):**
+```
+ค้นหาด้วย OR conditions:
+  conversationId = rawConvId
+  conversationId = "t_{rawConvId}"
+  participantId  = rawConvId
+  participantId  = incomingPsid    (ถ้า scraper ส่ง PSID มา)
+  conversationId = incomingPsid
+  conversationId = "t_{incomingPsid}"
+```
+
+**Cache Update (sync JSON cache หลัง DB update):**
+```
+Strategy A: Direct PSID folder — FB_CHAT_{psid}/chathistory/ → O(1) เมื่อมี PSID
+Strategy B: Filename match — scan folders หา file ที่ชื่อ = rawConvId
+Strategy C: Full-text scan — pre-filter raw.includes(prefix15) ก่อน JSON.parse → update fromName
 ```
 
 ### Session Boundary Logic (ใน `chatService.js`)
@@ -281,6 +330,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 | ADR-011 | **Product-Matched Attribution** | แยก Direct Revenue vs Cross-Sell Revenue |
 | ADR-014 | **Hybrid Agent Detection** | Regex signatures → Gemini fallback |
 | ADR-015 | **3-Layer Sync** | Webhook (reactive) + Cron :10 (consistency) + Cache (speed) |
+| ADR-022 | **Global Message Text Attribution** | เมื่อ conv ID ไม่ match (FB ID namespace mismatch) → ใช้ message text search ≥15 chars แทน |
 
 ---
 
@@ -292,12 +342,26 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 3. **Sync I/O** — `fs.readFileSync/writeFileSync` ควรเป็น `async/await`
 4. **Silent Catch** — `catch(e) {}` ซ่อน DB failures, ควร log + propagate
 5. **Naming Inconsistency** — snake_case และ camelCase ปนกันใน JS layer
-6. **Scripts Folder รก** — 39 ไฟล์ Python/TS/JS ปนกันไม่มี organization
+6. **Scripts Folder รก** — 42 ไฟล์ Python/TS/JS ปนกันไม่มี organization
 
 ### Known Business/Tracking Gaps
 1. **LINE AO Gap** — ลูกค้าที่ปิดการขายผ่าน LINE ไม่ถูก report กลับ Facebook → ROAS under-report (จริง 5.29x vs system รายงาน 1.54x)
 2. **Lead Quality** — Package campaigns ได้ leads 230% of target แต่ conversion 27% เท่านั้น
 3. **Creative Fatigue** — ไม่มี alert เมื่อ creative รันนานกว่า 30 วัน → ad fatigue ไม่ถูก detect
+
+### Agent Attribution — ID Namespace Mismatch (discovered 2026-03-04)
+> **สำคัญมาก** สำหรับ `sync_agents_v2.js` และ `message-sender/route.js`
+
+| Layer | ID Format | ตัวอย่าง |
+|---|---|---|
+| Facebook Business Suite (React Fiber `threadID`) | Global Facebook User ID (9–15 หลัก) | `540006679`, `100015473020711` |
+| Facebook Graph API / CRM DB (`participantId`) | Page-Scoped ID — PSID (16–17 หลัก) | `25726727506923789` |
+| CRM cache folder (`FB_CHAT_{id}`) | PSID (จาก Graph API) | `FB_CHAT_25726727506923789` |
+
+- สองระบบนี้ **ไม่มีตัวเลขที่ตรงกัน** — ต้อง map ผ่าน Facebook Graph API (`/{page}/conversations?user_id={globalId}`) หรือใช้ global message text search แทน
+- ผลการทดสอบ: **2/127** scraper threads match CRM โดย ID ตรง (เฉพาะ PSIDs `100002428547834`, `100006632796012`)
+- **Workaround ปัจจุบัน**: Global DB message search (Strategy 1b) + full-text cache scan (Strategy C) ใน `message-sender/route.js`
+- Business Suite URL ไม่ expose PSID ใน query params เมื่อ navigate ด้วย click — `selected_item_id` จะว่างเปล่า
 
 ---
 
@@ -314,6 +378,23 @@ npm run dev                   # http://localhost:3000
 # Background worker (แยก terminal)
 npm run worker                # BullMQ event processor
 ```
+
+### Data Sync Runbook (ใช้เมื่อ cache/DB มีช่องว่าง)
+```bash
+cd crm-app
+
+# 1. เช็ค distribution ปัจจุบัน
+node scripts/check_db_feb_distribution.js
+
+# 2. ดึงข้อมูลที่หายจาก Facebook API → save ลง DB + cache
+node scripts/sync_fb_missing_range.js --from 2026-02-20 --to 2026-02-26
+# (dry-run ก่อน: --dry-run)
+
+# 3. Rebuild cache จาก DB (กรณี cache ไม่ sync กับ DB)
+node scripts/rebuild_cache_from_db.js --all
+# (เฉพาะ range: --from 2026-02-21 --to 2026-03-03)
+```
+> **Note:** scripts เหล่านี้ต้องรันบน Mac โดยตรง (ไม่ใช่ใน Claude sandbox) เพราะต้องเชื่อมต่อ `localhost:5432` และ `graph.facebook.com`
 
 ### Key Docs
 - Architecture: `crm-app/docs/architecture/arc42-main.md`
