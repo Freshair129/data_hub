@@ -32,23 +32,23 @@ export async function GET(request) {
         // Active Admins Look-up
         const activeAdmins = await prisma.employee.findMany({
             where: {
-                status: 'Active',
+                status: 'ACTIVE',
                 OR: [
-                    { role: 'Agent' },
-                    { role: 'Admin' },
-                    { role: 'Manager' },
-                    { role: 'Management' }
+                    { role: 'AGENT' },
+                    { role: 'ADMIN' },
+                    { role: 'MANAGER' },
+                    { role: 'MANAGEMENT' }
                 ]
             },
             select: {
                 id: true,
-                employeeId: true,
+                employeeCode: true,
                 firstName: true,
                 lastName: true,
                 nickName: true,
                 role: true,
                 profilePicture: true,
-                facebookId: true
+                identities: true
             }
         });
 
@@ -62,15 +62,14 @@ export async function GET(request) {
         let globalResponseTimes = [];
 
         for (const emp of activeAdmins) {
-            // Metrics Query
-            // We use raw query here because of the complex participant vs responder logic needed
+            const fbId = String(emp.identities?.facebook?.psid || '');
             const metricsResult = await prisma.$queryRaw`
                 SELECT 
                     COUNT(*) as total_outbound_messages,
                     COUNT(DISTINCT conversation_id) as conversations_handled,
                     COUNT(DISTINCT DATE(created_at)) as active_days
                 FROM messages
-                WHERE (responder_id = ${emp.id} OR (from_id = ${emp.facebookId} AND from_id IS NOT NULL))
+                WHERE (responder_id = ${emp.id} OR (from_id = ${fbId} AND from_id IS NOT NULL))
                   AND created_at >= ${new Date(startDateStr)} AND created_at < ${new Date(endDateStr)}
             `;
 
@@ -103,7 +102,7 @@ export async function GET(request) {
                 FROM ordered_msgs
                 WHERE from_id != participant_id -- Any admin replied
                   AND prev_from_id = participant_id -- The previous message was a customer
-                  AND (responder_id = ${emp.id} OR (from_id = ${emp.facebookId} AND from_id IS NOT NULL))
+                  AND (responder_id = ${emp.id} OR (from_id = ${fbId} AND from_id IS NOT NULL))
                   AND (created_at - prev_time) <= INTERVAL '24 hours'
             `;
 
@@ -118,7 +117,7 @@ export async function GET(request) {
 
             reports.push({
                 id: emp.id,
-                employeeId: emp.employeeId,
+                employeeCode: emp.employeeCode,
                 name: emp.nickName || emp.firstName,
                 fullName: `${emp.firstName} ${emp.lastName}`,
                 role: emp.role,

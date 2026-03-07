@@ -1,0 +1,219 @@
+# DATA HUB - ID FORMATTING & NAMING CONVENTIONS
+# Standard Guidelines for Identifiers and Coding Conventions
+# ---------------------------------------------------------
+
+id_naming_conventions:
+
+  - category: "Customer Identifiers"
+    description: "Standardized cross-channel customer identifiers."
+    formats:
+      - name: "Customer ID (TVS-CUS)"
+        format: "TVS-CUS-[CHANNEL]-[YEAR]-[SERIAL]"
+        example: "TVS-CUS-FB-26-0123"
+        description: "Permanent internal identifier. CHANNEL corresponds to FB, LN, WB, etc."
+      - name: "origin_id"
+        description: "ID ของแหล่งที่มา (Source Attribution) ที่ทำให้ลูกค้าเข้าสู่ระบบครั้งแรก เช่น ad_id, post_id, qr_code_id หรือ lead_form_id เพื่อใช้ในการคำนวณ ROAS (Return on Ad Spend) ได้แม่นยำรายตัว"
+      - name: "content_id"
+        description: "ID ของสินค้าหรือบริการ (Product/Course) ที่ลูกค้าสนใจ ใช้ใน Meta Pixel / Catalog เพื่อทำ Dynamic Retargeting (ควรตรงกับ Menu ID หรือ SKU ในระบบ)"
+      - name: "Advanced Customer ID"
+        format: "TVS_{CHANNEL}_{ORIGIN}_{NameEn}_{ExtID}"
+        example: "TVS_FB_AD_John_123456"
+        description: "Semantic ID capturing channel and origin for better traceability. (ORIGIN mapping: AD, MSG, QR, FORM, REF)"
+      - name: "Member ID (Student ID)"
+        format: "MEM-[YY][AGENT][INTENT]-[SERIAL]"
+        example: "MEM-26BKKP-0001"
+        description: "Semantic ID สำหรับนักเรียน: [YY]=ปีสมัคร, [AGENT]=รหัสย่อ Agent (e.g., BKK), [INTENT]=(P=Pro/เชฟ, B=Business, H=Hobby), [SERIAL]=ลำดับ"
+
+  - category: "Academy & Kitchen Identifiers"
+    description: "มาตรฐานการตั้งรหัสสำหรับสูตรอาหารและเมนูอาหาร (Academy Level)"
+    formats:
+      - name: "Menu ID"
+        format: "[Cuisine][Category][Kitchen]-[Type][SERIAL]"
+        example: "THMDH-N001"
+        description: "รหัสเมนูอาการ: [Cuisine]=สัญชาติ (JP, TH), [Category]=ประเภท (AP=Appetizer, MD=Main Dish, DE=Dessert), [Kitchen]=ครัว (H=Hot, C=Cold), [Type]=สถานะ (N=Normal, S=Special)"
+      - name: "Recipe ID"
+        format: "RCP-[Menu ID]-[CHEFNAME]-[Sub/Version]"
+        example: "RCP-THMDH-N001-KEN-01"
+        description: "รหัสสูตรอาหาร: อ้างอิง Menu ID พร้อมส่วนขยาย (01=ตัวหลัก, 02=ซอส, V2=ปรับสูตร)"
+
+  - category: "Conversational Identifiers"
+    description: "Multi-layered ID hierarchy aligning with Meta Graph API and internal models."
+    formats:
+      - name: "Conversation ID (FB Thread)"
+        format: "t_{15_digit_uid}"
+        example: "t_10163799966326505"
+        description: "Raw Facebook threadID used สำหรับ deep links เป็น Primary Key หลักในการเชื่อมโยงข้อมูลแชท"
+      - name: "Message ID (responseId)"
+        format: "mid.$c... หรือ m_..."
+        description: "Facebook's responseId ดึงผ่าน React Fiber เพื่อความแม่นยำ 100% ในระดับข้อความ และใช้สำหรับ Deduplication"
+      - name: "Advanced Conversation ID"
+        format: "{CHANNEL}_TVS_{ORIGIN}_{Timestamp}_{ExtID}"
+        example: "FB_TVS_AD_1712345678_12345"
+        description: "Traceable conversational sessioning across channels."
+      - name: "PSID / Participant ID"
+        format: "{17_digit_psid}"
+        description: "Page-Scoped ID serving as the primary webhook identifier."
+      - name: "Message ID"
+        format: "mid.$c... หรือ m_..."
+        description: "Exact exact-match identifier for individual messages ensuring deduplication."
+
+  - category: "AI & Session Identifiers"
+    description: "Smarter boundaries for AI context segmentation."
+    formats:
+      - name: "Session ID"
+        format: "session_{YYYYMMDD}_{HHMMSS}_{ExtID}"
+        description: "Boundaries created either by a 30-minute timeout or a change in ad intent."
+
+  - category: "Meta Native IDs"
+    description: "ตัวแปรประเภท String เสมอที่ผูกติดกับระบบ Facebook/Meta (ข้อระวัง: เกิดปัญหา ID Namespace Mismatch ระหว่าง React Fiber และ Graph API)"
+    formats:
+      - name: "fb_campaign_id, fb_adset_id, fb_ad_id"
+        description: "ID โฆษณาที่ได้จาก Meta Graph API"
+      - name: "psid (Page-Scoped ID)"
+        description: "ID ของผู้ใช้ที่ทักเข้ามาในเพจ (1 คนอาจมีหลาย PSID ถ้าทักหลายเพจ) รูปแบบ 16-17 หลัก ใช้คู่กับ Graph API และรับ Webhook"
+      - name: "fb_thread_id"
+        description: "ID ของห้องแชท (Conversation) รูปแบบ Global Facebook User ID (9-15 หลัก) ได้จากการอ่านค่า React Fiber (ข้อควรระวัง: ไม่ตรงกับ PSID จึงไม่สามารถนำมาเทียบเพื่อค้นหาลูกค้าโดยตรงได้)"
+      - name: "fb_mid (Message ID)"
+        description: "ID ของข้อความแต่ละข้อความ ใช้เป็นกุญแจสำคัญในการทำ Idempotency ป้องกันข้อความซ้ำ"
+      - name: "reply_to_id"
+        description: "ID ของข้อความต้นทางที่ข้อความนี้ส่งกลับไป (Parent Message ID) ใช้สำหรับทำ Message Threading และช่วยให้ AI เข้าใจบริบทว่ากำลังตอบคำถามไหนอยู่"
+      - name: "lead_id"
+        description: "ID จาก Facebook Lead Form (กรณีใช้ Lead Ads) ใช้สำหรับกวาดข้อมูลลูกค้าเข้า CRM โดยอัตโนมัติ"
+
+  - category: "Internal System IDs"
+    description: "ID ภายในระบบ CRM ใช้ในการเชื่อมโยงและอ้างอิงข้อมูล"
+    formats:
+      - name: "global_user_id"
+        format: "UUID"
+        description: "ID หลักของลูกค้าในระบบ CRM ใช้เป็นศูนย์กลางในการผูก psid หลายๆ ตัวเข้าด้วยกัน"
+      - name: "agent_id (Internal System ID)"
+        format: "UUID"
+        description: "Primary Key หลักของพนักงานหรือตัวแทน (Agent) ในฐานข้อมูล CRM ใช้ในการเชื่อมความสัมพันธ์ (Relations) ทั้งหมด"
+      - name: "agent_code"
+        format: "AGT-[TYPE]-[YEAR]-[SERIAL]"
+        example: "AGT-H-26-003, AGT-AI-G4-001"
+        description: |
+          รหัสตัวแทนระบุประเภทผู้ใช้งาน:
+          - [TYPE]: H = Human (คน), AI = Artificial Intelligence (AI เช่น Gemini 2.0)
+          - [YEAR]: ปีที่ลงทะเบียน (เช่น 26) สำหรับ AI อาจใช้รหัสรุ่น (เช่น G4 = Gemini 4, M4 = GPT-4)
+          - [SERIAL]: ลำดับรันนิ่ง (001-999)
+      - name: "employee_id (emp_id)"
+        format: "String (HR Standard)"
+        example: "TVS-MKT-001"
+        description: "รหัสพนักงาน สำหรับผู้ที่มีสถานะเป็นพนักงานประจำ (Employee) ที่มีเงินเดือนและผูกกับระบบ HR"
+      - name: "order_id"
+        format: "UUID"
+        description: "รหัสอ้างอิงคำสั่งซื้อในระบบ CRM"
+      - name: "task_id"
+        format: "TSK-[YYYYMMDD]-[SERIAL]"
+        example: "TSK-20260307-001"
+        description: "รหัสอ้างอิงงาน (Task) ที่ต้องดำเนินการ (Actionable) เช่น การ Follow-up ลูกค้า, การตรวจสอบสลิป"
+      - name: "note_id"
+        format: "NOTE-[YYYYMMDD]-[RANDOM]"
+        example: "NOTE-20260307-X12"
+        description: "รหัสบันทึกภายใน (Internal Note) สำหรับเก็บคอมเม้นต์, คำสั่งจากผู้จัดการ (Manager Instruction) หรือบันทึกช่วยจำที่ไม่ใช่ 'งาน' ที่ต้องขีดฆ่าทิ้ง แต่เป็นข้อมูลประกอบ"
+      - name: "ticket_id"
+        format: "TKT-[CHANNEL]-[YEAR]-[SERIAL]"
+        example: "TKT-FB-26-005"
+        description: "รหัสตั๋วสนับสนุน (Support Ticket) ใช้สำหรับติดตามเคสปัญหาหรือคำขอพิเศษจากลูกค้า"
+      - name: "payment_id"
+        format: "PAY-[YYYYMMDD]-[SERIAL]"
+        example: "PAY-20260308-001"
+        description: "รหัสอ้างอิงการชำระเงิน (Financial Record) ใช้สำหรับผูก Order เข้ากับ Transaction หลายรายการ (เช่น มัดจำ + จ่ายจบ)"
+      - name: "case_id"
+        format: "CASE-[YYYYMMDD]-[SERIAL]"
+        example: "CASE-20260307-001"
+        description: "รหัสเคสบริหารจัดการ (Case Management) ใช้เป็น 'ตู้คอนเทนเนอร์' สำหรับรวบรวมกลุ่มของ Ticket, Task และ Conversation ที่เกี่ยวข้องกันในหนึ่งเหตุการณ์ (เช่น เคสขอเงินคืน, เคสสมัครทุนการศึกษา) เพื่อให้เห็นภาพรวมของเหตุการณ์นั้นทั้งหมด"
+      - name: "responder_id"
+        format: "UUID (matches agent_id)"
+        description: "ID ของ Agent ผู้ตอบข้อความ บันทึกอยู่ในตาราง Message เพื่อใช้ทำ KPI Attribution"
+      - name: "Transient Mapping Key (Sent by)"
+        format: "String (Name/Nickname)"
+        description: "กุญแจชั่วคราวที่ได้จาก Scraper ('Sent by Aoi') ใช้สำหรับทำ Heuristic Matching เพื่อแปลงเป็น agent_id"
+
+  - category: "Product & Course SKUs"
+    description: "รูปแบบการตั้งชื่อรหัสสินค้าและคอร์สเรียนอ้างอิงจาก Product Catalog"
+    formats:
+      - name: "Standard Course ID"
+        format: "TVS-[CATEGORY]-[PACK]-[SUBCAT]-[SERIAL]"
+        example: "TVS-JP-1FC-HC-20"
+        description: "รหัสคอร์สเรียนเดี่ยว (เช่น JP=Japan, 1FC=Full Course Pack 1, 2FC=Full Course Pack 1+2, SP=Special Course, MA=Management)"
+      - name: "Course Sub-Category Codes"
+        format: "H, C, SP, MA"
+        description: "H = Hot Kitchen, C = Cold Kitchen, SP = Special Courses, MA = Management"
+      
+  - category: "Product Cross-Link & Fallback Logic"
+    description: "ตรรกะการเชื่อมโยงข้อมูลข้ามโมดูล (Package -> Course -> Menu) และแผนสำรองหากข้อมูลไม่ครบ"
+    logic_rules:
+      - name: "Follow-up Engagement"
+        description: "การ Follow-up ลูกค้าให้บันทึกเป็น Task (TSK) โดยใช้ Type: FOLLOW_UP เพื่อให้สามารถ Track สถานะ Finished/Pending ได้"
+      - name: "Manager-to-Agent Feedback"
+        description: "คำสั่งหรือคอมเม้นต์จาก Manager ให้บันทึกเป็น Note (NOTE) และผูกกับ Case ID หรือ Task ID นั้นๆ เพื่อใช้เป็น Audit Trail และประวัติการสอนงาน (Coaching Log)"
+      - name: "Task Assignment Logic"
+        description: "เมื่อ Manager มอบหมายงาน (Assign) ระบบต้องบันทึก assignee_id (agent_id) และส่งการแจ้งเตือนไปยัง Agent คนนั้นๆ"
+      - name: "PKG-TO-COURSE Link"
+        description: "Package (PKG) ต้องมีฟิลด์เก็บรายการ Course IDs ที่รวมอยู่ในแพ็กเกจ (1:N หรือ N:N) เพื่อใช้ออกใบเสร็จและตัดสต็อกชุดวิชา"
+      - name: "COURSE-TO-MENU Link"
+        description: "Course ต้องระบุ Linked Menu IDs (RCP-...) ที่สอนในวิชานั้นๆ เพื่อดึงข้อมูลวัตถุดิบและสูตรอาหารมาแสดงผล"
+      - name: "Dependency Fallback Strategy"
+        description: |
+          ในกรณีที่ไม่สามารถระบุ Menu ID เจาะจงได้ (เช่น ข้อมูลยังไม่นิ่ง หรือเป็นคอร์สเปิดใหม่) ให้ใช้ลำดับ Fallback ดังนี้:
+          1. Fallback to SUBCATEGORY (e.g., H, C) - เพื่อให้รู้ว่าเป็นกลุ่มครัวร้อนหรือครัวเย็น
+          2. Fallback to CATEGORY (e.g., JP, TH) - เพื่อให้รู้ว่าเป็นสัญชาติอาหารอะไร
+          3. Fallback to UNKNOWN - ระบบจะแจ้งเตือนให้ Admin ทำการ Mapping ข้อมูล
+    
+    schema_requirements:
+      - model: "Product (Course)"
+        adds:
+          - "linkedMenuIds: String[] (เก็บรายการรหัสเมนู/สูตรอาหาร)"
+          - "fallbackCategory: String (หมวดหมู่หลักสำรอง)"
+          - "fallbackSubCategory: String (หมวดหมู่ย่อยสำรอง)"
+      - model: "Product (Package)"
+        adds:
+          - "bundleItems: Product[] (Relation self-link หรือ Json รายการรหัส Course ID)"
+      - name: "Course Dependencies (Mapping)"
+        description: "คอร์สเรียน (Course ID) ต้องระบุว่าเชื่อมโยงกับ Menu ID ใดบ้าง เพื่อใช้ในการจัดเตรียมวัตถุดิบและสูตรอาหาร (e.g., TVS-JP-1FC-HC-20 contains Menu IDs [THMDH-N001, JPAP-C-N002])"
+      - name: "Package / Bundle ID"
+        format: "TVS-PKG[NO]-[NAME]-[HOURS]H"
+        example: "TVS-PKG01-BUFFET-30H"
+        description: "รหัสแพ็กเกจรวมคอร์สเรียน (PKG = แพ็กเกจ, ตามด้วยตัวเลขแพ็กเกจ, คำย่อแพ็กเกจ, และเวลาเรียนชั่วโมงลงท้ายด้วย H)"
+
+# ---------------------------------------------------------
+# CASING CONVENTIONS & API ORIGINS
+# ---------------------------------------------------------
+casing_conventions:
+
+  - category: "Casing Standards (มาตรฐานการตั้งชื่อตัวแปร)"
+    rules:
+      - name: "Database Columns & Webhook Payloads"
+        case: "snake_case"
+        example: "customer_id, fb_thread_id, transaction_id"
+        description: "ใช้เป็นมาตรฐานสำหรับการตั้งชื่อ Column ในฐานข้อมูล (PostgreSQL) และ Payload ที่รับส่งผ่าน JSON/Webhook"
+      - name: "Application Code (JavaScript/Node.js/Prisma)"
+        case: "camelCase"
+        example: "customerId, fbThreadId, transactionId"
+        description: "ใช้เป็นมาตรฐานเมื่อเขียนโค้ด Logic ภายในแอปพลิเคชัน"
+
+  - category: "ID Origins (ที่มาของ ID ต่างๆ)"
+    rules:
+      - name: "attachment_id / document_id"
+        origin: "External (Meta Graph API)"
+        description: "Facebook เป็นคนสร้างและส่งมาให้ผ่าน Webhook เมื่อลูกค้าส่งรูปภาพ ไฟล์ หรือเสียง เพื่อให้ระบบเราเอา ID นี้ไปดึงไฟล์ต้นฉบับได้"
+      - name: "transaction_id"
+        origin: "Internal / External (SlipOK)"
+        description: "ระบบสร้างเองเป็น UUID เป็นหลัก (สำหรับธุรกรรมทั่วไป) แต่ถ้ามีการสแกนสลิป อาจใช้รหัสอา้งอิงจาก SlipOK มาเก็บคู่กันเพื่อการตรวจสอบ (Reconciliation)"
+      - name: "fb_thread_id"
+        origin: "External (Meta)"
+        description: "ยืนยันใช้รูปแบบ t_{15_digit_uid} เพื่อให้ตรงกับมาตรฐาน Facebook Business Suite ตามที่กำหนดไว้"
+
+  - category: "Audit & Lifecycle Identifiers"
+    description: "ID สำหรับการติดตามสถานะระบบและการซิงค์ข้อมูล (Observability)"
+    formats:
+      - name: "sync_id / trace_id"
+        format: "SYNC-[TYPE]-[YYYYMMDD]-[RANDOM]"
+        example: "SYNC-ADS-20260307-A92B"
+        description: "รหัสอ้างอิงการซิงค์ข้อมูลแต่ละรอบ (Batch) ใช้สำหรับ Audit และการแก้ปัญหาเมื่อการซิงค์ในรอบนั้นๆ เกิดข้อผิดพลาด (Traceability)"
+      - name: "asset_id"
+        format: "AST-[TYPE]-[SERIAL]"
+        example: "AST-IMG-001"
+        description: "รหัสอ้างอิงไฟล์มัลติมีเดีย (Media Asset) เช่น รูปภาพสลิป, รูปหน้าจอลูกค้า, ไฟล์เมนูอาหาร เพื่อใช้จัดการสตอเรจและค้นหาไฟล์ได้ง่ายขึ้น"

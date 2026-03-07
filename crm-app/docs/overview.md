@@ -3,6 +3,7 @@
 ### 📗 Technical Infrastructure (arc42/C4 Model)
 The Single Source of Truth for system architecture, data flow, and technical decisions.
 👉 [**Read the Architecture Documentation**](./architecture/arc42-main.md)
+👉 [**ID & Naming Standards**](./id_standards.yaml)
 
 ---
 
@@ -122,3 +123,4 @@ Major technical choices and their rationale.
 | **020** | Threading Standard | Unified `t_THREAD_ID` mapping and Deep-Sync logic. |
 | **021** | Admin PSIDs | Automated mapping of Page-Scoped IDs to Employee records. |
 | **022** | Inbox Star System | Dual-sync strategy (PG + JSON) for Starred conversations feature. |
+| **023** | Differential Sync | Intelligent rate-limit and storage optimization for marketing data. |

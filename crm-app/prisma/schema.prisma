@@ -179,30 +179,37 @@ model ChatEpisode {
 }
 
 model Employee {
-  id             String    @id @default(cuid())
-  employeeId     String    @unique @map("employee_id")
-  agentId        String?   @unique @map("agent_id")
-  firstName      String    @map("first_name")
-  lastName       String    @map("last_name")
-  nickName       String?   @map("nick_name")
-  role           String    @default("sales")
-  department     String?
-  profilePicture String?   @map("profile_picture")
-  status         String    @default("Active")
-  joinDate       DateTime? @map("join_date")
-  email          String    @unique
-  phonePrimary   String?   @map("phone_primary")
-  lineId         String?   @map("line_id")
-  passwordHash   String    @map("password_hash")
-  permissions    Json      @default("{}")
-  performance    Json?     @default("{}")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  metadata       Json?     @default("{}")
-  facebookName   String?   @map("facebook_name")
-  facebookId     String?   @unique @map("facebook_id")
-  lineName       String?   @map("line_name")
-  tasks                 Task[]
+  id              String    @id @default(cuid())
+  employeeCode    String    @unique @map("employee_code") // e.g., V-EMP-001
+  
+  // Basic Info
+  firstName       String    @map("first_name")
+  lastName        String    @map("last_name")
+  nickName        String?   @map("nick_name")
+  email           String    @unique
+  phone           String?
+  department      String?
+  
+  // Auth & Security
+  passwordHash    String    @map("password_hash")
+  role            String    @default("AGENT") // ADMIN, MANAGER, AGENT
+  status          String    @default("ACTIVE") // ACTIVE, INACTIVE
+  
+  // External Identity Mapping (Unified)
+  identities     Json?     @default("{}") 
+  // { "facebook": { "psid": "...", "name": "..." }, "line": { "id": "..." } }
+  
+  // Settings & Metadata
+  settings        Json?     @default("{}")
+  permissions     Json?     @default("[]") // Granular array e.g. ["edit_orders"]
+  
+  // Audit & Analytics
+  lastLoginAt     DateTime? @map("last_login_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations (Maintain existing)
+  assignedTasks         Task[]         @relation("AgentTasks")
   respondedMessages     Message[]      @relation("MessageResponder")
   assignedConversations Conversation[] @relation("ConversationAssignee")
   closedOrders          Order[]        @relation("OrderCloser")
@@ -410,7 +417,7 @@ model Task {
   aiContext   Json?     @map("ai_context")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
-  assignee    Employee? @relation(fields: [assigneeId], references: [id])
+  assignee    Employee? @relation("AgentTasks", fields: [assigneeId], references: [id])
   customer    Customer? @relation(fields: [customerId], references: [id])
 
   @@map("tasks")
@@ -442,5 +449,16 @@ model AuditLog {
 
   @@index([action, createdAt])
   @@index([target])
+
   @@map("audit_logs")
 }
+
+// model ChatEmbedding {
+//   id             String   @id @default(cuid())
+//   conversationId String   @unique @map("conversation_id")
+//   content        String   
+//   embedding      Unsupported("vector(768)")?
+//   createdAt      DateTime @default(now()) @map("created_at")
+// 
+//   @@map("chat_embeddings")
+// }

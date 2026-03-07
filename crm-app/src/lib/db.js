@@ -24,6 +24,7 @@ import { readCacheList, readCacheEntry } from './cacheSync.js';
 const { Pool } = pg;
 
 const DB_ADAPTER = process.env.DB_ADAPTER || 'json';
+const DISABLE_LOCAL_CACHE = process.env.DISABLE_LOCAL_CACHE === 'true';
 const DATA_DIR = path.join(process.cwd(), 'cache');
 
 // ─── Lazy Prisma Loader ────────────────────────────────────
@@ -93,6 +94,10 @@ export async function getAllCustomers() {
     }
 
     // Cache/JSON Fallback using cacheSync
+    if (DISABLE_LOCAL_CACHE) {
+        console.warn('[DB] Local Cache is DISABLED. Returning empty list.');
+        return [];
+    }
     const cached = readCacheList('customer');
     if (cached.length > 0) {
         return cached.map(c => {
@@ -125,6 +130,8 @@ export async function getChatHistory(customerId) {
         }
     }
     // Cache Fallback
+    if (DISABLE_LOCAL_CACHE) return [];
+
     const cached = readCacheEntry(`customer/${customerId}/chathistory`, 'all'); // Or specific conv if we knew it
     if (cached) return cached.conversations || [];
 
@@ -183,6 +190,8 @@ export async function createTask(taskData) {
     }
 
     // JSON Fallback
+    if (DISABLE_LOCAL_CACHE) throw new Error('Database error and Local Cache is DISABLED');
+
     const taskDir = path.join(DATA_DIR, 'tasks');
     if (!fs.existsSync(taskDir)) fs.mkdirSync(taskDir, { recursive: true });
     const taskId = taskData.taskId || `TSK-${Date.now()}`;
@@ -213,6 +222,8 @@ export async function getCustomerById(customerId) {
     }
 
     // Cache/JSON Fallback (Split files: profile + wallet + ...)
+    if (DISABLE_LOCAL_CACHE) return null;
+
     const cachedProfile = readCacheEntry(`customer/${customerId}`, 'profile');
     if (cachedProfile) {
         // Enforce same shape as Prisma for UI compatibility
@@ -244,6 +255,7 @@ export async function upsertCustomer(data) {
             });
         }
     }
+    if (DISABLE_LOCAL_CACHE) throw new Error('Database error and Local Cache is DISABLED');
     return saveCustomerToJSON(data);
 }
 
@@ -256,7 +268,7 @@ export async function getAllEmployees() {
         const prisma = await getPrisma();
         if (prisma) return prisma.employee.findMany();
     }
-    return getAllEmployeesFromJSON();
+    return []; // JSON Fallback removed for security
 }
 
 export async function getEmployeeByEmail(email) {
@@ -264,9 +276,25 @@ export async function getEmployeeByEmail(email) {
         const prisma = await getPrisma();
         if (prisma) return prisma.employee.findUnique({ where: { email } });
     }
-    // JSON lookup
-    const employees = await getAllEmployeesFromJSON();
-    return employees.find(e => e.contact_info?.email === email || e.email === email) || null;
+    return null; // JSON Fallback removed for security
+}
+
+export async function getEmployeeByFacebookId(facebookId) {
+    if (DB_ADAPTER === 'prisma') {
+        const prisma = await getPrisma();
+        if (prisma) {
+            // New check inside identities JSON
+            return prisma.employee.findFirst({
+                where: {
+                    identities: {
+                        path: ['facebook', 'psid'],
+                        equals: String(facebookId)
+                    }
+                }
+            });
+        }
+    }
+    return null; // JSON Fallback removed for security
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -357,6 +385,7 @@ export async function getAllProducts() {
             }
         }
     }
+    if (DISABLE_LOCAL_CACHE) return [];
     const cached = readCacheList('products');
     if (cached.length > 0) return cached;
     return getProductsFromJSON();
@@ -377,6 +406,7 @@ export async function getAllCampaigns() {
             }
         }
     }
+    if (DISABLE_LOCAL_CACHE) return [];
     return readCacheList('ads/campaign');
 }
 
@@ -394,6 +424,7 @@ export async function getMarketingSummary() {
             }
         }
     }
+    if (DISABLE_LOCAL_CACHE) return {};
     return readCacheEntry('analytics', 'summary')?.marketing || {};
 }
 
@@ -409,6 +440,7 @@ export async function writeAuditLog(entry) {
         }
     }
     // JSON Fallback: Append to JSONL
+    if (DISABLE_LOCAL_CACHE) return;
     const logDir = path.join(DATA_DIR, 'logs');
     if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
     const logFile = path.join(logDir, 'audit.jsonl');
@@ -431,6 +463,7 @@ export async function writeErrorLog(entry) {
         }
     }
     // JSON Fallback
+    if (DISABLE_LOCAL_CACHE) return;
     const logDir = path.join(DATA_DIR, 'logs');
     if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
 
@@ -453,6 +486,7 @@ export async function getErrorLogs(filter = {}) {
         }
     }
     // JSON Read (Last 100 lines from today's log)
+    if (DISABLE_LOCAL_CACHE) return [];
     const logDir = path.join(DATA_DIR, 'logs');
     const dateStr = new Date().toISOString().slice(0, 10);
     const logFile = path.join(logDir, `errors_${dateStr}.jsonl`);

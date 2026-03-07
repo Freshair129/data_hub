@@ -209,6 +209,10 @@ export async function syncChat(conversationId) {
                     // Logic to update assignment (Self-calling a local assignment function)
                     await performAgentAssignment(sanitizedConvId, result.suggested_agent, true);
                 }
+
+                // [NEW] Index for Semantic Search
+                // Using messages from the current sync batch
+                await analyst.syncVector(sanitizedConvId, messages);
             }
         } catch (aiErr) {
             console.error('[AI] Assignment Detection Error:', aiErr);

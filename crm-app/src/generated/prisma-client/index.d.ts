@@ -2929,14 +2929,14 @@ export namespace Prisma {
    */
 
   export type EmployeeCountOutputType = {
-    tasks: number
+    assignedTasks: number
     respondedMessages: number
     assignedConversations: number
     closedOrders: number
   }
 
   export type EmployeeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tasks?: boolean | EmployeeCountOutputTypeCountTasksArgs
+    assignedTasks?: boolean | EmployeeCountOutputTypeCountAssignedTasksArgs
     respondedMessages?: boolean | EmployeeCountOutputTypeCountRespondedMessagesArgs
     assignedConversations?: boolean | EmployeeCountOutputTypeCountAssignedConversationsArgs
     closedOrders?: boolean | EmployeeCountOutputTypeCountClosedOrdersArgs
@@ -2956,7 +2956,7 @@ export namespace Prisma {
   /**
    * EmployeeCountOutputType without action
    */
-  export type EmployeeCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type EmployeeCountOutputTypeCountAssignedTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskWhereInput
   }
 
@@ -13096,148 +13096,112 @@ export namespace Prisma {
 
   export type EmployeeMinAggregateOutputType = {
     id: string | null
-    employeeId: string | null
-    agentId: string | null
+    employeeCode: string | null
     firstName: string | null
     lastName: string | null
     nickName: string | null
-    role: string | null
-    department: string | null
-    profilePicture: string | null
-    status: string | null
-    joinDate: Date | null
     email: string | null
-    phonePrimary: string | null
-    lineId: string | null
+    phone: string | null
+    department: string | null
     passwordHash: string | null
+    role: string | null
+    status: string | null
+    lastLoginAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
-    facebookName: string | null
-    facebookId: string | null
-    lineName: string | null
   }
 
   export type EmployeeMaxAggregateOutputType = {
     id: string | null
-    employeeId: string | null
-    agentId: string | null
+    employeeCode: string | null
     firstName: string | null
     lastName: string | null
     nickName: string | null
-    role: string | null
-    department: string | null
-    profilePicture: string | null
-    status: string | null
-    joinDate: Date | null
     email: string | null
-    phonePrimary: string | null
-    lineId: string | null
+    phone: string | null
+    department: string | null
     passwordHash: string | null
+    role: string | null
+    status: string | null
+    lastLoginAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
-    facebookName: string | null
-    facebookId: string | null
-    lineName: string | null
   }
 
   export type EmployeeCountAggregateOutputType = {
     id: number
-    employeeId: number
-    agentId: number
+    employeeCode: number
     firstName: number
     lastName: number
     nickName: number
-    role: number
-    department: number
-    profilePicture: number
-    status: number
-    joinDate: number
     email: number
-    phonePrimary: number
-    lineId: number
+    phone: number
+    department: number
     passwordHash: number
+    role: number
+    status: number
+    identities: number
+    settings: number
     permissions: number
-    performance: number
+    lastLoginAt: number
     createdAt: number
     updatedAt: number
-    metadata: number
-    facebookName: number
-    facebookId: number
-    lineName: number
     _all: number
   }
 
 
   export type EmployeeMinAggregateInputType = {
     id?: true
-    employeeId?: true
-    agentId?: true
+    employeeCode?: true
     firstName?: true
     lastName?: true
     nickName?: true
-    role?: true
-    department?: true
-    profilePicture?: true
-    status?: true
-    joinDate?: true
     email?: true
-    phonePrimary?: true
-    lineId?: true
+    phone?: true
+    department?: true
     passwordHash?: true
+    role?: true
+    status?: true
+    lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
-    facebookName?: true
-    facebookId?: true
-    lineName?: true
   }
 
   export type EmployeeMaxAggregateInputType = {
     id?: true
-    employeeId?: true
-    agentId?: true
+    employeeCode?: true
     firstName?: true
     lastName?: true
     nickName?: true
-    role?: true
-    department?: true
-    profilePicture?: true
-    status?: true
-    joinDate?: true
     email?: true
-    phonePrimary?: true
-    lineId?: true
+    phone?: true
+    department?: true
     passwordHash?: true
+    role?: true
+    status?: true
+    lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
-    facebookName?: true
-    facebookId?: true
-    lineName?: true
   }
 
   export type EmployeeCountAggregateInputType = {
     id?: true
-    employeeId?: true
-    agentId?: true
+    employeeCode?: true
     firstName?: true
     lastName?: true
     nickName?: true
-    role?: true
-    department?: true
-    profilePicture?: true
-    status?: true
-    joinDate?: true
     email?: true
-    phonePrimary?: true
-    lineId?: true
+    phone?: true
+    department?: true
     passwordHash?: true
+    role?: true
+    status?: true
+    identities?: true
+    settings?: true
     permissions?: true
-    performance?: true
+    lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
-    metadata?: true
-    facebookName?: true
-    facebookId?: true
-    lineName?: true
     _all?: true
   }
 
@@ -13315,28 +13279,22 @@ export namespace Prisma {
 
   export type EmployeeGroupByOutputType = {
     id: string
-    employeeId: string
-    agentId: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName: string | null
-    role: string
-    department: string | null
-    profilePicture: string | null
-    status: string
-    joinDate: Date | null
     email: string
-    phonePrimary: string | null
-    lineId: string | null
+    phone: string | null
+    department: string | null
     passwordHash: string
-    permissions: JsonValue
-    performance: JsonValue | null
+    role: string
+    status: string
+    identities: JsonValue | null
+    settings: JsonValue | null
+    permissions: JsonValue | null
+    lastLoginAt: Date | null
     createdAt: Date
     updatedAt: Date
-    metadata: JsonValue | null
-    facebookName: string | null
-    facebookId: string | null
-    lineName: string | null
     _count: EmployeeCountAggregateOutputType | null
     _min: EmployeeMinAggregateOutputType | null
     _max: EmployeeMaxAggregateOutputType | null
@@ -13358,29 +13316,23 @@ export namespace Prisma {
 
   export type EmployeeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    employeeId?: boolean
-    agentId?: boolean
+    employeeCode?: boolean
     firstName?: boolean
     lastName?: boolean
     nickName?: boolean
-    role?: boolean
-    department?: boolean
-    profilePicture?: boolean
-    status?: boolean
-    joinDate?: boolean
     email?: boolean
-    phonePrimary?: boolean
-    lineId?: boolean
+    phone?: boolean
+    department?: boolean
     passwordHash?: boolean
+    role?: boolean
+    status?: boolean
+    identities?: boolean
+    settings?: boolean
     permissions?: boolean
-    performance?: boolean
+    lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    metadata?: boolean
-    facebookName?: boolean
-    facebookId?: boolean
-    lineName?: boolean
-    tasks?: boolean | Employee$tasksArgs<ExtArgs>
+    assignedTasks?: boolean | Employee$assignedTasksArgs<ExtArgs>
     respondedMessages?: boolean | Employee$respondedMessagesArgs<ExtArgs>
     assignedConversations?: boolean | Employee$assignedConversationsArgs<ExtArgs>
     closedOrders?: boolean | Employee$closedOrdersArgs<ExtArgs>
@@ -13389,85 +13341,67 @@ export namespace Prisma {
 
   export type EmployeeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    employeeId?: boolean
-    agentId?: boolean
+    employeeCode?: boolean
     firstName?: boolean
     lastName?: boolean
     nickName?: boolean
-    role?: boolean
-    department?: boolean
-    profilePicture?: boolean
-    status?: boolean
-    joinDate?: boolean
     email?: boolean
-    phonePrimary?: boolean
-    lineId?: boolean
+    phone?: boolean
+    department?: boolean
     passwordHash?: boolean
+    role?: boolean
+    status?: boolean
+    identities?: boolean
+    settings?: boolean
     permissions?: boolean
-    performance?: boolean
+    lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    metadata?: boolean
-    facebookName?: boolean
-    facebookId?: boolean
-    lineName?: boolean
   }, ExtArgs["result"]["employee"]>
 
   export type EmployeeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    employeeId?: boolean
-    agentId?: boolean
+    employeeCode?: boolean
     firstName?: boolean
     lastName?: boolean
     nickName?: boolean
-    role?: boolean
-    department?: boolean
-    profilePicture?: boolean
-    status?: boolean
-    joinDate?: boolean
     email?: boolean
-    phonePrimary?: boolean
-    lineId?: boolean
+    phone?: boolean
+    department?: boolean
     passwordHash?: boolean
+    role?: boolean
+    status?: boolean
+    identities?: boolean
+    settings?: boolean
     permissions?: boolean
-    performance?: boolean
+    lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    metadata?: boolean
-    facebookName?: boolean
-    facebookId?: boolean
-    lineName?: boolean
   }, ExtArgs["result"]["employee"]>
 
   export type EmployeeSelectScalar = {
     id?: boolean
-    employeeId?: boolean
-    agentId?: boolean
+    employeeCode?: boolean
     firstName?: boolean
     lastName?: boolean
     nickName?: boolean
-    role?: boolean
-    department?: boolean
-    profilePicture?: boolean
-    status?: boolean
-    joinDate?: boolean
     email?: boolean
-    phonePrimary?: boolean
-    lineId?: boolean
+    phone?: boolean
+    department?: boolean
     passwordHash?: boolean
+    role?: boolean
+    status?: boolean
+    identities?: boolean
+    settings?: boolean
     permissions?: boolean
-    performance?: boolean
+    lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    metadata?: boolean
-    facebookName?: boolean
-    facebookId?: boolean
-    lineName?: boolean
   }
 
-  export type EmployeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "employeeId" | "agentId" | "firstName" | "lastName" | "nickName" | "role" | "department" | "profilePicture" | "status" | "joinDate" | "email" | "phonePrimary" | "lineId" | "passwordHash" | "permissions" | "performance" | "createdAt" | "updatedAt" | "metadata" | "facebookName" | "facebookId" | "lineName", ExtArgs["result"]["employee"]>
+  export type EmployeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "employeeCode" | "firstName" | "lastName" | "nickName" | "email" | "phone" | "department" | "passwordHash" | "role" | "status" | "identities" | "settings" | "permissions" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["employee"]>
   export type EmployeeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tasks?: boolean | Employee$tasksArgs<ExtArgs>
+    assignedTasks?: boolean | Employee$assignedTasksArgs<ExtArgs>
     respondedMessages?: boolean | Employee$respondedMessagesArgs<ExtArgs>
     assignedConversations?: boolean | Employee$assignedConversationsArgs<ExtArgs>
     closedOrders?: boolean | Employee$closedOrdersArgs<ExtArgs>
@@ -13479,35 +13413,29 @@ export namespace Prisma {
   export type $EmployeePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Employee"
     objects: {
-      tasks: Prisma.$TaskPayload<ExtArgs>[]
+      assignedTasks: Prisma.$TaskPayload<ExtArgs>[]
       respondedMessages: Prisma.$MessagePayload<ExtArgs>[]
       assignedConversations: Prisma.$ConversationPayload<ExtArgs>[]
       closedOrders: Prisma.$OrderPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      employeeId: string
-      agentId: string | null
+      employeeCode: string
       firstName: string
       lastName: string
       nickName: string | null
-      role: string
-      department: string | null
-      profilePicture: string | null
-      status: string
-      joinDate: Date | null
       email: string
-      phonePrimary: string | null
-      lineId: string | null
+      phone: string | null
+      department: string | null
       passwordHash: string
-      permissions: Prisma.JsonValue
-      performance: Prisma.JsonValue | null
+      role: string
+      status: string
+      identities: Prisma.JsonValue | null
+      settings: Prisma.JsonValue | null
+      permissions: Prisma.JsonValue | null
+      lastLoginAt: Date | null
       createdAt: Date
       updatedAt: Date
-      metadata: Prisma.JsonValue | null
-      facebookName: string | null
-      facebookId: string | null
-      lineName: string | null
     }, ExtArgs["result"]["employee"]>
     composites: {}
   }
@@ -13902,7 +13830,7 @@ export namespace Prisma {
    */
   export interface Prisma__EmployeeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    tasks<T extends Employee$tasksArgs<ExtArgs> = {}>(args?: Subset<T, Employee$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    assignedTasks<T extends Employee$assignedTasksArgs<ExtArgs> = {}>(args?: Subset<T, Employee$assignedTasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     respondedMessages<T extends Employee$respondedMessagesArgs<ExtArgs> = {}>(args?: Subset<T, Employee$respondedMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     assignedConversations<T extends Employee$assignedConversationsArgs<ExtArgs> = {}>(args?: Subset<T, Employee$assignedConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     closedOrders<T extends Employee$closedOrdersArgs<ExtArgs> = {}>(args?: Subset<T, Employee$closedOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -13936,28 +13864,22 @@ export namespace Prisma {
    */
   interface EmployeeFieldRefs {
     readonly id: FieldRef<"Employee", 'String'>
-    readonly employeeId: FieldRef<"Employee", 'String'>
-    readonly agentId: FieldRef<"Employee", 'String'>
+    readonly employeeCode: FieldRef<"Employee", 'String'>
     readonly firstName: FieldRef<"Employee", 'String'>
     readonly lastName: FieldRef<"Employee", 'String'>
     readonly nickName: FieldRef<"Employee", 'String'>
-    readonly role: FieldRef<"Employee", 'String'>
-    readonly department: FieldRef<"Employee", 'String'>
-    readonly profilePicture: FieldRef<"Employee", 'String'>
-    readonly status: FieldRef<"Employee", 'String'>
-    readonly joinDate: FieldRef<"Employee", 'DateTime'>
     readonly email: FieldRef<"Employee", 'String'>
-    readonly phonePrimary: FieldRef<"Employee", 'String'>
-    readonly lineId: FieldRef<"Employee", 'String'>
+    readonly phone: FieldRef<"Employee", 'String'>
+    readonly department: FieldRef<"Employee", 'String'>
     readonly passwordHash: FieldRef<"Employee", 'String'>
+    readonly role: FieldRef<"Employee", 'String'>
+    readonly status: FieldRef<"Employee", 'String'>
+    readonly identities: FieldRef<"Employee", 'Json'>
+    readonly settings: FieldRef<"Employee", 'Json'>
     readonly permissions: FieldRef<"Employee", 'Json'>
-    readonly performance: FieldRef<"Employee", 'Json'>
+    readonly lastLoginAt: FieldRef<"Employee", 'DateTime'>
     readonly createdAt: FieldRef<"Employee", 'DateTime'>
     readonly updatedAt: FieldRef<"Employee", 'DateTime'>
-    readonly metadata: FieldRef<"Employee", 'Json'>
-    readonly facebookName: FieldRef<"Employee", 'String'>
-    readonly facebookId: FieldRef<"Employee", 'String'>
-    readonly lineName: FieldRef<"Employee", 'String'>
   }
     
 
@@ -14346,9 +14268,9 @@ export namespace Prisma {
   }
 
   /**
-   * Employee.tasks
+   * Employee.assignedTasks
    */
-  export type Employee$tasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Employee$assignedTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Task
      */
@@ -29976,28 +29898,22 @@ export namespace Prisma {
 
   export const EmployeeScalarFieldEnum: {
     id: 'id',
-    employeeId: 'employeeId',
-    agentId: 'agentId',
+    employeeCode: 'employeeCode',
     firstName: 'firstName',
     lastName: 'lastName',
     nickName: 'nickName',
-    role: 'role',
-    department: 'department',
-    profilePicture: 'profilePicture',
-    status: 'status',
-    joinDate: 'joinDate',
     email: 'email',
-    phonePrimary: 'phonePrimary',
-    lineId: 'lineId',
+    phone: 'phone',
+    department: 'department',
     passwordHash: 'passwordHash',
+    role: 'role',
+    status: 'status',
+    identities: 'identities',
+    settings: 'settings',
     permissions: 'permissions',
-    performance: 'performance',
+    lastLoginAt: 'lastLoginAt',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    metadata: 'metadata',
-    facebookName: 'facebookName',
-    facebookId: 'facebookId',
-    lineName: 'lineName'
+    updatedAt: 'updatedAt'
   };
 
   export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
@@ -31194,29 +31110,23 @@ export namespace Prisma {
     OR?: EmployeeWhereInput[]
     NOT?: EmployeeWhereInput | EmployeeWhereInput[]
     id?: StringFilter<"Employee"> | string
-    employeeId?: StringFilter<"Employee"> | string
-    agentId?: StringNullableFilter<"Employee"> | string | null
+    employeeCode?: StringFilter<"Employee"> | string
     firstName?: StringFilter<"Employee"> | string
     lastName?: StringFilter<"Employee"> | string
     nickName?: StringNullableFilter<"Employee"> | string | null
-    role?: StringFilter<"Employee"> | string
-    department?: StringNullableFilter<"Employee"> | string | null
-    profilePicture?: StringNullableFilter<"Employee"> | string | null
-    status?: StringFilter<"Employee"> | string
-    joinDate?: DateTimeNullableFilter<"Employee"> | Date | string | null
     email?: StringFilter<"Employee"> | string
-    phonePrimary?: StringNullableFilter<"Employee"> | string | null
-    lineId?: StringNullableFilter<"Employee"> | string | null
+    phone?: StringNullableFilter<"Employee"> | string | null
+    department?: StringNullableFilter<"Employee"> | string | null
     passwordHash?: StringFilter<"Employee"> | string
-    permissions?: JsonFilter<"Employee">
-    performance?: JsonNullableFilter<"Employee">
+    role?: StringFilter<"Employee"> | string
+    status?: StringFilter<"Employee"> | string
+    identities?: JsonNullableFilter<"Employee">
+    settings?: JsonNullableFilter<"Employee">
+    permissions?: JsonNullableFilter<"Employee">
+    lastLoginAt?: DateTimeNullableFilter<"Employee"> | Date | string | null
     createdAt?: DateTimeFilter<"Employee"> | Date | string
     updatedAt?: DateTimeFilter<"Employee"> | Date | string
-    metadata?: JsonNullableFilter<"Employee">
-    facebookName?: StringNullableFilter<"Employee"> | string | null
-    facebookId?: StringNullableFilter<"Employee"> | string | null
-    lineName?: StringNullableFilter<"Employee"> | string | null
-    tasks?: TaskListRelationFilter
+    assignedTasks?: TaskListRelationFilter
     respondedMessages?: MessageListRelationFilter
     assignedConversations?: ConversationListRelationFilter
     closedOrders?: OrderListRelationFilter
@@ -31224,29 +31134,23 @@ export namespace Prisma {
 
   export type EmployeeOrderByWithRelationInput = {
     id?: SortOrder
-    employeeId?: SortOrder
-    agentId?: SortOrderInput | SortOrder
+    employeeCode?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
     nickName?: SortOrderInput | SortOrder
-    role?: SortOrder
-    department?: SortOrderInput | SortOrder
-    profilePicture?: SortOrderInput | SortOrder
-    status?: SortOrder
-    joinDate?: SortOrderInput | SortOrder
     email?: SortOrder
-    phonePrimary?: SortOrderInput | SortOrder
-    lineId?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    department?: SortOrderInput | SortOrder
     passwordHash?: SortOrder
-    permissions?: SortOrder
-    performance?: SortOrderInput | SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    identities?: SortOrderInput | SortOrder
+    settings?: SortOrderInput | SortOrder
+    permissions?: SortOrderInput | SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    metadata?: SortOrderInput | SortOrder
-    facebookName?: SortOrderInput | SortOrder
-    facebookId?: SortOrderInput | SortOrder
-    lineName?: SortOrderInput | SortOrder
-    tasks?: TaskOrderByRelationAggregateInput
+    assignedTasks?: TaskOrderByRelationAggregateInput
     respondedMessages?: MessageOrderByRelationAggregateInput
     assignedConversations?: ConversationOrderByRelationAggregateInput
     closedOrders?: OrderOrderByRelationAggregateInput
@@ -31254,61 +31158,49 @@ export namespace Prisma {
 
   export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    employeeId?: string
-    agentId?: string
+    employeeCode?: string
     email?: string
-    facebookId?: string
     AND?: EmployeeWhereInput | EmployeeWhereInput[]
     OR?: EmployeeWhereInput[]
     NOT?: EmployeeWhereInput | EmployeeWhereInput[]
     firstName?: StringFilter<"Employee"> | string
     lastName?: StringFilter<"Employee"> | string
     nickName?: StringNullableFilter<"Employee"> | string | null
-    role?: StringFilter<"Employee"> | string
+    phone?: StringNullableFilter<"Employee"> | string | null
     department?: StringNullableFilter<"Employee"> | string | null
-    profilePicture?: StringNullableFilter<"Employee"> | string | null
-    status?: StringFilter<"Employee"> | string
-    joinDate?: DateTimeNullableFilter<"Employee"> | Date | string | null
-    phonePrimary?: StringNullableFilter<"Employee"> | string | null
-    lineId?: StringNullableFilter<"Employee"> | string | null
     passwordHash?: StringFilter<"Employee"> | string
-    permissions?: JsonFilter<"Employee">
-    performance?: JsonNullableFilter<"Employee">
+    role?: StringFilter<"Employee"> | string
+    status?: StringFilter<"Employee"> | string
+    identities?: JsonNullableFilter<"Employee">
+    settings?: JsonNullableFilter<"Employee">
+    permissions?: JsonNullableFilter<"Employee">
+    lastLoginAt?: DateTimeNullableFilter<"Employee"> | Date | string | null
     createdAt?: DateTimeFilter<"Employee"> | Date | string
     updatedAt?: DateTimeFilter<"Employee"> | Date | string
-    metadata?: JsonNullableFilter<"Employee">
-    facebookName?: StringNullableFilter<"Employee"> | string | null
-    lineName?: StringNullableFilter<"Employee"> | string | null
-    tasks?: TaskListRelationFilter
+    assignedTasks?: TaskListRelationFilter
     respondedMessages?: MessageListRelationFilter
     assignedConversations?: ConversationListRelationFilter
     closedOrders?: OrderListRelationFilter
-  }, "id" | "employeeId" | "agentId" | "email" | "facebookId">
+  }, "id" | "employeeCode" | "email">
 
   export type EmployeeOrderByWithAggregationInput = {
     id?: SortOrder
-    employeeId?: SortOrder
-    agentId?: SortOrderInput | SortOrder
+    employeeCode?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
     nickName?: SortOrderInput | SortOrder
-    role?: SortOrder
-    department?: SortOrderInput | SortOrder
-    profilePicture?: SortOrderInput | SortOrder
-    status?: SortOrder
-    joinDate?: SortOrderInput | SortOrder
     email?: SortOrder
-    phonePrimary?: SortOrderInput | SortOrder
-    lineId?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    department?: SortOrderInput | SortOrder
     passwordHash?: SortOrder
-    permissions?: SortOrder
-    performance?: SortOrderInput | SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    identities?: SortOrderInput | SortOrder
+    settings?: SortOrderInput | SortOrder
+    permissions?: SortOrderInput | SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    metadata?: SortOrderInput | SortOrder
-    facebookName?: SortOrderInput | SortOrder
-    facebookId?: SortOrderInput | SortOrder
-    lineName?: SortOrderInput | SortOrder
     _count?: EmployeeCountOrderByAggregateInput
     _max?: EmployeeMaxOrderByAggregateInput
     _min?: EmployeeMinOrderByAggregateInput
@@ -31319,28 +31211,22 @@ export namespace Prisma {
     OR?: EmployeeScalarWhereWithAggregatesInput[]
     NOT?: EmployeeScalarWhereWithAggregatesInput | EmployeeScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Employee"> | string
-    employeeId?: StringWithAggregatesFilter<"Employee"> | string
-    agentId?: StringNullableWithAggregatesFilter<"Employee"> | string | null
+    employeeCode?: StringWithAggregatesFilter<"Employee"> | string
     firstName?: StringWithAggregatesFilter<"Employee"> | string
     lastName?: StringWithAggregatesFilter<"Employee"> | string
     nickName?: StringNullableWithAggregatesFilter<"Employee"> | string | null
-    role?: StringWithAggregatesFilter<"Employee"> | string
-    department?: StringNullableWithAggregatesFilter<"Employee"> | string | null
-    profilePicture?: StringNullableWithAggregatesFilter<"Employee"> | string | null
-    status?: StringWithAggregatesFilter<"Employee"> | string
-    joinDate?: DateTimeNullableWithAggregatesFilter<"Employee"> | Date | string | null
     email?: StringWithAggregatesFilter<"Employee"> | string
-    phonePrimary?: StringNullableWithAggregatesFilter<"Employee"> | string | null
-    lineId?: StringNullableWithAggregatesFilter<"Employee"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"Employee"> | string | null
+    department?: StringNullableWithAggregatesFilter<"Employee"> | string | null
     passwordHash?: StringWithAggregatesFilter<"Employee"> | string
-    permissions?: JsonWithAggregatesFilter<"Employee">
-    performance?: JsonNullableWithAggregatesFilter<"Employee">
+    role?: StringWithAggregatesFilter<"Employee"> | string
+    status?: StringWithAggregatesFilter<"Employee"> | string
+    identities?: JsonNullableWithAggregatesFilter<"Employee">
+    settings?: JsonNullableWithAggregatesFilter<"Employee">
+    permissions?: JsonNullableWithAggregatesFilter<"Employee">
+    lastLoginAt?: DateTimeNullableWithAggregatesFilter<"Employee"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Employee"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Employee"> | Date | string
-    metadata?: JsonNullableWithAggregatesFilter<"Employee">
-    facebookName?: StringNullableWithAggregatesFilter<"Employee"> | string | null
-    facebookId?: StringNullableWithAggregatesFilter<"Employee"> | string | null
-    lineName?: StringNullableWithAggregatesFilter<"Employee"> | string | null
   }
 
   export type ProductWhereInput = {
@@ -33451,29 +33337,23 @@ export namespace Prisma {
 
   export type EmployeeCreateInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
     closedOrders?: OrderCreateNestedManyWithoutClosedByInput
@@ -33481,29 +33361,23 @@ export namespace Prisma {
 
   export type EmployeeUncheckedCreateInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
     closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
@@ -33511,29 +33385,23 @@ export namespace Prisma {
 
   export type EmployeeUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
     closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
@@ -33541,29 +33409,23 @@ export namespace Prisma {
 
   export type EmployeeUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
     closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
@@ -33571,80 +33433,62 @@ export namespace Prisma {
 
   export type EmployeeCreateManyInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
   }
 
   export type EmployeeUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmployeeUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProductCreateInput = {
@@ -34697,7 +34541,7 @@ export namespace Prisma {
     aiContext?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
-    assignee?: EmployeeCreateNestedOneWithoutTasksInput
+    assignee?: EmployeeCreateNestedOneWithoutAssignedTasksInput
     customer?: CustomerCreateNestedOneWithoutTasksInput
   }
 
@@ -34733,7 +34577,7 @@ export namespace Prisma {
     aiContext?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    assignee?: EmployeeUpdateOneWithoutTasksNestedInput
+    assignee?: EmployeeUpdateOneWithoutAssignedTasksNestedInput
     customer?: CustomerUpdateOneWithoutTasksNestedInput
   }
 
@@ -35774,74 +35618,56 @@ export namespace Prisma {
 
   export type EmployeeCountOrderByAggregateInput = {
     id?: SortOrder
-    employeeId?: SortOrder
-    agentId?: SortOrder
+    employeeCode?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
     nickName?: SortOrder
-    role?: SortOrder
-    department?: SortOrder
-    profilePicture?: SortOrder
-    status?: SortOrder
-    joinDate?: SortOrder
     email?: SortOrder
-    phonePrimary?: SortOrder
-    lineId?: SortOrder
+    phone?: SortOrder
+    department?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    identities?: SortOrder
+    settings?: SortOrder
     permissions?: SortOrder
-    performance?: SortOrder
+    lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    metadata?: SortOrder
-    facebookName?: SortOrder
-    facebookId?: SortOrder
-    lineName?: SortOrder
   }
 
   export type EmployeeMaxOrderByAggregateInput = {
     id?: SortOrder
-    employeeId?: SortOrder
-    agentId?: SortOrder
+    employeeCode?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
     nickName?: SortOrder
-    role?: SortOrder
-    department?: SortOrder
-    profilePicture?: SortOrder
-    status?: SortOrder
-    joinDate?: SortOrder
     email?: SortOrder
-    phonePrimary?: SortOrder
-    lineId?: SortOrder
+    phone?: SortOrder
+    department?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    facebookName?: SortOrder
-    facebookId?: SortOrder
-    lineName?: SortOrder
   }
 
   export type EmployeeMinOrderByAggregateInput = {
     id?: SortOrder
-    employeeId?: SortOrder
-    agentId?: SortOrder
+    employeeCode?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
     nickName?: SortOrder
-    role?: SortOrder
-    department?: SortOrder
-    profilePicture?: SortOrder
-    status?: SortOrder
-    joinDate?: SortOrder
     email?: SortOrder
-    phonePrimary?: SortOrder
-    lineId?: SortOrder
+    phone?: SortOrder
+    department?: SortOrder
     passwordHash?: SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    facebookName?: SortOrder
-    facebookId?: SortOrder
-    lineName?: SortOrder
   }
 
   export type FloatNullableFilter<$PrismaModel = never> = {
@@ -37938,9 +37764,9 @@ export namespace Prisma {
     update?: XOR<XOR<AdUpdateToOneWithWhereWithoutHourlyMetricsInput, AdUpdateWithoutHourlyMetricsInput>, AdUncheckedUpdateWithoutHourlyMetricsInput>
   }
 
-  export type EmployeeCreateNestedOneWithoutTasksInput = {
-    create?: XOR<EmployeeCreateWithoutTasksInput, EmployeeUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutTasksInput
+  export type EmployeeCreateNestedOneWithoutAssignedTasksInput = {
+    create?: XOR<EmployeeCreateWithoutAssignedTasksInput, EmployeeUncheckedCreateWithoutAssignedTasksInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutAssignedTasksInput
     connect?: EmployeeWhereUniqueInput
   }
 
@@ -37950,14 +37776,14 @@ export namespace Prisma {
     connect?: CustomerWhereUniqueInput
   }
 
-  export type EmployeeUpdateOneWithoutTasksNestedInput = {
-    create?: XOR<EmployeeCreateWithoutTasksInput, EmployeeUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutTasksInput
-    upsert?: EmployeeUpsertWithoutTasksInput
+  export type EmployeeUpdateOneWithoutAssignedTasksNestedInput = {
+    create?: XOR<EmployeeCreateWithoutAssignedTasksInput, EmployeeUncheckedCreateWithoutAssignedTasksInput>
+    connectOrCreate?: EmployeeCreateOrConnectWithoutAssignedTasksInput
+    upsert?: EmployeeUpsertWithoutAssignedTasksInput
     disconnect?: EmployeeWhereInput | boolean
     delete?: EmployeeWhereInput | boolean
     connect?: EmployeeWhereUniqueInput
-    update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutTasksInput, EmployeeUpdateWithoutTasksInput>, EmployeeUncheckedUpdateWithoutTasksInput>
+    update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutAssignedTasksInput, EmployeeUpdateWithoutAssignedTasksInput>, EmployeeUncheckedUpdateWithoutAssignedTasksInput>
   }
 
   export type CustomerUpdateOneWithoutTasksNestedInput = {
@@ -38437,7 +38263,7 @@ export namespace Prisma {
     aiContext?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
-    assignee?: EmployeeCreateNestedOneWithoutTasksInput
+    assignee?: EmployeeCreateNestedOneWithoutAssignedTasksInput
   }
 
   export type TaskUncheckedCreateWithoutCustomerInput = {
@@ -38806,58 +38632,46 @@ export namespace Prisma {
 
   export type EmployeeCreateWithoutClosedOrdersInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
   }
 
   export type EmployeeUncheckedCreateWithoutClosedOrdersInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
   }
@@ -39033,58 +38847,46 @@ export namespace Prisma {
 
   export type EmployeeUpdateWithoutClosedOrdersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutClosedOrdersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
   }
@@ -39510,58 +39312,46 @@ export namespace Prisma {
 
   export type EmployeeCreateWithoutAssignedConversationsInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
     closedOrders?: OrderCreateNestedManyWithoutClosedByInput
   }
 
   export type EmployeeUncheckedCreateWithoutAssignedConversationsInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
     closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
   }
@@ -39779,58 +39569,46 @@ export namespace Prisma {
 
   export type EmployeeUpdateWithoutAssignedConversationsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
     closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutAssignedConversationsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
     closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
   }
@@ -40002,58 +39780,46 @@ export namespace Prisma {
 
   export type EmployeeCreateWithoutRespondedMessagesInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskCreateNestedManyWithoutAssigneeInput
     assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
     closedOrders?: OrderCreateNestedManyWithoutClosedByInput
   }
 
   export type EmployeeUncheckedCreateWithoutRespondedMessagesInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
-    tasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
+    assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
     closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
   }
@@ -40117,58 +39883,46 @@ export namespace Prisma {
 
   export type EmployeeUpdateWithoutRespondedMessagesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUpdateManyWithoutAssigneeNestedInput
     assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
     closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutRespondedMessagesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
-    tasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+    assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
     closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
   }
@@ -41841,67 +41595,55 @@ export namespace Prisma {
     liveStatus?: AdLiveStatusUncheckedUpdateOneWithoutAdNestedInput
   }
 
-  export type EmployeeCreateWithoutTasksInput = {
+  export type EmployeeCreateWithoutAssignedTasksInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
     respondedMessages?: MessageCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationCreateNestedManyWithoutAssignedEmployeeInput
     closedOrders?: OrderCreateNestedManyWithoutClosedByInput
   }
 
-  export type EmployeeUncheckedCreateWithoutTasksInput = {
+  export type EmployeeUncheckedCreateWithoutAssignedTasksInput = {
     id?: string
-    employeeId: string
-    agentId?: string | null
+    employeeCode: string
     firstName: string
     lastName: string
     nickName?: string | null
-    role?: string
-    department?: string | null
-    profilePicture?: string | null
-    status?: string
-    joinDate?: Date | string | null
     email: string
-    phonePrimary?: string | null
-    lineId?: string | null
+    phone?: string | null
+    department?: string | null
     passwordHash: string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: string
+    status?: string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: string | null
-    facebookId?: string | null
-    lineName?: string | null
     respondedMessages?: MessageUncheckedCreateNestedManyWithoutResponderInput
     assignedConversations?: ConversationUncheckedCreateNestedManyWithoutAssignedEmployeeInput
     closedOrders?: OrderUncheckedCreateNestedManyWithoutClosedByInput
   }
 
-  export type EmployeeCreateOrConnectWithoutTasksInput = {
+  export type EmployeeCreateOrConnectWithoutAssignedTasksInput = {
     where: EmployeeWhereUniqueInput
-    create: XOR<EmployeeCreateWithoutTasksInput, EmployeeUncheckedCreateWithoutTasksInput>
+    create: XOR<EmployeeCreateWithoutAssignedTasksInput, EmployeeUncheckedCreateWithoutAssignedTasksInput>
   }
 
   export type CustomerCreateWithoutTasksInput = {
@@ -41975,70 +41717,58 @@ export namespace Prisma {
     create: XOR<CustomerCreateWithoutTasksInput, CustomerUncheckedCreateWithoutTasksInput>
   }
 
-  export type EmployeeUpsertWithoutTasksInput = {
-    update: XOR<EmployeeUpdateWithoutTasksInput, EmployeeUncheckedUpdateWithoutTasksInput>
-    create: XOR<EmployeeCreateWithoutTasksInput, EmployeeUncheckedCreateWithoutTasksInput>
+  export type EmployeeUpsertWithoutAssignedTasksInput = {
+    update: XOR<EmployeeUpdateWithoutAssignedTasksInput, EmployeeUncheckedUpdateWithoutAssignedTasksInput>
+    create: XOR<EmployeeCreateWithoutAssignedTasksInput, EmployeeUncheckedCreateWithoutAssignedTasksInput>
     where?: EmployeeWhereInput
   }
 
-  export type EmployeeUpdateToOneWithWhereWithoutTasksInput = {
+  export type EmployeeUpdateToOneWithWhereWithoutAssignedTasksInput = {
     where?: EmployeeWhereInput
-    data: XOR<EmployeeUpdateWithoutTasksInput, EmployeeUncheckedUpdateWithoutTasksInput>
+    data: XOR<EmployeeUpdateWithoutAssignedTasksInput, EmployeeUncheckedUpdateWithoutAssignedTasksInput>
   }
 
-  export type EmployeeUpdateWithoutTasksInput = {
+  export type EmployeeUpdateWithoutAssignedTasksInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
     respondedMessages?: MessageUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUpdateManyWithoutAssignedEmployeeNestedInput
     closedOrders?: OrderUpdateManyWithoutClosedByNestedInput
   }
 
-  export type EmployeeUncheckedUpdateWithoutTasksInput = {
+  export type EmployeeUncheckedUpdateWithoutAssignedTasksInput = {
     id?: StringFieldUpdateOperationsInput | string
-    employeeId?: StringFieldUpdateOperationsInput | string
-    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    employeeCode?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     nickName?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    joinDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     email?: StringFieldUpdateOperationsInput | string
-    phonePrimary?: NullableStringFieldUpdateOperationsInput | string | null
-    lineId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
     passwordHash?: StringFieldUpdateOperationsInput | string
-    permissions?: JsonNullValueInput | InputJsonValue
-    performance?: NullableJsonNullValueInput | InputJsonValue
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    identities?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    facebookName?: NullableStringFieldUpdateOperationsInput | string | null
-    facebookId?: NullableStringFieldUpdateOperationsInput | string | null
-    lineName?: NullableStringFieldUpdateOperationsInput | string | null
     respondedMessages?: MessageUncheckedUpdateManyWithoutResponderNestedInput
     assignedConversations?: ConversationUncheckedUpdateManyWithoutAssignedEmployeeNestedInput
     closedOrders?: OrderUncheckedUpdateManyWithoutClosedByNestedInput
@@ -42598,7 +42328,7 @@ export namespace Prisma {
     aiContext?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    assignee?: EmployeeUpdateOneWithoutTasksNestedInput
+    assignee?: EmployeeUpdateOneWithoutAssignedTasksNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutCustomerInput = {

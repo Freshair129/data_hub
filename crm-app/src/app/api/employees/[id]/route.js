@@ -4,17 +4,36 @@ import { writeCacheEntry } from '@/lib/cacheSync';
 
 export async function PUT(request, { params }) {
     try {
-        const { id } = params;
+        const { id } = params; // This is now employeeCode
         const data = await request.json();
 
         const prisma = await getPrisma();
-        if (!prisma) {
-            throw new Error('Prisma not available');
+        if (!prisma) throw new Error('Prisma not available');
+
+        // Fetch current to merge identities
+        const current = await prisma.employee.findUnique({
+            where: { employeeCode: id }
+        });
+
+        if (!current) {
+            return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
         }
 
-        // 1. Update Database
+        // Merge identities
+        const newIdentities = {
+            ...(current.identities || {}),
+            facebook: {
+                ...(current.identities?.facebook || {}),
+                name: data.facebookName || current.identities?.facebook?.name
+            },
+            line: {
+                ...(current.identities?.line || {}),
+                id: data.lineName || current.identities?.line?.id
+            }
+        };
+
         const updated = await prisma.employee.update({
-            where: { employeeId: id },
+            where: { employeeCode: id },
             data: {
                 firstName: data.firstName,
                 lastName: data.lastName,
@@ -23,17 +42,13 @@ export async function PUT(request, { params }) {
                 department: data.department,
                 status: data.status,
                 email: data.email,
-                phonePrimary: data.phonePrimary,
-                lineId: data.lineId,
-                facebookName: data.facebookName,
-                lineName: data.lineName,
-                permissions: data.permissions || {},
-                metadata: data.metadata
+                phone: data.phonePrimary || data.phone,
+                identities: newIdentities,
+                permissions: data.permissions || [],
+                settings: data.settings || current.settings,
+                metadata: data.metadata || current.metadata
             }
         });
-
-        // 2. Sync with Cache
-        writeCacheEntry('employee', id, updated);
 
         return NextResponse.json({ success: true, data: updated });
 
@@ -45,21 +60,13 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
     try {
-        const { id } = params;
+        const { id } = params; // employeeCode
         const prisma = await getPrisma();
+        if (!prisma) throw new Error('Prisma not available');
 
-        if (!prisma) {
-            throw new Error('Prisma not available');
-        }
-
-        // 1. Delete from Database
         await prisma.employee.delete({
-            where: { employeeId: id }
+            where: { employeeCode: id }
         });
-
-        // 2. Invalidate/Delete from Cache
-        const { invalidateCacheEntry } = await import('@/lib/cacheSync');
-        invalidateCacheEntry('employee', id);
 
         return NextResponse.json({ success: true });
 

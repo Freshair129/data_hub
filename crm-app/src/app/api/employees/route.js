@@ -9,7 +9,7 @@ export async function GET() {
         // 1. Create a performance map (Agent Name -> Metrics)
         // This is much faster than looping through all customers for each employee
         const performanceMap = {};
-        
+
         customers.forEach(c => {
             const agent = c.agent || 'Unassigned';
             if (!performanceMap[agent]) {
@@ -29,14 +29,15 @@ export async function GET() {
 
             // 2. Find metrics using various name formats from the map
             let stats = { count: 0, revenue: 0 };
-            const nameKeys = [nick, full, emp.firstName, emp.facebookName, ...aliases];
-            
+            const fbName = emp.identities?.facebook?.name;
+            const nameKeys = [nick, full, emp.firstName, fbName, ...aliases];
+
             nameKeys.forEach(key => {
                 if (key && performanceMap[key]) {
                     stats.count += performanceMap[key].count;
                     stats.revenue += performanceMap[key].revenue;
                     // Delete from map to avoid double-counting if multiple formats match
-                    delete performanceMap[key]; 
+                    delete performanceMap[key];
                 }
             });
 

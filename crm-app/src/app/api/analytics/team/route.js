@@ -45,10 +45,10 @@ export async function GET(request) {
         // 3. Initialize aggregation map
         const agentStats = {};
         employees.forEach(emp => {
-            if (emp.status === 'Active') {
+            if (emp.status === 'ACTIVE') {
                 const name = emp.nickName || emp.firstName;
                 agentStats[name] = {
-                    id: emp.employeeId,
+                    id: emp.employeeCode,
                     name: name,
                     fullName: `${emp.firstName} ${emp.lastName}`,
                     role: emp.role,
@@ -58,7 +58,7 @@ export async function GET(request) {
                     customers: 0,
                     conversionRate: 0,
                     avgOrderValue: 0,
-                    facebookName: emp.facebookName || '',
+                    facebookName: emp.identities?.facebook?.name || '',
                     metadata: emp.metadata || {}
                 };
             }
@@ -77,8 +77,9 @@ export async function GET(request) {
             const matchingEmp = employees.find(e => {
                 const nick = e.nickName || e.firstName;
                 const full = `${e.firstName} ${e.lastName}`;
+                const fbName = e.identities?.facebook?.name;
                 const aliases = e.metadata?.aliases || [];
-                const matches = [nick, full, e.firstName, e.facebookName, ...aliases].filter(Boolean).map(v => v.toLowerCase());
+                const matches = [nick, full, e.firstName, fbName, ...aliases].filter(Boolean).map(v => v.toLowerCase());
                 const am = agent.toLowerCase();
                 return matches.some(m => am === m || am.includes(m) || m.includes(am));
             });

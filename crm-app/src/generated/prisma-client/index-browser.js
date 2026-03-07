@@ -255,28 +255,22 @@ exports.Prisma.ChatEpisodeScalarFieldEnum = {
 
 exports.Prisma.EmployeeScalarFieldEnum = {
   id: 'id',
-  employeeId: 'employeeId',
-  agentId: 'agentId',
+  employeeCode: 'employeeCode',
   firstName: 'firstName',
   lastName: 'lastName',
   nickName: 'nickName',
-  role: 'role',
-  department: 'department',
-  profilePicture: 'profilePicture',
-  status: 'status',
-  joinDate: 'joinDate',
   email: 'email',
-  phonePrimary: 'phonePrimary',
-  lineId: 'lineId',
+  phone: 'phone',
+  department: 'department',
   passwordHash: 'passwordHash',
+  role: 'role',
+  status: 'status',
+  identities: 'identities',
+  settings: 'settings',
   permissions: 'permissions',
-  performance: 'performance',
+  lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  metadata: 'metadata',
-  facebookName: 'facebookName',
-  facebookId: 'facebookId',
-  lineName: 'lineName'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.ProductScalarFieldEnum = {

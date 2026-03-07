@@ -43,7 +43,7 @@ export default function EmployeeManagement({ employees, customers = [], onRefres
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/employees/${selectedEmployee.employeeId}`, {
+            const res = await fetch(`/api/employees/${selectedEmployee.employeeCode}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editForm)
@@ -68,7 +68,7 @@ export default function EmployeeManagement({ employees, customers = [], onRefres
         if (!confirmed) return;
 
         try {
-            const res = await fetch(`/api/employees/${emp.employeeId}`, {
+            const res = await fetch(`/api/employees/${emp.employeeCode}`, {
                 method: 'DELETE'
             });
             const result = await res.json();
@@ -167,7 +167,7 @@ export default function EmployeeManagement({ employees, customers = [], onRefres
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredEmployees.map((emp) => (
-                        <div key={emp.employeeId} className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden group hover:border-[#C9A34E]/30 hover:bg-white/[0.07] transition-all duration-500 relative">
+                        <div key={emp.employeeCode} className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden group hover:border-[#C9A34E]/30 hover:bg-white/[0.07] transition-all duration-500 relative">
                             {/* Status Badge */}
                             <div className="absolute top-6 right-6 z-10">
                                 <span className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${emp.status === 'Active' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-500/20 text-slate-400 border border-slate-500/30'

@@ -2,6 +2,17 @@
 
 All notable changes to the CRM project will be documented in this file.
 
+## [0.6.0] - 2026-03-08
+
+### Added
+- **Intelligent Differential Marketing Sync (ADR 023)**: Implemented "Ad-Level First" fetching and delta-based write optimization to reduce storage and rate-limit risks.
+- **ID Standards Documentation**: Extracted naming and formatting conventions into a dedicated `docs/id_standards.yaml`.
+- **Enhanced Marketing Identifiers**: Added `origin_id`, `content_id`, `lead_id`, `payment_id`, `asset_id`, and `reply_to_id` for 100% data traceability.
+
+### Changed
+- **Agent vs. Employee Standardization**: Clearly distinguished between `agent_id` (CRM role) and `employee_id` (HR status) in documentation and API specs.
+- **Reporting Hierarchy**: Standardized bottom-up aggregation (Ad -> Ad Set -> Campaign) for marketing audits.
+
 ## [0.5.0] - 2026-03-06
 
 ### Added

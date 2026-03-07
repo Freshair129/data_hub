@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import VectorStore from "../lib/vectorStore.js";
 
 export default class BusinessAnalyst {
     constructor(apiKey) {
@@ -346,6 +347,40 @@ export default class BusinessAnalyst {
         } catch (error) {
             console.error("Smart Reply Generation Failed:", error);
             return null;
+        }
+    }
+
+    /**
+     * Summarizes the conversation and saves its vector embedding for future similarity searches.
+     */
+    async syncVector(conversationId, messages) {
+        if (!conversationId || !messages || messages.length === 0) return false;
+
+        const chatContext = messages.map(m => `${m.sender || m.from?.name || 'User'}: ${m.text || m.message}`).join('\n');
+
+        const prompt = `
+        Summarize the following conversation from "The V School" in 2-3 concise sentences.
+        Focus on:
+        1. Customer's main intent (courses, prices, schedule).
+        2. Emotional state (satisfied, angry, confused).
+        3. Outcome (purchased, pending, lost).
+        
+        Conversation:
+        ${chatContext}
+        
+        Summary (Thai):
+        `;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const summary = result.response.text().trim();
+
+            const vectorStore = new VectorStore();
+            console.log(`[VectorSync] Archiving semantic summary for ${conversationId}`);
+            return await vectorStore.upsertEmbedding(conversationId, summary);
+        } catch (error) {
+            console.error("Vector Sync Failed:", error);
+            return false;
         }
     }
 }

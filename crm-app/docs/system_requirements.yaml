@@ -1,0 +1,266 @@
+system_name: "The V School CRM"
+version: "0.1.0"
+description: "A comprehensive Hybrid CRM system integrating Meta Ads, Messenger, AI (Gemini), and Automated Bank Slip Verification."
+
+# ---------------------------------------------------------
+# FUNCTIONAL REQUIREMENTS
+# ---------------------------------------------------------
+functional_requirements:
+
+  - module: "Authentication & RBAC"
+    ui_tab: "LoginPage"
+    status: "Partially Working"
+    description: "Access control for CRM administrators and marketing agents."
+    dependencies: ["PostgreSQL (Agent/Employee Tables)"]
+    features:
+      - name: "FR1.1: Facebook Graph API Login"
+        description: "ระบบต้องอนุญาตให้พนักงานเข้าสู่ระบบผ่าน Facebook Graph API (Meta Login) ได้"
+        status: "Broken (Awaiting PSID mapping recovery)"
+      - name: "FR1.2: Facebook / Agent Mapping"
+        description: "ระบบต้องตรวจสอบว่า Facebook ID ที่ล็อคอินเข้ามา ถูกผูกกับ agent_code หรือ id ในระบบ Registry หรือไม่ หากไม่พบต้องปฏิเสธการเข้าใช้งาน"
+        status: "Working (Logic implemented, missing database mapping)"
+      - name: "FR1.3: Role-Based Access Control (RBAC)"
+        description: "ระบบต้องจำกัดสิทธิ์การเข้าถึงเมนู (Authorization) โดยแยกเป็น Developer (full access), Manager, Supervisor, Admin, Agent, Guest"
+        status: "Pending Implementation"
+      - name: "Email and Password Login"
+        description: "ระบบล็อคอินด้วยอีเมลและรหัสผ่านแบบดั้งเดิม"
+        status: "Working"
+
+  - module: "Messaging & Webhook"
+    ui_tab: ["facebook-chat"]
+    status: "Working"
+    description: "Integration with Meta Messenger for proactive support, sales, and auto-labeling."
+    dependencies: ["Meta Graph API v19.0", "Redis", "BullMQ"]
+    features:
+      - name: "FR2.1: Receive Meta Webhooks"
+        description: "ระบบต้องสามารถรับ Webhook (Messages, Postbacks, Opt-ins) จาก Meta ได้"
+        status: "Working"
+      - name: "FR2.2: Idempotency (Prevent Duplicates)"
+        description: "ระบบต้องป้องกันการบันทึกข้อความซ้ำโดยใช้ fb_mid"
+        status: "Working"
+      - name: "FR2.3: Referral & Attribution"
+        description: "ระบบต้องสามารถดึงข้อมูล referral (เช่น ad_id) จาก Webhook เพื่อบันทึกที่มาของแชทได้"
+        status: "Working"
+      - name: "FR2.4: Message Text Attribution (Fallback)"
+        description: "เมื่อพบปัญหา ID Namespace Mismatch (เช่น threadID จาก Scraper ไม่ตรงกับ PSID ใน DB) ระบบต้องใช้การค้นหาข้อความ (Message Text Search) เพื่อระบุตัวตน Admin สำรอง โดยใช้เงื่อนไขข้อความความยาว 15 ตัวอักษรขึ้นไปเพื่อป้องกัน False Positive"
+        status: "Working (As defined in ADR-022)"
+
+  - module: "Identity Resolution"
+    ui_tab: ["customers"]
+    status: "Planned"
+    description: "Cross-platform identity mapping and normalization."
+    features:
+      - name: "FR3.1: Phone Number Normalization"
+        description: "ระบบต้องนำเบอร์โทรศัพท์ที่ได้จากแชท มาทำ Normalization (E.164) ทุกครั้ง"
+        status: "Pending Implementation"
+      - name: "FR3.2: Identity Merge"
+        description: "ระบบต้องสามารถรวมบัญชีลูกค้า (Merge) ที่ทักมาจากหลายเพจ (หลาย PSID) ให้เป็น global_user_id เดียวกันได้ หากเบอร์โทรศัพท์ตรงกัน"
+        status: "Pending Implementation"
+      - name: "FR3.3: Scraper Agent Identity Mapping (Heuristic)"
+        description: "ระบบต้องนำชื่อ Admin ที่ได้จาก Scraper (Sent by [Name]) มาเทียบกับ id-mapping.yaml หรือ Database เพื่อหา agent_id ที่แท้จริง และบันทึกเป็นผู้ตอบ (responder_id) ของข้อความนั้น"
+        status: "Working"
+      - name: "FR3.4: Admin PSID Permanent Mapping"
+        description: "เมื่อเข้าเงื่อนไข FR3.3 สำเร็จ ระบบต้องทำการบันทึก PSID ลงในฟิลด์ facebookId ของ Agent โดยอัตโนมัติ (Discovery) และใช้ PSID เป็นกุญแจหลักในการยืนยันตัวตนในครั้งต่อๆ ไป"
+        status: "Working"
+
+  - module: "Marketing & AI"
+    ui_tab: ["dashboard", "analytics", "facebook-ads"]
+    status: "Partially Working"
+    description: "AI-driven insights and marketing attribution."
+    dependencies: ["Gemini AI", "Meta Marketing API"]
+    features:
+      - name: "FR4.1: Ad Spend Syncing"
+        description: "ระบบ (Python Worker) ต้องสามารถซิงค์ข้อมูล Ad Spend และนำมา Join กับยอดขายผ่าน Conversation ได้"
+        status: "Working"
+      - name: "FR4.2: AI Intent Analysis"
+        description: "ระบบต้องส่งประวัติการแชทให้ Gemini AI วิเคราะห์ และสรุป Customer Intent เก็บลง Database"
+        status: "Working"
+      - name: "FR4.3: Hourly Marketing Metrics Sync"
+        description: "ระบบต้องซิงค์ข้อมูล Marketing (Ad Spend, Impressions, Clicks) แบบ Hourly Breakdown ทุกๆ นาทีที่ 5 ของชั่วโมง และใช้ Database เป็น Single Source of Truth แทนไฟล์ JSON (ADR-013)"
+        status: "Working"
+      - name: "FR4.4: Automated LINE Reporting"
+        description: |
+          ระบบต้องส่งรายงานอัตโนมัติเข้ากลุ่ม LINE ตามที่กำหนด:
+          1. Daily Report: สรุปภาพรวมรายวัน (Revenue, Spend, ROAS)
+          2. Live Ad Report: รายงานสถานะแอดปัจจุบัน (จำนวนแอดที่กำลังรัน, จำนวนแอดที่เพิ่มขึ้น/ลดลง เมื่อเทียบกับข้อมูลจากวันที่ผ่านมา)
+        status: "Pending Implementation"
+      - name: "FR4.5: Derived Marketing Metrics"
+        description: "ระบบต้องคำนวณ Attribution Metrics จากค่าย่อยระดับ Transaction (CON = Transaction Count / CPR Ratio) เพื่อวัดประสิทธิภาพการปิดการขายต่อต้นทุนการทักแชท"
+        status: "Pending Implementation"
+      - name: "FR4.6: Hierarchical Bottom-Up Aggregation"
+        description: |
+          ระบบต้องทำการคำนวณผลลัพธ์เป็นระดับชั้นแบบ Bottom-Up:
+          - (L1) Ad Level: คำนวณจากยอดรายตัว
+          - (L2) Ad Set Level: ผลรวมของ Ads ภายใต้ Ad Set
+          - (L3) Campaign Level: ผลรวมของ Ad Sets ภายใต้ Campaign
+        status: "Pending Implementation"
+      - name: "FR4.7: Hourly Persistence for Visuals"
+        description: "ทุกครั้งหลังจากการซิงค์รายชั่วโมงเสร็จสิ้น (Cron Job) ระบบต้องบันทึกค่า Summary ลงใน Ledger/Log แยกตามชั่วโมง เพื่อใช้ในการทำกราฟแสดงผลรายชั่วโมง (Hourly Metrics Persistence)"
+        status: "Pending Implementation"
+      - name: "FR4.8: Data Integrity Audit (Checksum)"
+        description: "ระบบต้องมีการทำ Checksum Verification: ผลรวมของ Ads ในระดับชั้นล่างสุด เมื่อนำมารวมกัน (Sum) ต้องมียอดเท่ากับค่า Campaign Total ที่ได้รับจาก Meta API หากไม่เท่ากัน ระบบต้องบันทึกเป็น Error Log (Data Mismatch) เพื่อตรวจสอบความผิดพลาดของ Logic"
+        status: "Pending Implementation"
+      - name: "FR4.9: Intelligent Differential Sync (Rate Limit Optimization)"
+        description: |
+          ระบบประหยัดการเรียก API (Rate Limit) และพื้นที่จัดเก็บ โดยใช้กลยุทธ์ Differential Sync:
+          - (Fetch Strategy): ใช้แนวทาง **'Ad-Level First'** (ดึงข้อมูลระดับ Ad เป็นหลัก) เพื่อให้สามารถทำ Product Attribution และคำนวณ Checksum ย้อนกลับไปหาระดับ Campaign ได้อย่างแม่นยำ
+          - (Read Optimization): ใช้พารามิเตอร์ `filtering` ร่วมกับ `updated_time` (Unix Timestamp) และ `effective_status: ['ACTIVE']` เพื่อดึงข้อมูลเฉพาะแอดที่มีการเคลื่อนไหวหรือเปลี่ยนแปลงล่าสุดจาก Facebook เท่านั้น
+          - (Write Optimization): เปรียบเทียบค่าที่ดึงมาใหม่กับค่าล่าสุดใน DB (Baseline) หากไม่มีการเปลี่ยนแปลง (Delta = 0) ให้ข้ามการบันทึก Record รายชั่วโมงนั้นเพื่อประหยัดพื้นที่
+          - (First-Sync Baseline): ทุกต้นวัน (00:00 - 01:00) ต้องทำการ Full Sync เพื่อล้าง Baseline และตั้งค่าเริ่มต้นใหม่สำหรับวันนั้นๆ
+        status: "Pending Implementation"
+
+  - category: "Data Integrity & Verification Rules"
+    description: "กฎการตรวจสอบความถูกต้องของข้อมูล (Audit Logic)"
+    rules:
+      - name: "Aggregation Checksum"
+        logic: "Sum(Ads.Metrics) == Campaign.Metrics"
+        description: "ใช้ตรวจสอบหาช่องว่างของข้อมูล (Gaps) หรือการซิงค์ข้อมูลที่ไม่ครบถ้วน"
+      - name: "Hourly Sync Continuity"
+        logic: "Next_Sync_Hour == Current_Sync_Hour + 1"
+        description: "ตรวจสอบความต่อเนื่องของข้อมูลรายชั่วโมง ป้องกันข้อมูลหาย (Data Gap) ระหว่างช่วงเวลา"
+      - name: "Differential Delta Rule"
+        logic: "Delta = Current_Total - Previous_Total"
+        description: "บันทึกเฉพาะค่าผลต่างลงใน Ledger รายชั่วโมง หาก Delta เป็น 0 ไม่ต้องสร้าง Record ใหม่"
+
+  - category: "Reporting Calculation Formulas"
+    description: "สูตรการคำนวณมาตรฐานสำหรับรายงาน (Calculated from Granular Data)"
+    formulas:
+      - name: "CON (Conversion Efficiency)"
+        logic: "Total Transactions / Cost Per Result (CPR)"
+        description: "ใช้วัดว่าเงินที่เสียไปกับการทักแชท 1 ครั้ง (CPR) สามารถสร้างรายการซื้อขายได้กี่รายการ (ยิ่งสูงยิ่งดี)"
+      - name: "CPA (Cost Per Acquisition)"
+        logic: "Total Spend / Total Transactions"
+        description: "ต้นทุนเฉลี่ยเพื่อให้ได้ 1 ออเดอร์ (Transaction)"
+      - name: "ROAS (Return on Ad Spend)"
+        logic: "Total Revenue / Total Spend"
+        description: "ผลตอบแทนจากยอดขายเทียบกับค่าโฆษณา"
+
+  - module: "UI & Dashboard"
+    ui_tab: ["dashboard", "facebook-chat"]
+    status: "Working"
+    description: "Real-time user interface and executive reporting."
+    dependencies: ["Socket.io / SSE"]
+    features:
+      - name: "FR5.1: Real-time Revenue & Chat Queue"
+        description: "หน้า Dashboard ต้องแสดงสรุปยอดขาย (Revenue) และจำนวนแชทค้างตอบแบบ Real-time"
+        status: "Partially Working (UI built, needing socket integration for revenue)"
+      - name: "FR5.2: Real-time Chat UI"
+        description: "หน้าจอ Chat ของ Agent ต้องมีการอัปเดตข้อความใหม่ทันทีโดยไม่ต้อง Refresh"
+        status: "Working (Via SSE)"
+
+  - module: "Customer Database"
+    ui_tab: ["customers", "inventory"]
+    status: "Working"
+    description: "Centralized database for student/customer profiles, timelines, and course inventory."
+    features:
+      - name: "Customer Index (List view & intelligent search)"
+        status: "Working"
+      - name: "Customer 360 Profile (Timeline, Wallet, Tags)"
+        status: "Working"
+      - name: "Customer Registration Form"
+        status: "Working"
+      - name: "Inventory Management (Learning Courses / Packages Tracking)"
+        status: "Working"
+
+  - module: "Store & Order Management"
+    ui_tab: ["store", "orders"]
+    status: "Working"
+    description: "Product catalog, shopping cart, and checkout processing."
+    features:
+      - name: "Product & Bundle Selection Modal"
+        status: "Working"
+      - name: "Shopping Cart & Checkout Engine"
+        status: "Working"
+      - name: "Payment Method Selection (Wallet vs. Transfer)"
+        status: "Working"
+
+  - module: "Payment Verification"
+    ui_tab: ["verification"]
+    status: "Working"
+    description: "Automated verification of Thai bank transfer slips."
+    features:
+      - name: "Bank Slip Automation Queue (OCR)"
+        status: "Working"
+      - name: "Manual Approve/Reject Slip Workflow"
+        status: "Working"
+
+
+# ---------------------------------------------------------
+# NON-FUNCTIONAL REQUIREMENTS
+# ---------------------------------------------------------
+non_functional_requirements:
+
+  - category: "Performance & Latency"
+    requirements:
+      - name: "NFR1 - Webhook Latency"
+        description: "API `/api/webhooks/messenger` ต้องตอบกลับ Facebook ด้วย HTTP 200 OK ภายในเวลา < 200ms เสมอ"
+      - name: "NFR2 - UI Performance"
+        description: "API ของหน้า Dashboard ต้องตอบสนองภายในเวลา < 500ms โดยใช้กลยุทธ์ Local JSON Caching"
+
+  - category: "Reliability & Integrity"
+    requirements:
+      - name: "NFR3 - Reliability (Queueing)"
+        description: "งานที่เกี่ยวกับการเขียน Database หรือยิง External API (Gemini/Meta) ต้องทำผ่าน BullMQ และต้องมี Exponential Backoff Retry อย่างน้อย 5 ครั้งเมื่อเกิด Error"
+      - name: "NFR5 - Data Integrity"
+        description: "การ Update หรือ Insert ข้อมูล Identity ต้องทำงานอยู่ภายใต้ `prisma.$transaction` เสมอ"
+      - name: "Data Reconciliation (Cron Jobs)"
+        description: "มีการทำ Cron Job รายชั่วโมงเพื่อประสานข้อมูลระหว่าง Meta Ads และ Database ให้ตรงกัน"
+
+  - category: "Architecture & Security"
+    requirements:
+      - name: "NFR4 - Security (Webhook Validation)"
+        description: "ทุก Request ที่มาจาก Facebook ต้องผ่านการตรวจสอบ X-Hub-Signature-256 ก่อนประมวลผล"
+      - name: "Hybrid Database Strategy"
+        description: "แอปพลิเคชันใช้ PostgreSQL เป็นหลัก แต่รองรับเงื่อนไข Graceful Fallback ไปยัง Local JSON Files"
+
+
+# ---------------------------------------------------------
+# API SPECIFICATION (RESTful API Routes)
+# ---------------------------------------------------------
+api_specification:
+
+  - module: "Webhook & Ingestion"
+    endpoints:
+      - name: "Verify Webhook"
+        method: "GET"
+        endpoint: "/api/webhooks/messenger"
+        purpose: "ใช้สำหรับยืนยัน URL กับ Facebook App Dashboard"
+        parameters: ["hub.mode", "hub.verify_token", "hub.challenge"]
+        response: "HTTP 200 พร้อมส่ง hub.challenge กลับไป (Text plain)"
+      
+      - name: "Receive Events"
+        method: "POST"
+        endpoint: "/api/webhooks/messenger"
+        purpose: "รับข้อมูลการแชทจาก Meta"
+        headers: ["X-Hub-Signature-256 (Required)"]
+        body: "Meta Webhook Payload (JSON)"
+        action: "ส่ง Payload ลง BullMQ fb-events"
+        response: "HTTP 200 EVENT_RECEIVED (ตอบทันที < 200ms)"
+
+  - module: "Authentication & Session"
+    endpoints:
+      - name: "NextAuth Routes"
+        method: "GET/POST"
+        endpoint: "/api/auth/[...nextauth]"
+        purpose: "จัดการ Flow ของ Facebook Login และสร้าง Session Cookie"
+        action: "ตรวจสอบ Meta IDs กับฐานข้อมูล Agent"
+      
+      - name: "Get Current User Profile"
+        method: "GET"
+        endpoint: "/api/agent/me"
+        purpose: "ดึงข้อมูลพนักงานหรือตัวแทนที่กำลัง Login อยู่"
+        response: |
+          {
+            "agent_id": "uuid",
+            "agent_code": "AGT-26-001",
+            "employee_id": "TVS-MKT-001",
+            "role": "ADMIN",
+            "full_name": "John Doe"
+          }
+      
+# ---------------------------------------------------------
+# ID FORMATTING, NAMING CONVENTIONS & DATA STANDARDS
+# ---------------------------------------------------------
+# มาตรฐานการตั้งชื่อ ID และข้อกำหนดทางเทคนิคถูกแยกไปไว้ที่ไฟล์เฉพาะ
+# See: [id_standards.yaml](file:///Users/ideab/Desktop/data_hub/crm-app/docs/id_standards.yaml)
+# ---------------------------------------------------------

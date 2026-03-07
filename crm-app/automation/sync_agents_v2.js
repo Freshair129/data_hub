@@ -74,8 +74,13 @@ function callCrmApi(endpoint, body) {
 
 // ─── Persistence: Synced Threads Cache ──────────────────────────────────────
 const SYNC_CACHE_PATH = path.join(__dirname, '..', 'cache', 'synced_threads.json');
+const DISABLE_LOCAL_CACHE = process.env.DISABLE_LOCAL_CACHE === 'true';
 
 function loadSyncCache() {
+    if (DISABLE_LOCAL_CACHE) {
+        console.log('   [Sync] DISABLE_LOCAL_CACHE is active. Local synced_threads.json will be bypassed for logic.');
+        return {};
+    }
     try {
         if (process.env.DEBUG_SYNC) console.log('   [Debug] Loading cache from:', SYNC_CACHE_PATH);
         if (fs.existsSync(SYNC_CACHE_PATH)) {
@@ -98,6 +103,16 @@ if (!fs.existsSync(path.join(process.cwd(), 'logs'))) {
 }
 
 function saveSyncCache(threadID, result, secondaryID = null) {
+    if (DISABLE_LOCAL_CACHE) {
+        // Log to flat file for auditing anyway, but skip JSON cache
+        if (result.success) {
+            const idStr = String(threadID).trim();
+            const extra = secondaryID ? ` [Mapped: ${secondaryID}]` : '';
+            const logEntry = `[${new Date().toISOString()}] Synced: ${idStr}${extra} | Agents: ${result.agents?.join(', ') || 'n/a'}\n`;
+            fs.appendFileSync(SYNC_LOG_PATH, logEntry, 'utf8');
+        }
+        return;
+    }
     try {
         const idStr = String(threadID).trim();
         const cache = loadSyncCache();

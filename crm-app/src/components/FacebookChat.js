@@ -256,7 +256,7 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
                 body: JSON.stringify({
                     recipientId: recipient.id,
                     message: text,
-                    ownerName: currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Agent',
+                    ownerName: currentUser?.identities?.facebook?.name || currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Agent',
                     usePersona: true // Enable personas for better tracking
                 })
             });
@@ -267,9 +267,9 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
                     const newMsg = {
                         id: data.data.message_id,
                         message: text,
-                        from: { name: currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Me', id: pageId },
+                        from: { name: currentUser?.identities?.facebook?.name || currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Me', id: pageId },
                         created_time: new Date().toISOString(),
-                        metadata: { agent_name: currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Agent' },
+                        metadata: { agent_name: currentUser?.identities?.facebook?.name || currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Agent' },
                         isOptimistic: true
                     };
                     setMessages(prev => [...prev, newMsg]);
@@ -495,7 +495,7 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
                             <option value="" className="bg-[#0A1A2F] text-white">All Agents</option>
                             <option value="Unassigned" className="bg-[#0A1A2F] text-white">Unassigned</option>
                             {employees.map(emp => (
-                                <option key={emp.employeeId || emp.id} value={emp.nickName || emp.firstName} className="bg-[#0A1A2F] text-white">
+                                <option key={emp.employeeCode || emp.id} value={emp.nickName || emp.firstName} className="bg-[#0A1A2F] text-white">
                                     {emp.nickName || emp.firstName}
                                 </option>
                             ))}
@@ -611,7 +611,7 @@ export default function FacebookChat({ onViewCustomer, initialCustomerId, curren
 
                                     {(!selectedConv.agent || selectedConv.agent === 'Unassigned') && (
                                         <button
-                                            onClick={() => handleAssignAgent(currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Me')}
+                                            onClick={() => handleAssignAgent(currentUser?.identities?.facebook?.name || currentUser?.facebookName || currentUser?.nickName || currentUser?.firstName || 'Me')}
                                             className="ml-4 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500/40 transition-all flex items-center gap-1.5"
                                         >
                                             <i className="fas fa-hand-paper"></i> Claim Chat
